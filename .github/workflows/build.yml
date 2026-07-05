@@ -14,6 +14,7 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
       - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
       - run: gradle assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
