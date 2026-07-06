@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.Shader
@@ -26,10 +27,10 @@ class ArcReactorView @JvmOverloads constructor(
             applyStateParams()
         }
 
-    private val cyan = ContextCompat.getColor(context, R.color.hud_cyan)
-    private val cyanDim = ContextCompat.getColor(context, R.color.hud_cyan_dim)
-    private val amber = ContextCompat.getColor(context, R.color.hud_amber)
-    private val red = ContextCompat.getColor(context, R.color.hud_red)
+    private val cyan = Color.parseColor("#00D4FF")
+    private val cyanDim = Color.parseColor("#0A6E85")
+    private val amber = Color.parseColor("#FFB300")
+    private val red = Color.parseColor("#FF3B30")
 
     private var accentColor = cyan
     private var outerRotation = 0f
