@@ -3,6 +3,25 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+tasks.register("generateColorResources") {
+    val colorsFile = file("src/main/res/values/colors.xml")
+    colorsFile.parentFile.mkdirs()
+    colorsFile.writeText("""
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="hud_bg">#050A0F</color>
+    <color name="hud_cyan">#00D4FF</color>
+    <color name="hud_cyan_dim">#0A6E85</color>
+    <color name="hud_amber">#FFB300</color>
+    <color name="hud_white">#E8F9FF</color>
+    <color name="hud_text_dim">#5C8A94</color>
+    <color name="hud_cyan_faint">#1A2E36</color>
+</resources>
+    """.trimIndent())
+}
+
+tasks.getByName("preBuild").dependsOn("generateColorResources")
+
 android {
     namespace = "com.jarvis.assistant"
     compileSdk = 34
