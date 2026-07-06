@@ -3,6 +3,7 @@ package com.jarvis.assistant.ui
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
@@ -20,7 +21,7 @@ class WaveformView @JvmOverloads constructor(
     private var targetHeights = FloatArray(barCount) { 0.15f }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.hud_cyan)
+        color = Color.parseColor("#00D4FF")
         strokeCap = Paint.Cap.ROUND
     }
 
