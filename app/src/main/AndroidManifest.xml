@@ -15,7 +15,7 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher"
+        
         android:label="Jarvis"
         android:theme="@style/Theme.AppCompat.DayNight">
 
