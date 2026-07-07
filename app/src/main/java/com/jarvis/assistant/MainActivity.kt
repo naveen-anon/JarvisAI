@@ -7,11 +7,10 @@ import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.widget.Button
-import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.jarvis.assistant.service.AssistantForegroundService
+import com.jarvis.assistant.ui.ArcReactorView
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,18 +48,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        // Simple programmatic layout so this compiles without an XML layout file.
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 96, 48, 48)
+        val arcReactor = findViewById<ArcReactorView>(R.id.arcReactor)
+        arcReactor.setOnClickListener {
+            service?.startListeningCycle()
         }
-        val talkButton = Button(this).apply {
-            text = "Talk to Jarvis"
-            setOnClickListener { service?.startListeningCycle() }
-        }
-        root.addView(talkButton)
-        setContentView(root)
 
         permissionLauncher.launch(requiredPermissions)
     }
