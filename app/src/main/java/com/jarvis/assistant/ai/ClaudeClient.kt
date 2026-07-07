@@ -31,8 +31,7 @@ class ClaudeClient(private val apiKey: String) {
         }
 
         Rules:
-        - If the user just wants conversation (no device action), use action "reply" and put
-          your spoken response in "message".
+        - If the user just wants conversation (no device action), use action "reply" and put your spoken response in "message".
         - For "open_app", target must be the common app name as installed (e.g. "WhatsApp", "Camera").
         - For "send_sms", target = contact name, message = body text.
         - For "call", target = contact name.
@@ -44,12 +43,12 @@ class ClaudeClient(private val apiKey: String) {
 
     suspend fun getCommand(userSpeech: String): AssistantCommand = withContext(Dispatchers.IO) {
         conversationHistory.add(mapOf("role" to "user", "content" to userSpeech))
-        
+
         val messagesArray = JSONArray()
         conversationHistory.forEach { msg ->
             messagesArray.put(JSONObject(msg))
         }
-        
+
         val body = JSONObject().apply {
             put("model", "claude-sonnet-4-6")
             put("max_tokens", 300)
@@ -81,7 +80,7 @@ class ClaudeClient(private val apiKey: String) {
 
             conversationHistory.add(mapOf("role" to "assistant", "content" to text))
             pruneHistory()
-            
+
             parseCommandJson(text)
         }
     }
