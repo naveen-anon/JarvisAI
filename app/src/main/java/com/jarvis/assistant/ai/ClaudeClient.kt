@@ -11,13 +11,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-/**
- * Wraps calls to the Anthropic Messages API.
- * NOTE ON KEY STORAGE: never hardcode the API key in source. Store it in
- * EncryptedSharedPreferences or pull it from your own backend proxy so the
- * key never ships inside the APK (anyone can pull it out of a release build
- * with apktool/jadx otherwise).
- */
 class ClaudeClient(private val apiKey: String) {
 
     private val client = OkHttpClient.Builder()
@@ -47,14 +40,21 @@ class ClaudeClient(private val apiKey: String) {
         - Never include commentary outside the JSON object.
     """.trimIndent()
 
+    private val conversationHistory = mutableListOf<Map<String, String>>()
+
     suspend fun getCommand(userSpeech: String): AssistantCommand = withContext(Dispatchers.IO) {
+        conversationHistory.add(mapOf("role" to "user", "content" to userSpeech))
+        
+        val messagesArray = JSONArray()
+        conversationHistory.forEach { msg ->
+            messagesArray.put(JSONObject(msg))
+        }
+        
         val body = JSONObject().apply {
             put("model", "claude-sonnet-4-6")
             put("max_tokens", 300)
             put("system", systemPrompt)
-            put("messages", JSONArray().put(
-                JSONObject().put("role", "user").put("content", userSpeech)
-            ))
+            put("messages", messagesArray)
         }
 
         val request = Request.Builder()
@@ -79,6 +79,9 @@ class ClaudeClient(private val apiKey: String) {
                 .getString("text")
                 .trim()
 
+            conversationHistory.add(mapOf("role" to "assistant", "content" to text))
+            pruneHistory()
+            
             parseCommandJson(text)
         }
     }
@@ -102,4 +105,11 @@ class ClaudeClient(private val apiKey: String) {
     }
 
     private fun fallback() = AssistantCommand(action = "reply", message = "No response from server.")
+
+    private fun pruneHistory(maxTurns: Int = 5) {
+        if (conversationHistory.size > maxTurns * 2) {
+            conversationHistory.removeAt(0)
+            conversationHistory.removeAt(0)
+        }
+    }
 }
