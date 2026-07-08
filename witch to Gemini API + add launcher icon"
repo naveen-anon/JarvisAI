@@ -1,0 +1,48 @@
+[1mdiff --git a/app/src/main/java/com/jarvis/assistant/service/AssistantForegroundService.kt b/app/src/main/java/com/jarvis/assistant/service/AssistantForegroundService.kt[m
+[1mindex 2625d27..0a4daee 100644[m
+[1m--- a/app/src/main/java/com/jarvis/assistant/service/AssistantForegroundService.kt[m
+[1m+++ b/app/src/main/java/com/jarvis/assistant/service/AssistantForegroundService.kt[m
+[36m@@ -9,7 +9,7 @@[m [mimport android.os.Build[m
+ import android.os.IBinder[m
+ import androidx.core.app.NotificationCompat[m
+ import com.jarvis.assistant.R[m
+[31m-import com.jarvis.assistant.ai.ClaudeClient[m
+[32m+[m[32mimport com.jarvis.assistant.ai.GeminiClient[m
+ import com.jarvis.assistant.executor.CommandExecutor[m
+ import com.jarvis.assistant.voice.SpeechToText[m
+ import com.jarvis.assistant.voice.TextToSpeechHelper[m
+[36m@@ -27,14 +27,14 @@[m [mclass AssistantForegroundService : Service() {[m
+     private lateinit var stt: SpeechToText[m
+     private lateinit var tts: TextToSpeechHelper[m
+     private lateinit var executor: CommandExecutor[m
+[31m-    private lateinit var claude: ClaudeClient[m
+[32m+[m[32m    private lateinit var gemini: GeminiClient[m
+     private val scope = CoroutineScope(Dispatchers.Main)[m
+ [m
+     companion object {[m
+         const val CHANNEL_ID = "jarvis_channel"[m
+         const val NOTIF_ID = 101[m
+         // Replace with a secure retrieval, e.g. EncryptedSharedPreferences.[m
+[31m-        const val API_KEY_PLACEHOLDER = "YOUR_ANTHROPIC_API_KEY"[m
+[32m+[m[32m        const val API_KEY_PLACEHOLDER = "YOUR_GEMINI_API_KEY"[m
+     }[m
+ [m
+     override fun onCreate() {[m
+[36m@@ -42,7 +42,7 @@[m [mclass AssistantForegroundService : Service() {[m
+         stt = SpeechToText(this)[m
+         tts = TextToSpeechHelper(this)[m
+         executor = CommandExecutor(this)[m
+[31m-        claude = ClaudeClient(API_KEY_PLACEHOLDER)[m
+[32m+[m[32m        gemini = GeminiClient(BuildConfig.GEMINI_API_KEY)[m
+         createNotificationChannel()[m
+     }[m
+ [m
+[36m@@ -66,7 +66,7 @@[m [mclass AssistantForegroundService : Service() {[m
+ [m
+     private fun handleUserSpeech(speech: String) {[m
+         scope.launch {[m
+[31m-            val command = claude.getCommand(speech)[m
+[32m+[m[32m            val command = gemini.getCommand(speech)[m
+             val resultText = executor.execute(command)[m
+             tts.speak(resultText)[m
+         }[m

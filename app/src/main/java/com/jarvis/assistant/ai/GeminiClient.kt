@@ -11,7 +11,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-class ClaudeClient(private val apiKey: String) {
+class GeminiClient(private val apiKey: String) {
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
@@ -31,7 +31,8 @@ class ClaudeClient(private val apiKey: String) {
         }
 
         Rules:
-        - If the user just wants conversation (no device action), use action "reply" and put your spoken response in "message".
+        - If the user just wants conversation (no device action), use action "reply" and put
+          your spoken response in "message".
         - For "open_app", target must be the common app name as installed (e.g. "WhatsApp", "Camera").
         - For "send_sms", target = contact name, message = body text.
         - For "call", target = contact name.
@@ -39,27 +40,35 @@ class ClaudeClient(private val apiKey: String) {
         - Never include commentary outside the JSON object.
     """.trimIndent()
 
-    private val conversationHistory = mutableListOf<Map<String, String>>()
+    private val conversationHistory = mutableListOf<Pair<String, String>>()
 
     suspend fun getCommand(userSpeech: String): AssistantCommand = withContext(Dispatchers.IO) {
-        conversationHistory.add(mapOf("role" to "user", "content" to userSpeech))
+        conversationHistory.add("user" to userSpeech)
 
-        val messagesArray = JSONArray()
-        conversationHistory.forEach { msg ->
-            messagesArray.put(JSONObject(msg))
+        val contentsArray = JSONArray()
+        conversationHistory.forEach { (role, text) ->
+            val geminiRole = if (role == "assistant") "model" else "user"
+            val partsArray = JSONArray().put(JSONObject().put("text", text))
+            contentsArray.put(JSONObject().apply {
+                put("role", geminiRole)
+                put("parts", partsArray)
+            })
         }
 
         val body = JSONObject().apply {
-            put("model", "claude-sonnet-4-6")
-            put("max_tokens", 300)
-            put("system", systemPrompt)
-            put("messages", messagesArray)
+            put("system_instruction", JSONObject().apply {
+                put("parts", JSONArray().put(JSONObject().put("text", systemPrompt)))
+            })
+            put("contents", contentsArray)
+            put("generationConfig", JSONObject().apply {
+                put("maxOutputTokens", 300)
+            })
         }
 
+        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey"
+
         val request = Request.Builder()
-            .url("https://api.anthropic.com/v1/messages")
-            .addHeader("x-api-key", apiKey)
-            .addHeader("anthropic-version", "2023-06-01")
+            .url(url)
             .addHeader("content-type", "application/json")
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
@@ -72,13 +81,18 @@ class ClaudeClient(private val apiKey: String) {
                 )
             }
             val raw = response.body?.string() ?: return@withContext fallback()
+
             val text = JSONObject(raw)
-                .getJSONArray("content")
+                .getJSONArray("candidates")
+                .getJSONObject(0)
+                .getJSONObject("content")
+                .getJSONArray("parts")
                 .getJSONObject(0)
                 .getString("text")
                 .trim()
+                .removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
 
-            conversationHistory.add(mapOf("role" to "assistant", "content" to text))
+            conversationHistory.add("assistant" to text)
             pruneHistory()
 
             parseCommandJson(text)

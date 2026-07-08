@@ -9,7 +9,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.jarvis.assistant.R
-import com.jarvis.assistant.ai.ClaudeClient
+import com.jarvis.assistant.ai.GeminiClient
 import com.jarvis.assistant.executor.CommandExecutor
 import com.jarvis.assistant.voice.SpeechToText
 import com.jarvis.assistant.voice.TextToSpeechHelper
@@ -27,14 +27,14 @@ class AssistantForegroundService : Service() {
     private lateinit var stt: SpeechToText
     private lateinit var tts: TextToSpeechHelper
     private lateinit var executor: CommandExecutor
-    private lateinit var claude: ClaudeClient
+    private lateinit var gemini: GeminiClient
     private val scope = CoroutineScope(Dispatchers.Main)
 
     companion object {
         const val CHANNEL_ID = "jarvis_channel"
         const val NOTIF_ID = 101
         // Replace with a secure retrieval, e.g. EncryptedSharedPreferences.
-        const val API_KEY_PLACEHOLDER = "YOUR_ANTHROPIC_API_KEY"
+        const val API_KEY_PLACEHOLDER = "YOUR_GEMINI_API_KEY"
     }
 
     override fun onCreate() {
@@ -42,7 +42,7 @@ class AssistantForegroundService : Service() {
         stt = SpeechToText(this)
         tts = TextToSpeechHelper(this)
         executor = CommandExecutor(this)
-        claude = ClaudeClient(API_KEY_PLACEHOLDER)
+        gemini = GeminiClient(BuildConfig.GEMINI_API_KEY)
         createNotificationChannel()
     }
 
@@ -66,7 +66,7 @@ class AssistantForegroundService : Service() {
 
     private fun handleUserSpeech(speech: String) {
         scope.launch {
-            val command = claude.getCommand(speech)
+            val command = gemini.getCommand(speech)
             val resultText = executor.execute(command)
             tts.speak(resultText)
         }
