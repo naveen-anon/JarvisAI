@@ -49,12 +49,21 @@ class AssistantForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIF_ID, buildNotification("Listening for commands"))
-        startListeningCycle()
+        startForeground(NOTIF_ID, buildNotification("Say \"Jarvis\" to activate"))
+        startWakeWordListening()
         return START_STICKY
     }
 
-    /** Call this each time the wake word ("Jarvis") is detected. */
+    private fun startWakeWordListening() {
+        stt.listenContinuous { trailingCommand ->
+            if (trailingCommand.isNotBlank()) {
+                handleUserSpeech(trailingCommand)
+            } else {
+                startListeningCycle()
+            }
+        }
+    }
+
     fun startListeningCycle() {
         stt.listenOnce(
             onResult = { speech ->
@@ -98,6 +107,7 @@ class AssistantForegroundService : Service() {
     override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onDestroy() {
+        stt.stopContinuous()
         stt.destroy()
         tts.shutdown()
         super.onDestroy()
