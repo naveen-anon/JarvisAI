@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
 
         locationHelper = LocationHelper(this)
         // Paste your free OpenWeatherMap key here (openweathermap.org -> API keys tab)
-        weatherClient = WeatherClient(apiKey = "YOUR_OPENWEATHERMAP_KEY")
+        weatherClient = WeatherClient(apiKey = "paste_actual_key_here")
 
         permissionLauncher.launch(requiredPermissions)
     }
