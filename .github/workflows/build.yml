@@ -1,9 +1,12 @@
-name: Build APK
+name: Android Build
 
 on:
-  push:
-    branches: [ main, master ]
   workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feature/brain-v1
+  pull_request:
 
 jobs:
   build:
@@ -27,9 +30,11 @@ jobs:
 
       - run: chmod +x gradlew
 
-      - run: ./gradlew assembleDebug --no-daemon
+      - name: Build APK
+        run: ./gradlew assembleDebug --no-daemon
         env:
-  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
       - uses: actions/upload-artifact@v4
         with:
           name: JarvisAI-debug-apk

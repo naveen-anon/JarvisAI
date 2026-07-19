@@ -6,6 +6,5 @@ enum class BrainState {
     THINKING,
     EXECUTING,
     SPEAKING,
-    LEARNING,
     ERROR
 }
