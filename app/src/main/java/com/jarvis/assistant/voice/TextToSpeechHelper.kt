@@ -7,17 +7,18 @@ import java.util.Locale
 class TextToSpeechHelper(context: Context) {
 
     private var ready = false
-    // Queue up anything spoken before the engine finished initializing instead of
-    // silently dropping it — engine init is async and commonly takes 200-500ms,
-    // easily longer than the time between service start and the first response.
     private var pending: String? = null
 
-    private val tts: TextToSpeech = TextToSpeech(context) { status ->
-        if (status == TextToSpeech.SUCCESS) {
-            ready = true
-            tts.language = Locale.US
-            pending?.let { speak(it) }
-            pending = null
+    private lateinit var tts: TextToSpeech
+
+    init {
+        tts = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                ready = true
+                tts.language = Locale.US
+                pending?.let { speak(it) }
+                pending = null
+            }
         }
     }
 
