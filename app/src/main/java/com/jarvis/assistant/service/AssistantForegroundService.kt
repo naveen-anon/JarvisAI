@@ -27,13 +27,10 @@ import kotlinx.coroutines.launch
  * startListeningCycle() on wake, rather than this service polling continuously —
  * continuous SpeechRecognizer usage will drain battery fast and Android will kill it.
  *
- * Command routing is offline-first: [OfflineBrain] tries to answer locally (app
+ * Command routing is offline-first: OfflineBrain tries to answer locally (app
  * control, settings, time/date/battery, math, notes, small talk — all on-device).
  * Gemini is only ever contacted when the offline brain doesn't recognize the
- * command AND [NetworkStatusManager] confirms there's an actual internet path.
- * This means the assistant keeps working — app launching, calling, texting,
- * toggling wifi/bluetooth/flashlight, telling the time — with zero connectivity,
- * and it never crashes trying to reach the cloud while offline.
+ * command AND NetworkStatusManager confirms there's an actual internet path.
  */
 class AssistantForegroundService : Service() {
 
@@ -45,7 +42,6 @@ class AssistantForegroundService : Service() {
     private lateinit var networkStatus: NetworkStatusManager
     private val scope = CoroutineScope(Dispatchers.Main)
 
-    /** Lets MainActivity (or any bound UI) reflect what the assistant is doing. */
     var listener: AssistantListener? = null
 
     interface AssistantListener {
@@ -108,17 +104,17 @@ class AssistantForegroundService : Service() {
         listener?.onStateChanged(BrainState.THINKING)
 
         scope.launch {
-            // 1) Try the offline brain first. Covers app control, calls, SMS,
-            //    settings toggles, time/date/battery, math, notes, and small talk —
-            //    entirely on-device, no network round trip involved.
-            val offlineReply = offlineBrain.handle(speech)
+            val offlineReply = try {
+                offlineBrain.handle(speech)
+            } catch (e: SecurityException) {
+                "I don't have permission to do that. Please grant it in the app's settings."
+            } catch (e: Exception) {
+                "Something went wrong running that command."
+            }
 
             val (resultText, fromCloud) = if (offlineReply != null) {
                 offlineReply to false
             } else if (networkStatus.isOnline()) {
-                // 2) Only reach for Gemini if genuinely online. Any failure here
-                //    (timeout, DNS failure, bad key, non-200 response) is caught so
-                //    it degrades to a spoken message instead of crashing the service.
                 try {
                     val command = gemini.getCommand(speech)
                     executor.execute(command) to true
@@ -126,8 +122,6 @@ class AssistantForegroundService : Service() {
                     "I couldn't reach the cloud brain just now. Try a device command instead." to true
                 }
             } else {
-                // 3) Fully offline and the offline brain didn't recognize it —
-                //    fail gracefully instead of ever touching the network.
                 "I'm offline right now and don't have a local command for that yet." to false
             }
 
