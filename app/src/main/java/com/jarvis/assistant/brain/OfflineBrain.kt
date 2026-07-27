@@ -8,6 +8,7 @@ import com.jarvis.assistant.util.ConversationContext
 import com.jarvis.assistant.util.PersistentMemory
 import com.jarvis.assistant.util.SettingsManager
 import com.jarvis.assistant.util.SmartSuggestionEngine
+import com.jarvis.assistant.util.AutoLearnEngine
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
