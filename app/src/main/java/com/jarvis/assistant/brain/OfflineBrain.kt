@@ -284,7 +284,34 @@ class OfflineBrain(
         else -> null
     }
 
-    private fun toDeviceCommand(cmd: String, original: String): AssistantCommand? = when {
+    private fun toDeviceCommand(cmd: String, original: String): AssistantCommand? {
+        // Call — Hindi word order first: "ashu ko call karo", "priya ko call lagao".
+        // Checked BEFORE the English pattern below, because "ashu ko call karo" also
+        // contains "call karo" — matching English-first would wrongly capture "karo"
+        // as the contact name instead of "ashu".
+        Regex("""(.+?)\s+ko\s+call\s*(?:karo|kar do|lagao|milao)?\s*$""").find(cmd)?.let { m ->
+            return AssistantCommand("call", extractTail(original, m.groupValues[1], fromStart = true))
+        }
+
+        // Call — English order: "call X", "please call X", "phone X", "dial X"
+        Regex("""\b(?:call|phone|dial|ring)\s+(.+)""").find(cmd)?.let { m ->
+            return AssistantCommand("call", extractTail(original, m.groupValues[1]))
+        }
+
+        // Message/SMS — Hindi word order first, same reasoning as above.
+        Regex("""(.+?)\s+ko\s+(?:message|text|sms)\s*(?:karo|kar do|bhejo|karna)?\s*$""").find(cmd)?.let { m ->
+            return AssistantCommand("send_sms", extractTail(original, m.groupValues[1], fromStart = true), null)
+        }
+
+        // Message/SMS — English order
+        Regex("""\b(?:message|text|sms)\s+(.+)""").find(cmd)?.let { m ->
+            val body = extractTail(original, m.groupValues[1])
+            val target = body.substringBefore(" saying ").trim()
+            val message = if (" saying " in body) body.substringAfter(" saying ").trim() else null
+            return AssistantCommand("send_sms", target, message)
+        }
+
+        return when {
         containsAny(cmd, "open camera", "camera kholo", "camera on karo") -> AssistantCommand("open_app", "Camera")
         containsAny(cmd, "open gallery", "open photos", "gallery kholo") -> AssistantCommand("open_app", "Gallery")
         containsAny(cmd, "open chrome", "open browser", "browser kholo") -> AssistantCommand("open_app", "Chrome")
@@ -361,21 +388,32 @@ class OfflineBrain(
         containsAny(cmd, "disconnect pc", "stop pc bridge", "pc disconnect") ->
             AssistantCommand("pc_connect", "off")
 
-        cmd.startsWith("call ") || cmd.startsWith("phone ") ->
-            AssistantCommand("call", original.substringAfter(" ").trim())
-
-        cmd.startsWith("message ") || cmd.startsWith("text ") -> {
-            val body = original.substringAfter(" ").trim()
-            val target = body.substringBefore(" saying ").trim()
-            val message = if (" saying " in body) body.substringAfter(" saying ").trim() else null
-            AssistantCommand("send_sms", target, message)
-        }
+        // Call — "call X", "please call X", "phone X", "dial X" (English order)
+        // (matched earlier, before this when — see top of function)
 
         cmd.startsWith("open ") -> AssistantCommand("open_app", original.substringAfter(" ").trim())
         cmd.startsWith("launch ") -> AssistantCommand("open_app", original.substringAfter(" ").trim())
         cmd.startsWith("start ") -> AssistantCommand("open_app", original.substringAfter(" ").trim())
 
         else -> null
+        }
+    }
+
+    /**
+     * Pulls the matching span back out of the original (non-lowercased) text so contact
+     * names keep their real casing, instead of using the lowercased match directly.
+     * [fromStart] = true means the captured group was the leading part of the phrase
+     * (Hindi "X ko call karo" order); false means it was the trailing part ("call X").
+     */
+    private fun extractTail(original: String, matchedLower: String, fromStart: Boolean = false): String {
+        val words = matchedLower.trim().split(Regex("\\s+")).size
+        val originalWords = original.trim().split(Regex("\\s+"))
+        if (words <= 0 || words > originalWords.size) return matchedLower.trim()
+        return if (fromStart) {
+            originalWords.take(words).joinToString(" ").trim()
+        } else {
+            originalWords.takeLast(words).joinToString(" ").trim()
+        }
     }
 
     /** Extracts "HH:mm" from phrases like "set alarm for 7:30", "alarm at 7 am", "alarm for 6". */
