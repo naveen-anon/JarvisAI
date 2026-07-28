@@ -1,5 +1,6 @@
 package com.jarvis.assistant
 
+import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -9,10 +10,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.jarvis.assistant.brain.BrainState
+import com.jarvis.assistant.diagnostics.CrashHandler
 import com.jarvis.assistant.service.AssistantForegroundService
 import com.jarvis.assistant.ui.ArcReactorView
 import com.jarvis.assistant.ui.HudState
@@ -40,8 +43,6 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
     private val activityScope = CoroutineScope(Dispatchers.Main)
     private val perfHandler = Handler(Looper.getMainLooper())
 
-    // UI elements the service pushes updates into - previously declared as local vals
-    // in onCreate() and thrown away, so nothing the assistant said ever reached the screen.
     private lateinit var arcReactor: ArcReactorView
     private lateinit var waveform: WaveformView
     private lateinit var txtState: TextView
@@ -90,6 +91,8 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        showLastCrashIfAny()
+
         arcReactor = findViewById(R.id.arcReactor)
         waveform = findViewById(R.id.waveform)
         txtState = findViewById(R.id.txtState)
@@ -100,7 +103,6 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             if (bound) {
                 service?.startListeningCycle()
             } else {
-                // Service/permissions not ready yet - re-request instead of doing nothing.
                 permissionLauncher.launch(requiredPermissions)
             }
         }
@@ -122,12 +124,28 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         startPerfLoop(txtNetwork, txtPerf)
 
         locationHelper = LocationHelper(this)
-        // Weather is optional and online-only - offline commands work with or without this key.
-        // Get a free key at openweathermap.org -> API keys tab, or set OPENWEATHER_API_KEY
-        // as an env var / gradle property the same way GEMINI_API_KEY is handled.
         weatherClient = WeatherClient(apiKey = BuildConfig.OPENWEATHER_API_KEY)
 
         permissionLauncher.launch(requiredPermissions)
+    }
+
+    private fun showLastCrashIfAny() {
+        val crashText = CrashHandler.consumeLastCrash(this) ?: return
+
+        val textView = TextView(this).apply {
+            text = crashText
+            setTextIsSelectable(true)
+            setPadding(32, 32, 32, 32)
+            textSize = 12f
+        }
+        val scroll = ScrollView(this).apply { addView(textView) }
+
+        AlertDialog.Builder(this)
+            .setTitle("Jarvis crashed last time")
+            .setView(scroll)
+            .setPositiveButton("OK", null)
+            .setCancelable(true)
+            .show()
     }
 
     private fun startPerfLoop(txtNetwork: TextView, txtPerf: TextView) {
@@ -168,10 +186,6 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         startForegroundService(intent)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
-
-    // ---------- AssistantForegroundService.AssistantListener ----------
-    // These callbacks arrive on the main thread (the service's CoroutineScope uses
-    // Dispatchers.Main), so it's safe to touch views directly here.
 
     override fun onStateChanged(state: BrainState) {
         arcReactor.state = when (state) {

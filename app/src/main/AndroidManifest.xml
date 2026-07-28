@@ -20,6 +20,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
+        android:name=".JarvisApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
