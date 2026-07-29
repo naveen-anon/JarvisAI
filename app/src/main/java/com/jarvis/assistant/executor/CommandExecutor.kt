@@ -4,14 +4,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import com.jarvis.assistant.brain.OfflineBrain
+import com.jarvis.assistant.model.AssistantCommand
 import com.jarvis.assistant.voice.TextToSpeechHelper
 
 object CommandExecutor {
 
+    // Overload 1: Handles AssistantCommand object from Foreground Service
+    fun execute(context: Context, command: AssistantCommand): String {
+        val query = command.rawCommand ?: command.action ?: ""
+        return execute(context, query)
+    }
+
+    // Overload 2: Handles direct String query
     fun execute(context: Context, userQuery: String): String {
         val cleanQuery = userQuery.lowercase().trim()
 
-        // 1. App Launching Command ("open whatsapp", "youtube kholo")
         if (cleanQuery.startsWith("open ") || cleanQuery.startsWith("kholo ")) {
             val targetApp = cleanQuery
                 .replace("open ", "")
@@ -29,7 +36,6 @@ object CommandExecutor {
             return response
         }
 
-        // 2. Offline Queries & Conversations
         val response = OfflineBrain.processQuery(userQuery)
         TextToSpeechHelper.speak(context, response)
         return response
