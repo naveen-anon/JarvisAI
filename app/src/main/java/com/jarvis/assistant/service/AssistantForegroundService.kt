@@ -26,6 +26,7 @@ import com.jarvis.assistant.voice.TextToSpeechHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 /**
@@ -49,6 +50,8 @@ class AssistantForegroundService : Service() {
     private lateinit var weatherClient: WeatherClient
     private lateinit var locationHelper: LocationHelper
     private lateinit var pcBridge: PcBridgeServer
+    private lateinit var voiceAuth: com.jarvis.assistant.voice.VoiceAuthManager
+    private var voiceSessionVerified = false
     private val scope = CoroutineScope(Dispatchers.Main)
 
     var listener: AssistantListener? = null
@@ -74,6 +77,7 @@ class AssistantForegroundService : Service() {
         weatherClient = WeatherClient(BuildConfig.OPENWEATHER_API_KEY)
         locationHelper = LocationHelper(this)
         pcBridge = PcBridgeServer(this) { speech -> processSpeech(speech) }
+        voiceAuth = com.jarvis.assistant.voice.VoiceAuthManager(this)
         offlineBrain = OfflineBrain(this, executor) { turnOn ->
             if (turnOn) pcBridge.start() else pcBridge.stop()
         }
@@ -84,6 +88,9 @@ class AssistantForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIF_ID, buildNotification("Say \"Jarvis\" to activate"))
         startWakeWordListening()
+        if (intent?.action == com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING) {
+            startListeningCycle()
+        }
         return START_STICKY
     }
 
@@ -134,6 +141,18 @@ class AssistantForegroundService : Service() {
      * fit the pure offline/cloud split) → offline brain → Gemini cloud fallback.
      */
     private suspend fun processSpeech(speech: String): Pair<String, Boolean> {
+        // Voice authentication — checked at most once per service session (not per command),
+        // so it's a one-time gate rather than repeated friction. Once it passes, it stays
+        // passed until the service restarts.
+        if (voiceAuth.isEnabled() && voiceAuth.isEnrolled() && !voiceSessionVerified) {
+            val sample = withContext(Dispatchers.IO) { voiceAuth.captureSample() }
+            val passed = sample != null && voiceAuth.verify(sample)
+            if (!passed) {
+                return "Voice not recognized. This command wasn't run — try speaking again." to false
+            }
+            voiceSessionVerified = true
+        }
+
         weatherReplyIfAsked(speech)?.let {
             offlineBrain.recordInteraction()
             return it to false
@@ -221,13 +240,25 @@ class AssistantForegroundService : Service() {
         }
     }
 
-    private fun buildNotification(text: String) =
-        NotificationCompat.Builder(this, CHANNEL_ID)
+    private fun buildNotification(text: String): android.app.Notification {
+        val listenIntent = Intent(this, com.jarvis.assistant.widget.JarvisWidgetActionReceiver::class.java).apply {
+            action = com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING
+        }
+        val listenPendingIntent = PendingIntent.getBroadcast(
+            this, 0, listenIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Jarvis")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_mic)
             .setOngoing(true)
+            // Visible and tappable from the lock screen by default (unless the user has
+            // hidden notification content on the lock screen in system settings) — this is
+            // what makes "Jarvis works from the lock screen" possible without a full unlock.
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .addAction(R.drawable.ic_mic, "🎙 Listen", listenPendingIntent)
             .build()
+    }
 
     inner class LocalBinder : Binder() {
         fun getService(): AssistantForegroundService = this@AssistantForegroundService

@@ -27,9 +27,12 @@ class SpeechToText(private val context: Context) {
     }
 
     fun listenContinuous(onWakeWordDetected: (trailingCommand: String) -> Unit) {
+        if (isListeningContinuously) return // already running — don't start a second overlapping session
         isListeningContinuously = true
         startContinuousSession(onWakeWordDetected)
     }
+
+    fun isListening(): Boolean = isListeningContinuously
 
     private fun startContinuousSession(onWakeWordDetected: (String) -> Unit) {
         if (!isListeningContinuously) return

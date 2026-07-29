@@ -64,6 +64,25 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".widget.JarvisWidgetActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.jarvis.assistant.ACTION_START_LISTENING" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".widget.JarvisWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/jarvis_widget_info" />
+        </receiver>
+
         <service
             android:name=".service.AssistantForegroundService"
             android:foregroundServiceType="microphone"
