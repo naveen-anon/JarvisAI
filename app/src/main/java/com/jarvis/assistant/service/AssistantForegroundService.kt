@@ -134,7 +134,10 @@ class AssistantForegroundService : Service() {
      * fit the pure offline/cloud split) → offline brain → Gemini cloud fallback.
      */
     private suspend fun processSpeech(speech: String): Pair<String, Boolean> {
-        weatherReplyIfAsked(speech)?.let { return it to false }
+        weatherReplyIfAsked(speech)?.let {
+            offlineBrain.recordInteraction()
+            return it to false
+        }
 
         val offlineReply = try {
             offlineBrain.handle(speech)
@@ -144,7 +147,7 @@ class AssistantForegroundService : Service() {
             "Something went wrong running that command."
         }
 
-        return if (offlineReply != null) {
+        val result = if (offlineReply != null) {
             offlineReply to false
         } else if (networkStatus.isOnline()) {
             try {
@@ -156,6 +159,9 @@ class AssistantForegroundService : Service() {
         } else {
             "I'm offline right now and don't have a local command for that yet." to false
         }
+
+        offlineBrain.recordInteraction()
+        return result
     }
 
     /** Phase 5 — "Live weather aur location". Returns null if the speech isn't a weather question. */

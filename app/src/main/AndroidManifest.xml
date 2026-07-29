@@ -47,6 +47,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".settings.StatsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".security.LockScreenActivity"
             android:exported="false"
             android:launchMode="singleInstance"

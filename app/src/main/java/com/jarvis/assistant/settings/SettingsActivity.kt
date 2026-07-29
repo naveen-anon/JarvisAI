@@ -61,6 +61,13 @@ class SettingsActivity : AppCompatActivity() {
             textSize = 22f
         })
 
+        root.addView(Button(this).apply {
+            text = "📊 Usage Stats"
+            setOnClickListener {
+                startActivity(android.content.Intent(this@SettingsActivity, StatsActivity::class.java))
+            }
+        })
+
         // --- Voice type ---
         root.addView(sectionTitle("Voice Type"))
         voiceTypeLabel = bodyText("Current: ${settings.getVoiceType()}")

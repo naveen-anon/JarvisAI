@@ -179,6 +179,66 @@ class AutoLearnEngine(context: Context) {
         prefs.edit().clear().apply()
     }
 
+    /**
+     * Call this once per successful Jarvis response (offline or cloud) — powers the
+     * Usage Stats screen. Tracks a running total, which calendar days Jarvis was used
+     * on (for the streak calculation), and the very first time it was ever used.
+     */
+    fun recordInteraction() {
+        val total = prefs.getInt("total_interactions", 0)
+        prefs.edit().putInt("total_interactions", total + 1).apply()
+
+        if (!prefs.contains("first_used")) {
+            prefs.edit().putLong("first_used", System.currentTimeMillis()).apply()
+        }
+
+        val today = dayKey(Calendar.getInstance())
+        val activeDays = prefs.getStringSet("active_days", emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (today !in activeDays) {
+            activeDays.add(today)
+            prefs.edit().putStringSet("active_days", activeDays).apply()
+        }
+    }
+
+    data class UsageStats(
+        val totalInteractions: Int,
+        val daysActive: Int,
+        val currentStreak: Int,
+        val firstUsedDaysAgo: Int,
+        val topApps: List<Pair<String, Int>>,
+        val topContacts: List<Pair<String, Int>>
+    )
+
+    fun getUsageStats(): UsageStats {
+        val total = prefs.getInt("total_interactions", 0)
+        val activeDays = prefs.getStringSet("active_days", emptySet()) ?: emptySet()
+        val firstUsed = prefs.getLong("first_used", System.currentTimeMillis())
+        val daysAgo = ((System.currentTimeMillis() - firstUsed) / (1000 * 60 * 60 * 24)).toInt()
+
+        return UsageStats(
+            totalInteractions = total,
+            daysActive = activeDays.size,
+            currentStreak = currentStreak(activeDays),
+            firstUsedDaysAgo = daysAgo,
+            topApps = getTopApps(5),
+            topContacts = getTopContacts(5)
+        )
+    }
+
+    /** Counts consecutive days up to and including today that Jarvis was used at least once. */
+    private fun currentStreak(activeDays: Set<String>): Int {
+        var streak = 0
+        val cal = Calendar.getInstance()
+        while (dayKey(cal) in activeDays) {
+            streak++
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return streak
+    }
+
+    private fun dayKey(cal: Calendar): String =
+        "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
+
     private fun getDayName(dayOfWeek: Int): String = when (dayOfWeek) {
         Calendar.SUNDAY -> "Sunday"
         Calendar.MONDAY -> "Monday"

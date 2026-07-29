@@ -143,6 +143,9 @@ class OfflineBrain(
 
     fun canHandleOffline(rawText: String): Boolean = handle(rawText) != null
 
+    /** Called by the service once per successful response (offline or cloud) for the stats screen. */
+    fun recordInteraction() = autoLearn.recordInteraction()
+
     /** Settings management — voice, colors, preferences, etc. */
     private fun handleSettings(cmd: String, original: String): String? = when {
         // Voice settings
