@@ -326,7 +326,7 @@ class OfflineBrain(
         containsAny(cmd, "flashlight off", "torch off", "flashlight band", "torch band") ->
             AssistantCommand("toggle_setting", "flashlight")
         containsAny(cmd, "flashlight", "torch") -> AssistantCommand("toggle_setting", "flashlight")
-        containsAny(cmd, "wifi") -> AssistantCommand("toggle_setting", "wifi")
+        containsAny(cmd, "wifi", "wi-fi", "wi fi") -> AssistantCommand("toggle_setting", "wifi")
         containsAny(cmd, "bluetooth") -> AssistantCommand("toggle_setting", "bluetooth")
         containsAny(cmd, "airplane mode", "flight mode") -> AssistantCommand("toggle_setting", "airplane_mode")
 

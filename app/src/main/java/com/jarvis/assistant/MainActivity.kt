@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
     private val activityScope = CoroutineScope(Dispatchers.Main)
     private val perfHandler = Handler(Looper.getMainLooper())
 
+    // UI elements the service pushes updates into - previously declared as local vals
+    // in onCreate() and thrown away, so nothing the assistant said ever reached the screen.
     private lateinit var arcReactor: ArcReactorView
     private lateinit var waveform: WaveformView
     private lateinit var txtState: TextView
@@ -91,6 +93,8 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Check first, before anything else has a chance to crash again — if the
+        // previous launch died, show exactly why, right here on-screen, no PC/adb needed.
         showLastCrashIfAny()
 
         arcReactor = findViewById(R.id.arcReactor)
@@ -103,6 +107,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             if (bound) {
                 service?.startListeningCycle()
             } else {
+                // Service/permissions not ready yet - re-request instead of doing nothing.
                 permissionLauncher.launch(requiredPermissions)
             }
         }
@@ -111,6 +116,10 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         val txtBattery = findViewById<TextView>(R.id.txtBattery)
         val txtNetwork = findViewById<TextView>(R.id.txtNetwork)
         val txtPerf = findViewById<TextView>(R.id.txtPerf)
+
+        findViewById<TextView>(R.id.txtSettingsBtn).setOnClickListener {
+            startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+        }
 
         systemStatus = SystemStatusManager(
             context = this,
@@ -124,11 +133,19 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         startPerfLoop(txtNetwork, txtPerf)
 
         locationHelper = LocationHelper(this)
+        // Weather is optional and online-only - offline commands work with or without this key.
+        // Get a free key at openweathermap.org -> API keys tab, or set OPENWEATHER_API_KEY
+        // as an env var / gradle property the same way GEMINI_API_KEY is handled.
         weatherClient = WeatherClient(apiKey = BuildConfig.OPENWEATHER_API_KEY)
 
         permissionLauncher.launch(requiredPermissions)
     }
 
+    /**
+     * If the app crashed last time, show the saved stack trace in a copyable dialog.
+     * Long-press the text to select and copy it, or take a screenshot — either way, this
+     * is enough to diagnose a crash without adb, root, or a PC.
+     */
     private fun showLastCrashIfAny() {
         val crashText = CrashHandler.consumeLastCrash(this) ?: return
 
@@ -186,6 +203,10 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         startForegroundService(intent)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
+
+    // ---------- AssistantForegroundService.AssistantListener ----------
+    // These callbacks arrive on the main thread (the service's CoroutineScope uses
+    // Dispatchers.Main), so it's safe to touch views directly here.
 
     override fun onStateChanged(state: BrainState) {
         arcReactor.state = when (state) {

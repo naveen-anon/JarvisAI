@@ -43,6 +43,10 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".security.LockScreenActivity"
             android:exported="false"
             android:launchMode="singleInstance"
