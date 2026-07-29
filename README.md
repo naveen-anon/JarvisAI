@@ -9,13 +9,16 @@ Google's Gemini API for general conversation.
 
 ## ✨ Features
 
-- 🎙️ **Wake word activation** — say "Jarvis" to trigger listening
+- 🎙️ **Wake word activation** — say "Jarvis" to trigger listening (also recognizes Hindi/romanized variants)
 - ⚡ **Fully offline command engine** — works in airplane mode
 - ☁️ **Cloud fallback** — Gemini API handles anything the offline brain can't
 - 🔵 **Arc Reactor–style HUD** — animated, state-aware UI (idle / listening / thinking / speaking)
 - 🔒 **Crash-safe** — permission denials and network failures degrade gracefully instead of crashing
+- 🛠️ **On-device crash reporter** — if something does crash, reopening the app shows the full stack trace right on screen (no PC, adb, or root needed to diagnose it)
 - 💾 **Persistent memory** — notes survive app restarts and reboots
 - 🛰️ **Live system HUD** — clock, battery, network signal, CPU/RAM, location, weather
+- ⚙️ **Settings screen** — change voice type/speed, your name, and view/clear remembered notes, all visible and tappable instead of voice-only
+- 📊 **Usage Stats screen** — total commands run, current day streak, most-used apps and contacts
 
 ---
 
@@ -24,8 +27,8 @@ Google's Gemini API for general conversation.
 | Category | Example commands |
 |---|---|
 | **Apps** | "open camera", "open whatsapp", "launch settings", "open [any installed app]" (Hindi: "camera kholo") |
-| **Calls & SMS** | "call mom", "text john saying I'm on my way" |
-| **Device settings** | "turn on flashlight", "wifi", "bluetooth", "airplane mode" (Hindi: "torch jalao") |
+| **Calls & SMS** | "call mom", "please call priya", "text john saying I'm on my way" (Hindi order: "priya ko call karo", "mummy ko sms bhejo") |
+| **Device settings** | "turn on flashlight", "wifi" / "wi-fi", "bluetooth", "airplane mode" (Hindi: "torch jalao") |
 | **Volume** | "volume up/down", "mute", "full volume" (Hindi: "awaaz badhao", "awaaz kam karo") |
 | **Music** | "play music", "pause song", "next song", "previous song" (Hindi: "gaana chalao/roko") |
 | **Alarm & timer** | "set alarm for 7:30", "set a timer for 5 minutes" (Hindi: "alarm laga do") |
@@ -34,6 +37,7 @@ Google's Gemini API for general conversation.
 | **Math** | "what is 45 plus 20", "20 divided by 4" |
 | **Notes** | "remember to call the plumber", "what did you remember", "forget that" |
 | **Small talk** | "good morning jarvis", "how are you", "who are you", "help" |
+| **Voice customization** | "change voice to male/female/robot", "speak faster/slower" — takes effect on the very next thing Jarvis says. Also adjustable from the in-app Settings screen. |
 | **Auto Learn Mode** | Silently learns which apps/contacts you use at which times; ask "my routine" or "daily summary" for a recap, or Jarvis will proactively surface a learned habit once it has enough data |
 | **Vision (on-device)** | "read this text" (OCR), "what do you see" (object detection), "how many faces" (face detection) — opens the camera scanner, all processed on-device via ML Kit |
 | **Web search** | "search for nearest hospital", "google best biryani recipe" |

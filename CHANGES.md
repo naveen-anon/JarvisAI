@@ -4,6 +4,57 @@ This document lists exactly what was broken in the original project and what cha
 
 ---
 
+## 🔄 Pass 4 — Crash fixes, on-device diagnostics, Settings + Stats screens
+
+### Real crash found and fixed
+`NetworkStatusManager.getSignalLabel()` called `WifiManager.getConnectionInfo()` without
+the app ever declaring `ACCESS_WIFI_STATE` in the manifest — Android throws a
+`SecurityException` for this, and since it ran every 3 seconds in a `Handler` loop on the
+main HUD screen, the app crashed shortly after every launch. Fixed by adding the missing
+permission, plus wrapping the call in a `try/catch` so a similar permission gap never
+crashes the app again (falls back to a plain "WIFI" label instead).
+
+### On-device crash reporter (`diagnostics/CrashHandler.kt`, `JarvisApplication.kt`)
+Diagnosing the crash above was itself blocked by a chicken-and-egg problem: no PC, no
+root, and Android won't grant `READ_LOGS` to a third-party logcat app without adb. Added a
+global `Thread.UncaughtExceptionHandler` that writes any crash's full stack trace to a
+local file; `MainActivity` now checks for that file on every launch and shows it in a
+copyable dialog if present. No PC, adb, or root needed to diagnose any future crash — just
+reopen the app.
+
+### Hindi word-order call/SMS matching (`OfflineBrain.kt`)
+Command matching previously only recognized `"call X"` / `"phone X"` (English order).
+Saying it the natural Hindi way — **"Ashu ko call karo"** — fell all the way through to
+the generic suggestion engine instead of placing the call. Added regex-based matching for
+both orders (checking Hindi-order first, since e.g. "ashu ko call karo" also contains the
+substring "call karo" and would otherwise be misread as calling a contact named "karo").
+Same fix applied to SMS. Also fixed "wifi" not matching "wi-fi" / "wi fi".
+
+### TTS wasn't applying voice settings (`TextToSpeechHelper.kt`)
+`"change voice to male/female/robot"` and `"speak faster/slower"` updated
+`SettingsManager` correctly, but `TextToSpeechHelper` never read those values back — the
+TTS engine's pitch/rate were set once at init and never touched again, so the voice never
+actually changed. Now re-reads `SettingsManager` before every utterance and maps voice
+type to a pitch/rate preset. (Android doesn't reliably expose distinct male/female system
+voices across devices, so this approximates voice character via pitch/rate rather than
+swapping to a literally different underlying voice.)
+
+### New: Settings screen (`settings/SettingsActivity.kt`)
+Voice type, voice speed, user name, and the remembered note were previously **only**
+reachable by voice command with no visual confirmation anything happened. Added a
+`⚙ SETTINGS` button on the HUD (top-right) opening a screen where all of the above are
+visible and directly editable, with a live TTS preview when you change voice type.
+
+### New: Usage Stats screen (`settings/StatsActivity.kt`, `AutoLearnEngine.kt`)
+`AutoLearnEngine` already tracked top apps/contacts internally but exposed it only as a
+single spoken sentence ("my routine"). Added `recordInteraction()` (called once per
+successful response, offline or cloud, from `AssistantForegroundService.processSpeech()`)
+tracking total interaction count, which calendar days Jarvis was used, and a rolling
+day-streak. New `📊 Usage Stats` screen (linked from Settings) shows total commands run,
+current streak, and top apps/contacts as an actual dashboard.
+
+---
+
 ## 🔄 Pass 3 — Phase 4 (Vision) + remaining Phase 5 features
 
 Everything that was previously flagged as "not implemented" is now built:
