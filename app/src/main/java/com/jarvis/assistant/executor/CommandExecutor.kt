@@ -9,13 +9,15 @@ import com.jarvis.assistant.voice.TextToSpeechHelper
 
 object CommandExecutor {
 
-    // Overload 1: Handles AssistantCommand object from Foreground Service
+    fun handle(context: Context, command: AssistantCommand): String {
+        return execute(context, command)
+    }
+
     fun execute(context: Context, command: AssistantCommand): String {
         val query = command.rawCommand ?: command.action ?: ""
         return execute(context, query)
     }
 
-    // Overload 2: Handles direct String query
     fun execute(context: Context, userQuery: String): String {
         val cleanQuery = userQuery.lowercase().trim()
 
