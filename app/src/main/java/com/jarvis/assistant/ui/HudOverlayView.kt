@@ -62,7 +62,7 @@ class HudOverlayView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         drawGrid(canvas)
-        drawCornerBrackets(canvas)
+        // drawCornerBrackets(canvas) — removed
         drawParticles(canvas)
 
         animTime += 0.02f
