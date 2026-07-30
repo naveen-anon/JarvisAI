@@ -1,7 +1,12 @@
 package com.jarvis.assistant.settings
 
 import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -9,12 +14,31 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.jarvis.assistant.util.AutoLearnEngine
 
-/**
- * Surfaces AutoLearnEngine's data as a readable dashboard — this data already existed
- * (top apps, top contacts) but was previously only ever spoken aloud in a single sentence
- * via "my routine". This makes it something you can actually look at and feel motivated by.
- */
 class StatsActivity : AppCompatActivity() {
+
+    private val C_BG = Color.parseColor("#03080E")
+    private val C_CARD = Color.parseColor("#0A1520")
+    private val C_BORDER = Color.parseColor("#1A3A4A")
+    private val C_CYAN = Color.parseColor("#00E5FF")
+    private val C_CYAN_DIM = Color.parseColor("#0B7A94")
+    private val C_TEXT = Color.parseColor("#B8D4E0")
+    private val C_MUTED = Color.parseColor("#5A8A9A")
+    private val C_WHITE = Color.parseColor("#F0FBFF")
+    private val C_AMBER = Color.parseColor("#FFB020")
+
+    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+    private fun cardBg() = GradientDrawable().apply {
+        setColor(C_CARD)
+        cornerRadius = dp(14).toFloat()
+        setStroke(dp(1), C_BORDER)
+    }
+
+    private fun outlinedBtnBg() = GradientDrawable().apply {
+        setColor(Color.parseColor("#122230"))
+        cornerRadius = dp(10).toFloat()
+        setStroke(dp(1), C_CYAN)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,88 +49,191 @@ class StatsActivity : AppCompatActivity() {
     private fun buildUi(stats: AutoLearnEngine.UsageStats): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#050A0F"))
-            setPadding(48, 64, 48, 64)
+            setBackgroundColor(C_BG)
+            setPadding(dp(20), dp(48), dp(20), dp(40))
         }
 
-        fun title(text: String) = TextView(this).apply {
-            this.text = text
-            setTextColor(Color.parseColor("#00D4FF"))
-            textSize = 16f
-            setPadding(0, 32, 0, 8)
-        }
-        fun bigNumber(text: String) = TextView(this).apply {
-            this.text = text
-            setTextColor(Color.WHITE)
-            textSize = 36f
-        }
-        fun caption(text: String) = TextView(this).apply {
-            this.text = text
-            setTextColor(Color.parseColor("#5C8A94"))
-            textSize = 12f
-        }
-        fun listItem(text: String) = TextView(this).apply {
-            this.text = text
-            setTextColor(Color.parseColor("#8FC7D6"))
-            textSize = 14f
-            setPadding(0, 4, 0, 4)
-        }
-
+        root.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(View(this@StatsActivity).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(4), dp(22)).apply { marginEnd = dp(12) }
+                setBackgroundColor(C_CYAN)
+            })
+            addView(TextView(this@StatsActivity).apply {
+                text = "USAGE STATS"
+                setTextColor(C_WHITE)
+                textSize = 22f
+                typeface = Typeface.MONOSPACE
+                letterSpacing = 0.1f
+            })
+        })
         root.addView(TextView(this).apply {
-            text = "Usage Stats"
-            setTextColor(Color.WHITE)
-            textSize = 22f
+            text = "Your Jarvis activity at a glance"
+            setTextColor(C_MUTED)
+            textSize = 12f
+            typeface = Typeface.MONOSPACE
+            setPadding(dp(16), dp(4), 0, dp(12))
         })
 
-        // --- Headline numbers ---
-        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val metricsRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
         val col1 = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            gravity = Gravity.CENTER
+            background = cardBg()
+            setPadding(dp(12), dp(18), dp(12), dp(18))
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+                marginEnd = dp(8)
+            }
+            addView(TextView(this@StatsActivity).apply {
+                text = stats.totalInteractions.toString()
+                setTextColor(C_CYAN)
+                textSize = 28f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.CENTER
+            })
+            addView(TextView(this@StatsActivity).apply {
+                text = "commands"
+                setTextColor(C_MUTED)
+                textSize = 11f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.CENTER
+                setPadding(0, dp(4), 0, 0)
+            })
         }
-        col1.addView(bigNumber(stats.totalInteractions.toString()))
-        col1.addView(caption("total commands"))
         val col2 = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            gravity = Gravity.CENTER
+            background = cardBg()
+            setPadding(dp(12), dp(18), dp(12), dp(18))
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            addView(TextView(this@StatsActivity).apply {
+                text = "${stats.currentStreak}🔥"
+                setTextColor(C_AMBER)
+                textSize = 28f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.CENTER
+            })
+            addView(TextView(this@StatsActivity).apply {
+                text = "day streak"
+                setTextColor(C_MUTED)
+                textSize = 11f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.CENTER
+                setPadding(0, dp(4), 0, 0)
+            })
         }
-        col2.addView(bigNumber("${stats.currentStreak}🔥"))
-        col2.addView(caption("day streak"))
-        row.addView(col1)
-        row.addView(col2)
-        root.addView(row)
+        metricsRow.addView(col1)
+        metricsRow.addView(col2)
+        root.addView(metricsRow)
 
-        root.addView(caption(
-            if (stats.firstUsedDaysAgo <= 0) "You started using Jarvis today."
-            else "Using Jarvis for ${stats.firstUsedDaysAgo} day${if (stats.firstUsedDaysAgo != 1) "s" else ""} " +
+        root.addView(TextView(this).apply {
+            text = if (stats.firstUsedDaysAgo <= 0) "You started using Jarvis today."
+            else "Using Jarvis for \( {stats.firstUsedDaysAgo} day \){if (stats.firstUsedDaysAgo != 1) "s" else ""} " +
                 "(active on ${stats.daysActive} of those)."
-        ).apply { setPadding(0, 16, 0, 0) })
+            setTextColor(C_MUTED)
+            textSize = 12f
+            typeface = Typeface.MONOSPACE
+            setPadding(0, dp(14), 0, 0)
+        })
 
-        // --- Top apps ---
-        root.addView(title("Most Used Apps"))
+        fun sectionHeader(title: String) = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(22), 0, dp(10))
+            addView(View(this@StatsActivity).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(3), dp(14)).apply { marginEnd = dp(10) }
+                setBackgroundColor(C_CYAN)
+            })
+            addView(TextView(this@StatsActivity).apply {
+                text = title
+                setTextColor(C_CYAN)
+                textSize = 13f
+                typeface = Typeface.MONOSPACE
+                letterSpacing = 0.08f
+            })
+        }
+
+        fun rankRow(rank: Int, name: String, count: Int) = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = cardBg()
+            setPadding(dp(14), dp(12), dp(14), dp(12))
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(6) }
+            addView(TextView(this@StatsActivity).apply {
+                text = "#$rank"
+                setTextColor(if (rank == 1) C_AMBER else C_CYAN_DIM)
+                textSize = 13f
+                typeface = Typeface.MONOSPACE
+                layoutParams = LinearLayout.LayoutParams(dp(36), ViewGroup.LayoutParams.WRAP_CONTENT)
+            })
+            addView(TextView(this@StatsActivity).apply {
+                text = name
+                setTextColor(C_TEXT)
+                textSize = 13f
+                typeface = Typeface.MONOSPACE
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            })
+            addView(TextView(this@StatsActivity).apply {
+                text = "${count}×"
+                setTextColor(C_CYAN)
+                textSize = 13f
+                typeface = Typeface.MONOSPACE
+            })
+        }
+
+        root.addView(sectionHeader("MOST USED APPS"))
         if (stats.topApps.isEmpty()) {
-            root.addView(caption("Not enough data yet — keep using Jarvis!"))
+            root.addView(TextView(this).apply {
+                text = "Not enough data yet — keep using Jarvis!"
+                setTextColor(C_MUTED)
+                textSize = 12f
+                typeface = Typeface.MONOSPACE
+            })
         } else {
-            stats.topApps.forEach { (app, count) ->
-                root.addView(listItem("$app — $count time${if (count != 1) "s" else ""}"))
+            stats.topApps.forEachIndexed { i, (app, count) ->
+                root.addView(rankRow(i + 1, app, count))
             }
         }
 
-        // --- Top contacts ---
-        root.addView(title("Most Contacted"))
+        root.addView(sectionHeader("MOST CONTACTED"))
         if (stats.topContacts.isEmpty()) {
-            root.addView(caption("Not enough data yet."))
+            root.addView(TextView(this).apply {
+                text = "Not enough data yet."
+                setTextColor(C_MUTED)
+                textSize = 12f
+                typeface = Typeface.MONOSPACE
+            })
         } else {
-            stats.topContacts.forEach { (contact, count) ->
-                root.addView(listItem("$contact — $count time${if (count != 1) "s" else ""}"))
+            stats.topContacts.forEachIndexed { i, (contact, count) ->
+                root.addView(rankRow(i + 1, contact, count))
             }
         }
 
         root.addView(Button(this).apply {
-            text = "Close"
+            text = "←  Close"
+            background = outlinedBtnBg()
+            setTextColor(C_CYAN)
+            isAllCaps = false
+            textSize = 13f
+            typeface = Typeface.MONOSPACE
+            setPadding(dp(16), dp(12), dp(16), dp(12))
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(24) }
             setOnClickListener { finish() }
         })
 
-        return ScrollView(this).apply { addView(root) }
+        return ScrollView(this).apply {
+            setBackgroundColor(C_BG)
+            addView(root)
+        }
     }
 }

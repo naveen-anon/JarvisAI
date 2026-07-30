@@ -14,21 +14,21 @@ class HudOverlayView @JvmOverloads constructor(
 ) : View(context, attrs) {
 
     private val gridPaint = Paint().apply {
-        color = Color.parseColor("#0A6E85")
+        color = Color.parseColor("#0B7A94")
         alpha = 25
         strokeWidth = 1f
         style = Paint.Style.STROKE
     }
 
     private val bracketPaint = Paint().apply {
-        color = Color.parseColor("#00D4FF")
+        color = Color.parseColor("#00E5FF")
         strokeWidth = 4f
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
 
     private val particlePaint = Paint().apply {
-        color = Color.parseColor("#00D4FF")
+        color = Color.parseColor("#00E5FF")
         style = Paint.Style.FILL
     }
 

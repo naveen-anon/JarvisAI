@@ -26,9 +26,9 @@ class ArcReactorView @JvmOverloads constructor(
             applyStateParams()
         }
 
-    private val cyan = Color.parseColor("#00D4FF")
-    private val cyanDim = Color.parseColor("#0A6E85")
-    private val amber = Color.parseColor("#FFB300")
+    private val cyan = Color.parseColor("#00E5FF")
+    private val cyanDim = Color.parseColor("#0B7A94")
+    private val amber = Color.parseColor("#FFB020")
     private val red = Color.parseColor("#FF3B30")
 
     private var accentColor = cyan
