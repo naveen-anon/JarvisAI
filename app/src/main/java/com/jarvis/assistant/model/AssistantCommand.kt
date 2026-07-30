@@ -28,6 +28,7 @@ enum class ActionType(val key: String) {
     UNLOCK_APP("unlock_app"),      // target = app name
     SET_PIN("set_pin"),            // target = new PIN
     PC_CONNECT("pc_connect"),      // toggles the PC bridge server on/off; target = "on" | "off"
+    WHATSAPP_MESSAGE("whatsapp_message"), // target = contact name, message = text to pre-fill
     REPLY("reply"),          // pure conversational reply, no system action
     UNKNOWN("unknown");
 

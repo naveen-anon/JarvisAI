@@ -34,6 +34,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.LOCK_APP -> lockApp(cmd.target)
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
             ActionType.SET_PIN -> setPin(cmd.target)
+            ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
             ActionType.READ_SCREEN -> "Reading screen requires the Accessibility Service overlay."
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
@@ -263,6 +264,41 @@ class CommandExecutor(private val context: Context) {
     }
 
     /** Phase 5 — "App lock by voice". Requires a PIN to already be set (see setPin). */
+    /**
+     * WhatsApp gives no official API for a regular app to silently send a message —
+     * only the user tapping Send inside WhatsApp itself can do that (by design, to
+     * prevent spam). This opens WhatsApp's chat with the contact and the message already
+     * typed in, so all that's left is one tap.
+     */
+    private fun whatsappMessage(target: String?, message: String?): String {
+        if (target.isNullOrBlank()) return "Send a WhatsApp message to whom?"
+        if (message.isNullOrBlank()) return "What should the message say?"
+        val rawNumber = lookupContactNumber(target) ?: return "No number found for $target"
+
+        val digits = rawNumber.filter { it.isDigit() }
+        // wa.me needs a full international number; assume India (+91) for a bare 10-digit
+        // local number, since that's the common case for this app's contact books.
+        val intlNumber = if (digits.length == 10) "91$digits" else digits
+
+        val uri = Uri.parse("https://wa.me/$intlNumber?text=${Uri.encode(message)}")
+        return try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, uri).apply {
+                setPackage("com.whatsapp")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
+            "Opening WhatsApp to message $target — just tap send."
+        } catch (e: Exception) {
+            try {
+                context.startActivity(Intent(Intent.ACTION_VIEW, uri).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+                "Opening WhatsApp to message $target — just tap send."
+            } catch (e2: Exception) {
+                "Couldn't open WhatsApp. Is it installed?"
+            }
+        }
+    }
+
     private fun lockApp(appName: String?): String {
         if (appName.isNullOrBlank()) return "Which app should I lock?"
         if (!lockManager.hasPin()) {

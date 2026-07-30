@@ -301,6 +301,30 @@ class OfflineBrain(
             return AssistantCommand("call", extractTail(original, m.groupValues[1]))
         }
 
+        // WhatsApp — Hindi, contact-first: "meri sister ko whatsapp pe sms karo ki khana kya banaya hai"
+        Regex("""(.+?)\s+ko\s+whatsapp\s*(?:pe|par)?\s*(?:sms|message)?\s*(?:karo|kar do|bhejo)?\s*(?:ki|saying)\s+(.+)""")
+            .find(cmd)?.let { m ->
+                return AssistantCommand(
+                    "whatsapp_message",
+                    extractTail(original, m.groupValues[1], fromStart = true),
+                    m.groupValues[2]
+                )
+            }
+
+        // WhatsApp — Hindi, "whatsapp" keyword first: "whatsapp pe sms karo meri sister ko ki khana kya banaya hai"
+        Regex("""whatsapp\s*(?:pe|par)?\s*(?:sms|message)?\s*(?:karo|kar do|bhejo)?\s+(.+?)\s+ko\s+(?:ki|saying)\s+(.+)""")
+            .find(cmd)?.let { m ->
+                return AssistantCommand("whatsapp_message", extractTail(original, m.groupValues[1], fromStart = false), m.groupValues[2])
+            }
+
+        // WhatsApp — English: "whatsapp priya saying I'm on my way", "message priya on whatsapp saying ..."
+        Regex("""whatsapp\s+(.+?)\s+saying\s+(.+)""").find(cmd)?.let { m ->
+            return AssistantCommand("whatsapp_message", extractTail(original, m.groupValues[1]), m.groupValues[2])
+        }
+        Regex("""(?:message|send)\s+(.+?)\s+on\s+whatsapp\s+saying\s+(.+)""").find(cmd)?.let { m ->
+            return AssistantCommand("whatsapp_message", extractTail(original, m.groupValues[1]), m.groupValues[2])
+        }
+
         // Message/SMS — Hindi word order first, same reasoning as above.
         Regex("""(.+?)\s+ko\s+(?:message|text|sms)\s*(?:karo|kar do|bhejo|karna)?\s*$""").find(cmd)?.let { m ->
             return AssistantCommand("send_sms", extractTail(original, m.groupValues[1], fromStart = true), null)
