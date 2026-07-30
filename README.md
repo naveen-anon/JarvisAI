@@ -19,6 +19,8 @@ Google's Gemini API for general conversation.
 - 🛰️ **Live system HUD** — clock, battery, network signal, CPU/RAM, location, weather
 - ⚙️ **Settings screen** — change voice type/speed, your name, and view/clear remembered notes, all visible and tappable instead of voice-only
 - 📊 **Usage Stats screen** — total commands run, current day streak, most-used apps and contacts
+- 💬 **Text chat** — type messages in a dedicated chat screen (same offline-first brain as voice)
+- 🎨 **Full-screen HUD theme** — no grey ActionBar; status bar matches the dark cyan HUD
 
 ---
 
@@ -55,7 +57,7 @@ instead of hanging or crashing.
 ## 🏗️ Architecture
 
 ```
-Voice input (SpeechToText)
+Voice input (SpeechToText)  OR  Text chat (ChatActivity → submitText)
         |
         v
 AssistantForegroundService
@@ -89,6 +91,8 @@ crash-free with no connectivity.
 JarvisAI/
 ├── app/src/main/java/com/jarvis/assistant/
 │   ├── MainActivity.kt                  # UI, permissions, service binding, HUD updates
+│   ├── chat/
+│   │   └── ChatActivity.kt              # Text chat UI (bubbles + EditText)
 │   ├── brain/
 │   │   ├── OfflineBrain.kt              # The on-device reasoning engine
 │   │   └── BrainState.kt                # IDLE / LISTENING / THINKING / SPEAKING / ERROR
@@ -106,8 +110,11 @@ JarvisAI/
 │   ├── ui/
 │   │   ├── ArcReactorView.kt            # Animated HUD centerpiece
 │   │   ├── WaveformView.kt              # Listening animation
-│   │   ├── HudOverlayView.kt            # Scanline/overlay effect
+│   │   ├── HudOverlayView.kt            # Grid + particles (corner brackets removed)
 │   │   └── Typewriter.kt                # Animated text reveal
+│   ├── settings/
+│   │   ├── SettingsActivity.kt          # Voice, name, notes
+│   │   └── StatsActivity.kt             # Usage dashboard
 │   ├── util/
 │   │   ├── PersistentMemory.kt          # SharedPreferences-backed notes
 │   │   ├── NetworkStatusManager.kt      # isOnline() + signal label

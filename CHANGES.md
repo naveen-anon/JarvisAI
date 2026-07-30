@@ -4,6 +4,31 @@ This document lists exactly what was broken in the original project and what cha
 
 ---
 
+## 🔄 Pass 5 — Build fix, HUD polish, text chat
+
+### Kotlin compile fix (`settings/StatsActivity.kt`)
+CI failed on `:app:compileDebugKotlin` with illegal string escapes (`\\(`/`\\)`) and
+broken template tokens on the "Using Jarvis for N days" line. Replaced with proper
+Kotlin string templates: `${stats.firstUsedDaysAgo}` and
+`${if (stats.firstUsedDaysAgo != 1) "s" else ""}`.
+
+### HUD chrome (`themes.xml`, `AndroidManifest.xml`, `HudOverlayView.kt`)
+- Default `Theme.AppCompat.DayNight` showed a grey ActionBar ("Jarvis") that clashed
+  with the cyan HUD. Added `Theme.Jarvis` (`Theme.AppCompat.NoActionBar`) with
+  status/navigation bar and window background `#03080E`, wired in the manifest.
+- Removed the four cyan corner brackets drawn by `HudOverlayView.drawCornerBrackets()`
+  (call site commented out) so the screen edge stays clean.
+
+### Text chat (`chat/ChatActivity.kt`, `activity_chat.xml`)
+Voice-only input left no way to type. Added a full chat screen:
+- **💬 CHAT** chip on the main HUD (next to SETTINGS) opens `ChatActivity`.
+- Bubble UI (user right / Jarvis left), EditText + SEND, same offline-first pipeline
+  as voice via new `AssistantForegroundService.submitText()` → `handleUserSpeech()`.
+- Replies show `[OFFLINE]` when served by `OfflineBrain`; TTS still speaks the reply.
+- Manifest: `.chat.ChatActivity` with `windowSoftInputMode="adjustResize"`.
+
+---
+
 ## 🔄 Pass 4 — Crash fixes, on-device diagnostics, Settings + Stats screens
 
 ### Real crash found and fixed
