@@ -132,7 +132,7 @@ class StatsActivity : AppCompatActivity() {
 
         root.addView(TextView(this).apply {
             text = if (stats.firstUsedDaysAgo <= 0) "You started using Jarvis today."
-            else "Using Jarvis for \( {stats.firstUsedDaysAgo} day \){if (stats.firstUsedDaysAgo != 1) "s" else ""} " +
+            else "Using Jarvis for ( {stats.firstUsedDaysAgo} day ){if (stats.firstUsedDaysAgo != 1) "s" else ""} " +
                 "(active on ${stats.daysActive} of those)."
             setTextColor(C_MUTED)
             textSize = 12f
