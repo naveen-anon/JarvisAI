@@ -100,7 +100,7 @@ class VoiceAuthManager(private val context: Context) {
         val features = samplesList.map { extractFeatures(it) }
         val avg = FloatArray(melBands)
         for (f in features) for (i in 0 until melBands) avg[i] += f[i]
-        for (i in 0 until melBands) avg[i] /= features.size
+        for (i in 0 until melBands) avg[i] = avg[i] / features.size.toFloat()
 
         prefs.edit().putString("voiceprint", avg.joinToString(",")).apply()
         return true
@@ -139,7 +139,7 @@ class VoiceAuthManager(private val context: Context) {
         }
 
         if (frameCount == 0) return FloatArray(melBands)
-        for (b in 0 until melBands) accum[b] /= frameCount
+        for (b in 0 until melBands) accum[b] = accum[b] / frameCount.toFloat()
 
         // Mean-normalize so overall loudness/mic gain doesn't dominate the comparison.
         val mean = accum.average().toFloat()
