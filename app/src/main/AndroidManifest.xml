@@ -51,6 +51,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".chat.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".security.LockScreenActivity"
             android:exported="false"
             android:launchMode="singleInstance"

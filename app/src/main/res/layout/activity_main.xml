@@ -149,6 +149,23 @@
                 android:paddingBottom="6dp"
                 android:clickable="true"
                 android:focusable="true" />
+
+            <TextView
+                android:id="@+id/txtChatBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💬 CHAT"
+                android:textColor="#00E5FF"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:background="@drawable/hud_button_bg"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
     </HorizontalScrollView>
 

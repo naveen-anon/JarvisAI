@@ -104,6 +104,13 @@ class AssistantForegroundService : Service() {
         }
     }
 
+    /** Text chat — same offline-first pipeline as voice. */
+    fun submitText(text: String) {
+        val trimmed = text.trim()
+        if (trimmed.isBlank()) return
+        handleUserSpeech(trimmed)
+    }
+
     fun startListeningCycle() {
         listener?.onStateChanged(BrainState.LISTENING)
         stt.listenOnce(
