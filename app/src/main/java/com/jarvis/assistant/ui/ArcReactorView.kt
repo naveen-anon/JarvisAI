@@ -6,16 +6,24 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RadialGradient
+import android.graphics.RectF
 import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.LinearInterpolator
-import androidx.core.content.ContextCompat
-import com.jarvis.assistant.R
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.sin
 
 enum class HudState { IDLE, LISTENING, THINKING, SPEAKING }
 
+/**
+ * Iron Man–style Arc Reactor for Jarvis:
+ * metal outer housing, segmented rotating rings, triangular core,
+ * white-hot center, and a soft chest-glow bloom.
+ */
 class ArcReactorView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -27,115 +35,107 @@ class ArcReactorView @JvmOverloads constructor(
             applyStateParams()
         }
 
-    private val cyan = Color.parseColor("#00D4FF")
+    private val cyan = Color.parseColor("#00E5FF")
+    private val cyanBright = Color.parseColor("#B8F6FF")
     private val cyanDim = Color.parseColor("#0A6E85")
     private val amber = Color.parseColor("#FFB300")
-    private val red = Color.parseColor("#FF3B30")
+    private val metal = Color.parseColor("#1A3A4A")
+    private val metalLight = Color.parseColor("#2A5A6A")
 
     private var accentColor = cyan
     private var colorAnimator: ValueAnimator? = null
+
     private var outerRotation = 0f
     private var midRotation = 0f
-    private var tickRotation = 0f
-    private var bladeRotation = 0f
+    private var innerRotation = 0f
     private var pulseScale = 1f
     private var pulseAlpha = 1f
 
-    private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
-    private val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-    }
-    private val corePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val coreGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val bloomPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val bladePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
-    private val spokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
-    private val particlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
 
     private val outerAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-        duration = 8000
+        duration = 10000
         repeatCount = ValueAnimator.INFINITE
         interpolator = LinearInterpolator()
         addUpdateListener { outerRotation = it.animatedValue as Float; invalidate() }
     }
     private val midAnimator = ValueAnimator.ofFloat(360f, 0f).apply {
-        duration = 5000
+        duration = 7000
         repeatCount = ValueAnimator.INFINITE
         interpolator = LinearInterpolator()
         addUpdateListener { midRotation = it.animatedValue as Float; invalidate() }
     }
-    private val tickAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-        duration = 20000
+    private val innerAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
+        duration = 4000
         repeatCount = ValueAnimator.INFINITE
         interpolator = LinearInterpolator()
-        addUpdateListener { tickRotation = it.animatedValue as Float; invalidate() }
+        addUpdateListener { innerRotation = it.animatedValue as Float; invalidate() }
     }
-    private val pulseAnimator = ValueAnimator.ofFloat(0.85f, 1.15f).apply {
-        duration = 1200
+    private val pulseAnimator = ValueAnimator.ofFloat(0.92f, 1.08f).apply {
+        duration = 1400
         repeatCount = ValueAnimator.INFINITE
         repeatMode = ValueAnimator.REVERSE
         addUpdateListener {
             pulseScale = it.animatedValue as Float
-            pulseAlpha = 0.6f + (pulseScale - 0.85f) / 0.30f * 0.4f
+            pulseAlpha = 0.55f + (pulseScale - 0.92f) / 0.16f * 0.45f
             invalidate()
         }
-    }
-    private val bladeAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-        duration = 6000
-        repeatCount = ValueAnimator.INFINITE
-        interpolator = LinearInterpolator()
-        addUpdateListener { bladeRotation = it.animatedValue as Float; invalidate() }
     }
 
     init {
         outerAnimator.start()
         midAnimator.start()
-        tickAnimator.start()
+        innerAnimator.start()
         pulseAnimator.start()
-        bladeAnimator.start()
+        setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
     private fun applyStateParams() {
-        val targetColor = when (state) {
+        val target = when (state) {
             HudState.IDLE -> cyanDim
             HudState.LISTENING -> cyan
             HudState.THINKING -> amber
-            HudState.SPEAKING -> cyan
+            HudState.SPEAKING -> cyanBright
         }
-        animateAccentColor(targetColor)
+        animateAccentColor(target)
 
         when (state) {
             HudState.IDLE -> {
-                outerAnimator.duration = 12000
-                midAnimator.duration = 8000
-                pulseAnimator.duration = 2000
+                outerAnimator.duration = 14000
+                midAnimator.duration = 9000
+                innerAnimator.duration = 6000
+                pulseAnimator.duration = 1800
             }
             HudState.LISTENING -> {
-                outerAnimator.duration = 3000
-                midAnimator.duration = 2200
-                pulseAnimator.duration = 500
+                outerAnimator.duration = 3500
+                midAnimator.duration = 2500
+                innerAnimator.duration = 1800
+                pulseAnimator.duration = 600
             }
             HudState.THINKING -> {
-                outerAnimator.duration = 1200
-                midAnimator.duration = 900
-                pulseAnimator.duration = 350
+                outerAnimator.duration = 1400
+                midAnimator.duration = 1000
+                innerAnimator.duration = 700
+                pulseAnimator.duration = 320
             }
             HudState.SPEAKING -> {
-                outerAnimator.duration = 2000
-                midAnimator.duration = 1500
-                pulseAnimator.duration = 700
+                outerAnimator.duration = 2200
+                midAnimator.duration = 1600
+                innerAnimator.duration = 1100
+                pulseAnimator.duration = 750
             }
         }
     }
 
-    /** Blends the ring/core color over ~350ms instead of snapping instantly on state change. */
     private fun animateAccentColor(target: Int) {
         colorAnimator?.cancel()
         colorAnimator = ValueAnimator.ofObject(ArgbEvaluator(), accentColor, target).apply {
-            duration = 350
+            duration = 320
             addUpdateListener {
                 accentColor = it.animatedValue as Int
                 invalidate()
@@ -148,163 +148,213 @@ class ArcReactorView @JvmOverloads constructor(
         super.onDraw(canvas)
         val cx = width / 2f
         val cy = height / 2f
-        val maxRadius = minOf(width, height) / 2f * 0.92f
+        val R = min(width, height) / 2f * 0.90f
 
-        drawOuterBloom(canvas, cx, cy, maxRadius)
-        drawTickRing(canvas, cx, cy, maxRadius)
-        drawDashedRing(canvas, cx, cy, maxRadius * 0.78f, outerRotation, 14, 10f, 4.5f)
-        drawOrbitParticles(canvas, cx, cy, maxRadius * 0.78f, outerRotation)
-        drawDashedRing(canvas, cx, cy, maxRadius * 0.60f, midRotation, 9, 20f, 3.5f)
-        drawSpokes(canvas, cx, cy, maxRadius * 0.34f, maxRadius * 0.58f)
-        drawCore(canvas, cx, cy, maxRadius * 0.34f)
+        drawBloom(canvas, cx, cy, R)
+        drawOuterHousing(canvas, cx, cy, R)
+        drawSegmentedRing(canvas, cx, cy, R * 0.82f, outerRotation, 12, 5.5f, 8f)
+        drawSegmentedRing(canvas, cx, cy, R * 0.68f, midRotation, 8, 4f, 14f)
+        drawInnerTicks(canvas, cx, cy, R * 0.58f)
+        drawTriangleCore(canvas, cx, cy, R * 0.48f)
+        drawEnergyCore(canvas, cx, cy, R * 0.22f)
     }
 
-    /** A large, soft halo behind everything — the "glow" a real reactor would cast. */
-    private fun drawOuterBloom(canvas: Canvas, cx: Float, cy: Float, maxRadius: Float) {
-        val r = maxRadius * 1.35f
-        bloomPaint.shader = RadialGradient(
+    /** Soft chest-glow behind the reactor. */
+    private fun drawBloom(canvas: Canvas, cx: Float, cy: Float, R: Float) {
+        val r = R * 1.45f
+        glow.shader = RadialGradient(
             cx, cy, r,
             intArrayOf(
-                Color.argb((pulseAlpha * 28).toInt(), Color.red(accentColor), Color.green(accentColor), Color.blue(accentColor)),
+                Color.argb(
+                    (pulseAlpha * 36).toInt(),
+                    Color.red(accentColor),
+                    Color.green(accentColor),
+                    Color.blue(accentColor)
+                ),
+                Color.argb(
+                    (pulseAlpha * 12).toInt(),
+                    Color.red(accentColor),
+                    Color.green(accentColor),
+                    Color.blue(accentColor)
+                ),
                 Color.TRANSPARENT
             ),
-            null, Shader.TileMode.CLAMP
+            floatArrayOf(0f, 0.45f, 1f),
+            Shader.TileMode.CLAMP
         )
-        canvas.drawCircle(cx, cy, r, bloomPaint)
+        canvas.drawCircle(cx, cy, r, glow)
+        glow.shader = null
     }
 
-    /** Thin turbine-like spokes connecting the core to the middle ring, rotating opposite the core blades. */
-    private fun drawSpokes(canvas: Canvas, cx: Float, cy: Float, innerR: Float, outerR: Float) {
-        spokePaint.color = accentColor
-        spokePaint.alpha = 55
-        spokePaint.strokeWidth = 1.5f
-        canvas.save()
-        canvas.rotate(-bladeRotation * 0.5f, cx, cy)
-        for (i in 0 until 8) {
-            val angle = Math.toRadians(i * 45.0)
-            val x1 = cx + (innerR * Math.cos(angle)).toFloat()
-            val y1 = cy + (innerR * Math.sin(angle)).toFloat()
-            val x2 = cx + (outerR * Math.cos(angle)).toFloat()
-            val y2 = cy + (outerR * Math.sin(angle)).toFloat()
-            canvas.drawLine(x1, y1, x2, y2, spokePaint)
-        }
-        canvas.restore()
+    /** Thick outer metal ring + thin accent rim (housing). */
+    private fun drawOuterHousing(canvas: Canvas, cx: Float, cy: Float, R: Float) {
+        stroke.style = Paint.Style.STROKE
+        stroke.strokeCap = Paint.Cap.ROUND
+
+        stroke.color = metal
+        stroke.strokeWidth = R * 0.085f
+        stroke.alpha = 255
+        canvas.drawCircle(cx, cy, R * 0.94f, stroke)
+
+        stroke.color = metalLight
+        stroke.strokeWidth = R * 0.018f
+        stroke.alpha = 200
+        canvas.drawCircle(cx, cy, R * 0.98f, stroke)
+        canvas.drawCircle(cx, cy, R * 0.90f, stroke)
+
+        stroke.color = accentColor
+        stroke.strokeWidth = R * 0.012f
+        stroke.alpha = 160
+        canvas.drawCircle(cx, cy, R * 0.88f, stroke)
     }
 
-    /** A few small glowing "energy nodes" that orbit along the outer ring. */
-    private fun drawOrbitParticles(canvas: Canvas, cx: Float, cy: Float, radius: Float, rotation: Float) {
-        for (i in 0 until 3) {
-            val angle = Math.toRadians((rotation + i * 120f).toDouble())
-            val px = cx + (radius * Math.cos(angle)).toFloat()
-            val py = cy + (radius * Math.sin(angle)).toFloat()
-
-            particlePaint.shader = RadialGradient(
-                px, py, 10f,
-                intArrayOf(Color.argb(180, Color.red(accentColor), Color.green(accentColor), Color.blue(accentColor)), Color.TRANSPARENT),
-                null, Shader.TileMode.CLAMP
-            )
-            canvas.drawCircle(px, py, 10f, particlePaint)
-
-            particlePaint.shader = null
-            particlePaint.color = Color.WHITE
-            particlePaint.alpha = 230
-            canvas.drawCircle(px, py, 2.2f, particlePaint)
-        }
-    }
-
-    private fun drawTickRing(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
-        tickPaint.color = accentColor
-        tickPaint.alpha = 70
-        tickPaint.strokeWidth = 2f
-        val tickCount = 60
-        canvas.save()
-        canvas.rotate(tickRotation, cx, cy)
-        for (i in 0 until tickCount) {
-            val angle = Math.toRadians((360.0 / tickCount) * i)
-            val len = if (i % 5 == 0) 14f else 7f
-            val startR = radius
-            val endR = radius - len
-            val x1 = cx + (startR * Math.cos(angle)).toFloat()
-            val y1 = cy + (startR * Math.sin(angle)).toFloat()
-            val x2 = cx + (endR * Math.cos(angle)).toFloat()
-            val y2 = cy + (endR * Math.sin(angle)).toFloat()
-            canvas.drawLine(x1, y1, x2, y2, tickPaint)
-        }
-        canvas.restore()
-    }
-
-    private fun drawDashedRing(
-        canvas: Canvas, cx: Float, cy: Float, radius: Float,
-        rotation: Float, segments: Int, strokeWidth: Float, gapDegrees: Float
+    private fun drawSegmentedRing(
+        canvas: Canvas,
+        cx: Float,
+        cy: Float,
+        radius: Float,
+        rotation: Float,
+        segments: Int,
+        strokeWidth: Float,
+        gapDeg: Float
     ) {
-        ringPaint.color = accentColor
-        ringPaint.strokeWidth = strokeWidth
-        ringPaint.alpha = 220
-        val sweepPerSegment = 360f / segments - gapDegrees
-        val rect = android.graphics.RectF(cx - radius, cy - radius, cx + radius, cy + radius)
+        stroke.color = accentColor
+        stroke.strokeWidth = strokeWidth
+        stroke.alpha = 210
+        stroke.strokeCap = Paint.Cap.BUTT
+        val sweep = 360f / segments - gapDeg
+        val rect = RectF(cx - radius, cy - radius, cx + radius, cy + radius)
         for (i in 0 until segments) {
-            val startAngle = rotation + i * (360f / segments)
-            canvas.drawArc(rect, startAngle, sweepPerSegment, false, ringPaint)
+            val start = rotation + i * (360f / segments)
+            canvas.drawArc(rect, start, sweep, false, stroke)
         }
     }
 
-    private fun drawCore(canvas: Canvas, cx: Float, cy: Float, baseRadius: Float) {
-        val r = baseRadius * pulseScale
-
-        coreGlowPaint.shader = RadialGradient(
-            cx, cy, r * 2.2f,
-            intArrayOf(
-                Color.argb((pulseAlpha * 90).toInt(), Color.red(accentColor), Color.green(accentColor), Color.blue(accentColor)),
-                Color.TRANSPARENT
-            ),
-            null, Shader.TileMode.CLAMP
-        )
-        canvas.drawCircle(cx, cy, r * 2.2f, coreGlowPaint)
-
-        drawCoreBlades(canvas, cx, cy, r * 0.85f)
-
-        corePaint.style = Paint.Style.STROKE
-        corePaint.strokeWidth = 3f
-        corePaint.color = accentColor
-        corePaint.alpha = 255
-        canvas.drawCircle(cx, cy, r, corePaint)
-
-        corePaint.style = Paint.Style.FILL
-        corePaint.alpha = (pulseAlpha * 90).toInt()
-        canvas.drawCircle(cx, cy, r * 0.55f, corePaint)
-
-        // Bright center point — the "ignition point" of the reactor.
-        corePaint.alpha = 255
-        canvas.drawCircle(cx, cy, r * 0.14f, corePaint)
+    private fun drawInnerTicks(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
+        stroke.color = accentColor
+        stroke.strokeWidth = 2f
+        stroke.alpha = 90
+        stroke.strokeCap = Paint.Cap.ROUND
+        canvas.save()
+        canvas.rotate(innerRotation * 0.25f, cx, cy)
+        val count = 36
+        for (i in 0 until count) {
+            val a = Math.toRadians((360.0 / count) * i)
+            val len = if (i % 3 == 0) radius * 0.10f else radius * 0.05f
+            val x1 = cx + (radius * cos(a)).toFloat()
+            val y1 = cy + (radius * sin(a)).toFloat()
+            val x2 = cx + ((radius - len) * cos(a)).toFloat()
+            val y2 = cy + ((radius - len) * sin(a)).toFloat()
+            canvas.drawLine(x1, y1, x2, y2, stroke)
+        }
+        canvas.restore()
     }
 
-    /** Three rotating turbine-style blades inside the core — the signature reactor detail. */
-    private fun drawCoreBlades(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
-        bladePaint.color = accentColor
-        bladePaint.alpha = 150
+    /**
+     * Classic Arc Reactor triangle: three curved arms + triangular frame —
+     * the signature Iron Man look.
+     */
+    private fun drawTriangleCore(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
         canvas.save()
-        canvas.rotate(bladeRotation, cx, cy)
+        canvas.rotate(innerRotation * 0.15f, cx, cy)
+
+        stroke.color = accentColor
+        stroke.strokeWidth = 3.5f
+        stroke.alpha = 200
+        stroke.strokeJoin = Paint.Join.ROUND
+        val tri = Path()
+        for (i in 0 until 3) {
+            val a = Math.toRadians(-90.0 + i * 120.0)
+            val x = cx + (radius * cos(a)).toFloat()
+            val y = cy + (radius * sin(a)).toFloat()
+            if (i == 0) tri.moveTo(x, y) else tri.lineTo(x, y)
+        }
+        tri.close()
+        canvas.drawPath(tri, stroke)
+
+        fill.color = accentColor
         for (i in 0 until 3) {
             canvas.save()
-            canvas.rotate(i * 120f, cx, cy)
-            val path = android.graphics.Path().apply {
+            canvas.rotate(i * 120f - 90f, cx, cy)
+            val blade = Path().apply {
                 moveTo(cx, cy)
-                quadTo(cx + radius * 0.35f, cy - radius * 0.18f, cx + radius, cy)
-                quadTo(cx + radius * 0.35f, cy + radius * 0.18f, cx, cy)
+                quadTo(cx + radius * 0.28f, cy - radius * 0.12f, cx + radius * 0.72f, cy)
+                quadTo(cx + radius * 0.28f, cy + radius * 0.12f, cx, cy)
                 close()
             }
-            canvas.drawPath(path, bladePaint)
+            fill.alpha = 70
+            canvas.drawPath(blade, fill)
+            stroke.strokeWidth = 1.8f
+            stroke.alpha = 160
+            canvas.drawPath(blade, stroke)
             canvas.restore()
         }
+
+        fill.color = accentColor
+        fill.alpha = 220
+        for (i in 0 until 3) {
+            val a = Math.toRadians(-90.0 + i * 120.0)
+            val x = cx + (radius * cos(a)).toFloat()
+            val y = cy + (radius * sin(a)).toFloat()
+            canvas.drawCircle(x, y, radius * 0.06f, fill)
+        }
+
         canvas.restore()
+    }
+
+    /** White-hot center core with pulsing cyan glow. */
+    private fun drawEnergyCore(canvas: Canvas, cx: Float, cy: Float, baseR: Float) {
+        val r = baseR * pulseScale
+
+        glow.shader = RadialGradient(
+            cx, cy, r * 2.8f,
+            intArrayOf(
+                Color.argb(
+                    (pulseAlpha * 110).toInt(),
+                    Color.red(accentColor),
+                    Color.green(accentColor),
+                    Color.blue(accentColor)
+                ),
+                Color.argb(
+                    (pulseAlpha * 40).toInt(),
+                    Color.red(accentColor),
+                    Color.green(accentColor),
+                    Color.blue(accentColor)
+                ),
+                Color.TRANSPARENT
+            ),
+            floatArrayOf(0f, 0.4f, 1f),
+            Shader.TileMode.CLAMP
+        )
+        canvas.drawCircle(cx, cy, r * 2.8f, glow)
+        glow.shader = null
+
+        fill.shader = RadialGradient(
+            cx, cy, r,
+            intArrayOf(Color.WHITE, cyanBright, accentColor),
+            floatArrayOf(0f, 0.35f, 1f),
+            Shader.TileMode.CLAMP
+        )
+        fill.alpha = 255
+        canvas.drawCircle(cx, cy, r, fill)
+        fill.shader = null
+
+        stroke.color = Color.WHITE
+        stroke.strokeWidth = 2f
+        stroke.alpha = 180
+        canvas.drawCircle(cx, cy, r, stroke)
+
+        fill.color = Color.WHITE
+        fill.alpha = 255
+        canvas.drawCircle(cx, cy, r * 0.28f, fill)
     }
 
     override fun onDetachedFromWindow() {
         outerAnimator.cancel()
         midAnimator.cancel()
-        tickAnimator.cancel()
+        innerAnimator.cancel()
         pulseAnimator.cancel()
-        bladeAnimator.cancel()
+        colorAnimator?.cancel()
         super.onDetachedFromWindow()
     }
 }
