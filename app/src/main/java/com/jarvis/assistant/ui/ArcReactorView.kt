@@ -20,9 +20,8 @@ import kotlin.math.sin
 enum class HudState { IDLE, LISTENING, THINKING, SPEAKING }
 
 /**
- * Iron Man–style Arc Reactor for Jarvis:
- * metal outer housing, segmented rotating rings, triangular core,
- * white-hot center, and a soft chest-glow bloom.
+ * Iron Man Arc Reactor — Mark II style.
+ * Bright white core, large triangular chamber, thick metal rings, strong cyan glow.
  */
 class ArcReactorView @JvmOverloads constructor(
     context: Context,
@@ -36,62 +35,51 @@ class ArcReactorView @JvmOverloads constructor(
         }
 
     private val cyan = Color.parseColor("#00E5FF")
-    private val cyanBright = Color.parseColor("#B8F6FF")
-    private val cyanDim = Color.parseColor("#0A6E85")
-    private val amber = Color.parseColor("#FFB300")
-    private val metal = Color.parseColor("#1A3A4A")
-    private val metalLight = Color.parseColor("#2A5A6A")
+    private val cyanHi = Color.parseColor("#E0FBFF")
+    private val cyanDim = Color.parseColor("#0B7A94")
+    private val amber = Color.parseColor("#FFB020")
+    private val darkMetal = Color.parseColor("#0A1520")
+    private val midMetal = Color.parseColor("#1A3A4A")
 
-    private var accentColor = cyan
-    private var colorAnimator: ValueAnimator? = null
+    private var accent = cyan
+    private var colorAnim: ValueAnimator? = null
 
-    private var outerRotation = 0f
-    private var midRotation = 0f
-    private var innerRotation = 0f
-    private var pulseScale = 1f
-    private var pulseAlpha = 1f
+    private var rotOuter = 0f
+    private var rotMid = 0f
+    private var rotTri = 0f
+    private var pulse = 1f
+    private var glowA = 0.7f
 
-    private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
-    }
-    private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
-    private val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val pStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    private val pFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val pGlow = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
 
-    private val outerAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-        duration = 10000
-        repeatCount = ValueAnimator.INFINITE
+    private val aOuter = ValueAnimator.ofFloat(0f, 360f).apply {
+        duration = 12000; repeatCount = ValueAnimator.INFINITE
         interpolator = LinearInterpolator()
-        addUpdateListener { outerRotation = it.animatedValue as Float; invalidate() }
+        addUpdateListener { rotOuter = it.animatedValue as Float; invalidate() }
     }
-    private val midAnimator = ValueAnimator.ofFloat(360f, 0f).apply {
-        duration = 7000
-        repeatCount = ValueAnimator.INFINITE
+    private val aMid = ValueAnimator.ofFloat(360f, 0f).apply {
+        duration = 8000; repeatCount = ValueAnimator.INFINITE
         interpolator = LinearInterpolator()
-        addUpdateListener { midRotation = it.animatedValue as Float; invalidate() }
+        addUpdateListener { rotMid = it.animatedValue as Float; invalidate() }
     }
-    private val innerAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-        duration = 4000
-        repeatCount = ValueAnimator.INFINITE
+    private val aTri = ValueAnimator.ofFloat(0f, 360f).apply {
+        duration = 20000; repeatCount = ValueAnimator.INFINITE
         interpolator = LinearInterpolator()
-        addUpdateListener { innerRotation = it.animatedValue as Float; invalidate() }
+        addUpdateListener { rotTri = it.animatedValue as Float; invalidate() }
     }
-    private val pulseAnimator = ValueAnimator.ofFloat(0.92f, 1.08f).apply {
-        duration = 1400
-        repeatCount = ValueAnimator.INFINITE
-        repeatMode = ValueAnimator.REVERSE
+    private val aPulse = ValueAnimator.ofFloat(0.88f, 1.12f).apply {
+        duration = 1300; repeatCount = ValueAnimator.INFINITE; repeatMode = ValueAnimator.REVERSE
         addUpdateListener {
-            pulseScale = it.animatedValue as Float
-            pulseAlpha = 0.55f + (pulseScale - 0.92f) / 0.16f * 0.45f
+            pulse = it.animatedValue as Float
+            glowA = 0.5f + (pulse - 0.88f) / 0.24f * 0.5f
             invalidate()
         }
     }
 
     init {
-        outerAnimator.start()
-        midAnimator.start()
-        innerAnimator.start()
-        pulseAnimator.start()
+        aOuter.start(); aMid.start(); aTri.start(); aPulse.start()
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
@@ -100,47 +88,27 @@ class ArcReactorView @JvmOverloads constructor(
             HudState.IDLE -> cyanDim
             HudState.LISTENING -> cyan
             HudState.THINKING -> amber
-            HudState.SPEAKING -> cyanBright
+            HudState.SPEAKING -> cyanHi
         }
-        animateAccentColor(target)
-
+        colorAnim?.cancel()
+        colorAnim = ValueAnimator.ofObject(ArgbEvaluator(), accent, target).apply {
+            duration = 280
+            addUpdateListener { accent = it.animatedValue as Int; invalidate() }
+            start()
+        }
         when (state) {
             HudState.IDLE -> {
-                outerAnimator.duration = 14000
-                midAnimator.duration = 9000
-                innerAnimator.duration = 6000
-                pulseAnimator.duration = 1800
+                aOuter.duration = 14000; aMid.duration = 9000; aPulse.duration = 1600
             }
             HudState.LISTENING -> {
-                outerAnimator.duration = 3500
-                midAnimator.duration = 2500
-                innerAnimator.duration = 1800
-                pulseAnimator.duration = 600
+                aOuter.duration = 3000; aMid.duration = 2200; aPulse.duration = 500
             }
             HudState.THINKING -> {
-                outerAnimator.duration = 1400
-                midAnimator.duration = 1000
-                innerAnimator.duration = 700
-                pulseAnimator.duration = 320
+                aOuter.duration = 1100; aMid.duration = 800; aPulse.duration = 300
             }
             HudState.SPEAKING -> {
-                outerAnimator.duration = 2200
-                midAnimator.duration = 1600
-                innerAnimator.duration = 1100
-                pulseAnimator.duration = 750
+                aOuter.duration = 2000; aMid.duration = 1400; aPulse.duration = 700
             }
-        }
-    }
-
-    private fun animateAccentColor(target: Int) {
-        colorAnimator?.cancel()
-        colorAnimator = ValueAnimator.ofObject(ArgbEvaluator(), accentColor, target).apply {
-            duration = 320
-            addUpdateListener {
-                accentColor = it.animatedValue as Int
-                invalidate()
-            }
-            start()
         }
     }
 
@@ -148,213 +116,204 @@ class ArcReactorView @JvmOverloads constructor(
         super.onDraw(canvas)
         val cx = width / 2f
         val cy = height / 2f
-        val R = min(width, height) / 2f * 0.90f
+        val R = min(width, height) / 2f * 0.88f
 
-        drawBloom(canvas, cx, cy, R)
-        drawOuterHousing(canvas, cx, cy, R)
-        drawSegmentedRing(canvas, cx, cy, R * 0.82f, outerRotation, 12, 5.5f, 8f)
-        drawSegmentedRing(canvas, cx, cy, R * 0.68f, midRotation, 8, 4f, 14f)
-        drawInnerTicks(canvas, cx, cy, R * 0.58f)
-        drawTriangleCore(canvas, cx, cy, R * 0.48f)
-        drawEnergyCore(canvas, cx, cy, R * 0.22f)
+        drawBloom(canvas, cx, cy, R * 1.5f)
+
+        // thick dark metal housing
+        pStroke.style = Paint.Style.STROKE
+        pStroke.strokeCap = Paint.Cap.ROUND
+        pStroke.color = darkMetal
+        pStroke.strokeWidth = R * 0.10f
+        pStroke.alpha = 255
+        canvas.drawCircle(cx, cy, R * 0.95f, pStroke)
+
+        pStroke.color = midMetal
+        pStroke.strokeWidth = R * 0.025f
+        canvas.drawCircle(cx, cy, R * 0.99f, pStroke)
+        canvas.drawCircle(cx, cy, R * 0.90f, pStroke)
+
+        // outer segmented ring
+        drawSegments(canvas, cx, cy, R * 0.84f, rotOuter, 16, R * 0.035f, 6f)
+
+        // mid thin ring
+        pStroke.color = accent
+        pStroke.strokeWidth = R * 0.012f
+        pStroke.alpha = 180
+        canvas.drawCircle(cx, cy, R * 0.72f, pStroke)
+
+        // mid segmented ring (opposite direction)
+        drawSegments(canvas, cx, cy, R * 0.64f, rotMid, 10, R * 0.028f, 10f)
+
+        drawTicks(canvas, cx, cy, R * 0.56f)
+
+        // TRIANGLE — classic Arc Reactor signature
+        drawTriangle(canvas, cx, cy, R * 0.46f)
+
+        // white-hot core
+        drawCore(canvas, cx, cy, R * 0.18f)
     }
 
-    /** Soft chest-glow behind the reactor. */
-    private fun drawBloom(canvas: Canvas, cx: Float, cy: Float, R: Float) {
-        val r = R * 1.45f
-        glow.shader = RadialGradient(
+    private fun drawBloom(canvas: Canvas, cx: Float, cy: Float, r: Float) {
+        pGlow.shader = RadialGradient(
             cx, cy, r,
             intArrayOf(
-                Color.argb(
-                    (pulseAlpha * 36).toInt(),
-                    Color.red(accentColor),
-                    Color.green(accentColor),
-                    Color.blue(accentColor)
-                ),
-                Color.argb(
-                    (pulseAlpha * 12).toInt(),
-                    Color.red(accentColor),
-                    Color.green(accentColor),
-                    Color.blue(accentColor)
-                ),
+                Color.argb((glowA * 50).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
+                Color.argb((glowA * 18).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
                 Color.TRANSPARENT
             ),
-            floatArrayOf(0f, 0.45f, 1f),
+            floatArrayOf(0f, 0.5f, 1f),
             Shader.TileMode.CLAMP
         )
-        canvas.drawCircle(cx, cy, r, glow)
-        glow.shader = null
+        canvas.drawCircle(cx, cy, r, pGlow)
+        pGlow.shader = null
     }
 
-    /** Thick outer metal ring + thin accent rim (housing). */
-    private fun drawOuterHousing(canvas: Canvas, cx: Float, cy: Float, R: Float) {
-        stroke.style = Paint.Style.STROKE
-        stroke.strokeCap = Paint.Cap.ROUND
-
-        stroke.color = metal
-        stroke.strokeWidth = R * 0.085f
-        stroke.alpha = 255
-        canvas.drawCircle(cx, cy, R * 0.94f, stroke)
-
-        stroke.color = metalLight
-        stroke.strokeWidth = R * 0.018f
-        stroke.alpha = 200
-        canvas.drawCircle(cx, cy, R * 0.98f, stroke)
-        canvas.drawCircle(cx, cy, R * 0.90f, stroke)
-
-        stroke.color = accentColor
-        stroke.strokeWidth = R * 0.012f
-        stroke.alpha = 160
-        canvas.drawCircle(cx, cy, R * 0.88f, stroke)
-    }
-
-    private fun drawSegmentedRing(
-        canvas: Canvas,
-        cx: Float,
-        cy: Float,
-        radius: Float,
-        rotation: Float,
-        segments: Int,
-        strokeWidth: Float,
-        gapDeg: Float
+    private fun drawSegments(
+        canvas: Canvas, cx: Float, cy: Float, radius: Float,
+        rot: Float, n: Int, sw: Float, gap: Float
     ) {
-        stroke.color = accentColor
-        stroke.strokeWidth = strokeWidth
-        stroke.alpha = 210
-        stroke.strokeCap = Paint.Cap.BUTT
-        val sweep = 360f / segments - gapDeg
+        pStroke.color = accent
+        pStroke.strokeWidth = sw
+        pStroke.alpha = 230
+        pStroke.strokeCap = Paint.Cap.BUTT
+        val sweep = 360f / n - gap
         val rect = RectF(cx - radius, cy - radius, cx + radius, cy + radius)
-        for (i in 0 until segments) {
-            val start = rotation + i * (360f / segments)
-            canvas.drawArc(rect, start, sweep, false, stroke)
+        for (i in 0 until n) {
+            canvas.drawArc(rect, rot + i * (360f / n), sweep, false, pStroke)
         }
     }
 
-    private fun drawInnerTicks(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
-        stroke.color = accentColor
-        stroke.strokeWidth = 2f
-        stroke.alpha = 90
-        stroke.strokeCap = Paint.Cap.ROUND
+    private fun drawTicks(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
+        pStroke.color = accent
+        pStroke.strokeWidth = 2f
+        pStroke.alpha = 100
+        pStroke.strokeCap = Paint.Cap.ROUND
         canvas.save()
-        canvas.rotate(innerRotation * 0.25f, cx, cy)
-        val count = 36
-        for (i in 0 until count) {
-            val a = Math.toRadians((360.0 / count) * i)
-            val len = if (i % 3 == 0) radius * 0.10f else radius * 0.05f
-            val x1 = cx + (radius * cos(a)).toFloat()
-            val y1 = cy + (radius * sin(a)).toFloat()
-            val x2 = cx + ((radius - len) * cos(a)).toFloat()
-            val y2 = cy + ((radius - len) * sin(a)).toFloat()
-            canvas.drawLine(x1, y1, x2, y2, stroke)
+        canvas.rotate(rotMid * 0.3f, cx, cy)
+        for (i in 0 until 48) {
+            val a = Math.toRadians(i * 7.5)
+            val len = if (i % 4 == 0) radius * 0.09f else radius * 0.04f
+            canvas.drawLine(
+                cx + (radius * cos(a)).toFloat(),
+                cy + (radius * sin(a)).toFloat(),
+                cx + ((radius - len) * cos(a)).toFloat(),
+                cy + ((radius - len) * sin(a)).toFloat(),
+                pStroke
+            )
         }
         canvas.restore()
     }
 
-    /**
-     * Classic Arc Reactor triangle: three curved arms + triangular frame —
-     * the signature Iron Man look.
-     */
-    private fun drawTriangleCore(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
+    /** Large visible triangle + channels — Iron Man signature. */
+    private fun drawTriangle(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
         canvas.save()
-        canvas.rotate(innerRotation * 0.15f, cx, cy)
+        canvas.rotate(rotTri * 0.08f, cx, cy)
 
-        stroke.color = accentColor
-        stroke.strokeWidth = 3.5f
-        stroke.alpha = 200
-        stroke.strokeJoin = Paint.Join.ROUND
-        val tri = Path()
+        val plate = Path()
         for (i in 0 until 3) {
             val a = Math.toRadians(-90.0 + i * 120.0)
             val x = cx + (radius * cos(a)).toFloat()
             val y = cy + (radius * sin(a)).toFloat()
-            if (i == 0) tri.moveTo(x, y) else tri.lineTo(x, y)
+            if (i == 0) plate.moveTo(x, y) else plate.lineTo(x, y)
         }
-        tri.close()
-        canvas.drawPath(tri, stroke)
+        plate.close()
 
-        fill.color = accentColor
+        pFill.color = Color.argb(45, Color.red(accent), Color.green(accent), Color.blue(accent))
+        canvas.drawPath(plate, pFill)
+
+        pStroke.color = accent
+        pStroke.strokeWidth = 4.5f
+        pStroke.alpha = 250
+        pStroke.strokeJoin = Paint.Join.ROUND
+        pStroke.strokeCap = Paint.Cap.ROUND
+        canvas.drawPath(plate, pStroke)
+
+        val inner = Path()
+        val r2 = radius * 0.55f
         for (i in 0 until 3) {
-            canvas.save()
-            canvas.rotate(i * 120f - 90f, cx, cy)
-            val blade = Path().apply {
-                moveTo(cx, cy)
-                quadTo(cx + radius * 0.28f, cy - radius * 0.12f, cx + radius * 0.72f, cy)
-                quadTo(cx + radius * 0.28f, cy + radius * 0.12f, cx, cy)
-                close()
-            }
-            fill.alpha = 70
-            canvas.drawPath(blade, fill)
-            stroke.strokeWidth = 1.8f
-            stroke.alpha = 160
-            canvas.drawPath(blade, stroke)
-            canvas.restore()
+            val a = Math.toRadians(-90.0 + i * 120.0)
+            val x = cx + (r2 * cos(a)).toFloat()
+            val y = cy + (r2 * sin(a)).toFloat()
+            if (i == 0) inner.moveTo(x, y) else inner.lineTo(x, y)
+        }
+        inner.close()
+        pStroke.strokeWidth = 2.5f
+        pStroke.alpha = 190
+        canvas.drawPath(inner, pStroke)
+
+        // channels center → vertices
+        pStroke.strokeWidth = 2.5f
+        pStroke.alpha = 170
+        for (i in 0 until 3) {
+            val a = Math.toRadians(-90.0 + i * 120.0)
+            canvas.drawLine(
+                cx, cy,
+                cx + (radius * 0.92f * cos(a)).toFloat(),
+                cy + (radius * 0.92f * sin(a)).toFloat(),
+                pStroke
+            )
         }
 
-        fill.color = accentColor
-        fill.alpha = 220
+        // glowing vertex nodes
         for (i in 0 until 3) {
             val a = Math.toRadians(-90.0 + i * 120.0)
             val x = cx + (radius * cos(a)).toFloat()
             val y = cy + (radius * sin(a)).toFloat()
-            canvas.drawCircle(x, y, radius * 0.06f, fill)
+            pGlow.shader = RadialGradient(
+                x, y, radius * 0.14f,
+                intArrayOf(Color.argb(220, 255, 255, 255), Color.TRANSPARENT),
+                null, Shader.TileMode.CLAMP
+            )
+            canvas.drawCircle(x, y, radius * 0.14f, pGlow)
+            pGlow.shader = null
+            pFill.color = Color.WHITE
+            pFill.alpha = 255
+            canvas.drawCircle(x, y, radius * 0.05f, pFill)
         }
 
         canvas.restore()
     }
 
-    /** White-hot center core with pulsing cyan glow. */
-    private fun drawEnergyCore(canvas: Canvas, cx: Float, cy: Float, baseR: Float) {
-        val r = baseR * pulseScale
+    private fun drawCore(canvas: Canvas, cx: Float, cy: Float, base: Float) {
+        val r = base * pulse
 
-        glow.shader = RadialGradient(
-            cx, cy, r * 2.8f,
+        pGlow.shader = RadialGradient(
+            cx, cy, r * 3.2f,
             intArrayOf(
-                Color.argb(
-                    (pulseAlpha * 110).toInt(),
-                    Color.red(accentColor),
-                    Color.green(accentColor),
-                    Color.blue(accentColor)
-                ),
-                Color.argb(
-                    (pulseAlpha * 40).toInt(),
-                    Color.red(accentColor),
-                    Color.green(accentColor),
-                    Color.blue(accentColor)
-                ),
+                Color.argb((glowA * 150).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
+                Color.argb((glowA * 55).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
                 Color.TRANSPARENT
             ),
-            floatArrayOf(0f, 0.4f, 1f),
-            Shader.TileMode.CLAMP
-        )
-        canvas.drawCircle(cx, cy, r * 2.8f, glow)
-        glow.shader = null
-
-        fill.shader = RadialGradient(
-            cx, cy, r,
-            intArrayOf(Color.WHITE, cyanBright, accentColor),
             floatArrayOf(0f, 0.35f, 1f),
             Shader.TileMode.CLAMP
         )
-        fill.alpha = 255
-        canvas.drawCircle(cx, cy, r, fill)
-        fill.shader = null
+        canvas.drawCircle(cx, cy, r * 3.2f, pGlow)
+        pGlow.shader = null
 
-        stroke.color = Color.WHITE
-        stroke.strokeWidth = 2f
-        stroke.alpha = 180
-        canvas.drawCircle(cx, cy, r, stroke)
+        pFill.shader = RadialGradient(
+            cx, cy, r,
+            intArrayOf(Color.WHITE, cyanHi, accent),
+            floatArrayOf(0f, 0.4f, 1f),
+            Shader.TileMode.CLAMP
+        )
+        pFill.alpha = 255
+        canvas.drawCircle(cx, cy, r, pFill)
+        pFill.shader = null
 
-        fill.color = Color.WHITE
-        fill.alpha = 255
-        canvas.drawCircle(cx, cy, r * 0.28f, fill)
+        pStroke.color = Color.WHITE
+        pStroke.strokeWidth = 2.5f
+        pStroke.alpha = 230
+        canvas.drawCircle(cx, cy, r, pStroke)
+
+        pFill.color = Color.WHITE
+        pFill.alpha = 255
+        canvas.drawCircle(cx, cy, r * 0.32f, pFill)
     }
 
     override fun onDetachedFromWindow() {
-        outerAnimator.cancel()
-        midAnimator.cancel()
-        innerAnimator.cancel()
-        pulseAnimator.cancel()
-        colorAnimator?.cancel()
+        aOuter.cancel(); aMid.cancel(); aTri.cancel(); aPulse.cancel()
+        colorAnim?.cancel()
         super.onDetachedFromWindow()
     }
 }
