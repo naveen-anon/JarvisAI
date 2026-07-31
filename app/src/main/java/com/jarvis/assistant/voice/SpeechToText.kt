@@ -9,15 +9,15 @@ import android.speech.SpeechRecognizer
 import android.util.Log
 import java.util.Locale
 
+/**
+ * Speech pipeline tuned for quieter / soft voices.
+ */
 class SpeechToText(private val context: Context) {
 
     private var recognizer: SpeechRecognizer? = null
     private var isListeningContinuously = false
 
-    // Google's on-device speech recognizer usually transliterates Hindi speech spoken with
-    // "Jarvis" into one of these romanized forms, depending on accent/locale — match them all
-    // instead of only the exact English spelling.
-    private val wakeWords = listOf("jarvis", "जार्विस", "jarwis", "jaarvis")
+    private val wakeWords = listOf("jarvis", "जार्विस", "jarwis", "jaarvis", "jarviz")
 
     fun listenOnce(onResult: (String) -> Unit, onError: () -> Unit) {
         stopInternal()
@@ -27,7 +27,7 @@ class SpeechToText(private val context: Context) {
     }
 
     fun listenContinuous(onWakeWordDetected: (trailingCommand: String) -> Unit) {
-        if (isListeningContinuously) return // already running — don't start a second overlapping session
+        if (isListeningContinuously) return
         isListeningContinuously = true
         startContinuousSession(onWakeWordDetected)
     }
@@ -36,26 +36,18 @@ class SpeechToText(private val context: Context) {
 
     private fun startContinuousSession(onWakeWordDetected: (String) -> Unit) {
         if (!isListeningContinuously) return
-
         recognizer = SpeechRecognizer.createSpeechRecognizer(context)
         recognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onResults(results: Bundle?) {
-                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                val heard = matches?.firstOrNull()?.lowercase()?.trim() ?: ""
+                val heard = bestTranscript(results).lowercase().trim()
                 Log.d("SpeechToText", "Heard: $heard")
-
                 val matchedWakeWord = wakeWords.firstOrNull { heard.contains(it) }
                 if (matchedWakeWord != null) {
-                    val trailing = heard.substringAfter(matchedWakeWord).trim()
-                    onWakeWordDetected(trailing)
+                    onWakeWordDetected(heard.substringAfter(matchedWakeWord).trim())
                 }
                 restartContinuous(onWakeWordDetected)
             }
-
-            override fun onError(error: Int) {
-                restartContinuous(onWakeWordDetected)
-            }
-
+            override fun onError(error: Int) { restartContinuous(onWakeWordDetected) }
             override fun onReadyForSpeech(params: Bundle?) {}
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
@@ -64,7 +56,6 @@ class SpeechToText(private val context: Context) {
             override fun onPartialResults(partialResults: Bundle?) {}
             override fun onEvent(eventType: Int, params: Bundle?) {}
         })
-
         recognizer?.startListening(buildIntent())
     }
 
@@ -73,7 +64,7 @@ class SpeechToText(private val context: Context) {
         if (isListeningContinuously) {
             android.os.Handler(context.mainLooper).postDelayed({
                 startContinuousSession(onWakeWordDetected)
-            }, 300)
+            }, 250)
         }
     }
 
@@ -89,10 +80,7 @@ class SpeechToText(private val context: Context) {
 
     private fun simpleListener(onResult: (String) -> Unit, onError: () -> Unit) =
         object : RecognitionListener {
-            override fun onResults(results: Bundle?) {
-                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                onResult(matches?.firstOrNull() ?: "")
-            }
+            override fun onResults(results: Bundle?) { onResult(bestTranscript(results)) }
             override fun onError(error: Int) = onError()
             override fun onReadyForSpeech(params: Bundle?) {}
             override fun onBeginningOfSpeech() {}
@@ -103,16 +91,21 @@ class SpeechToText(private val context: Context) {
             override fun onEvent(eventType: Int, params: Bundle?) {}
         }
 
+    private fun bestTranscript(results: Bundle?): String {
+        val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) ?: return ""
+        if (matches.isEmpty()) return ""
+        return matches.filter { it.isNotBlank() }.maxByOrNull { it.trim().length } ?: matches.first()
+    }
+
     private fun buildIntent() = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
-        putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        // Use the device's configured locale (e.g. hi-IN) rather than forcing en-US, so
-        // Hindi and Hinglish commands recognize correctly on Indian devices. Users who want
-        // pure Hindi transcription can switch their phone's speech-recognition language in
-        // Android settings; Google's recognizer already handles Hindi-English code-switching
-        // reasonably well when the locale is set to hi-IN.
+        putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+        putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toString())
+        putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
+        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1000L)
+        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 400L)
     }
 
     fun destroy() {
