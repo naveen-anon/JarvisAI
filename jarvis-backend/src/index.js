@@ -2,6 +2,91 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          'access-control-allow-origin': '*',
+          'access-control-allow-methods': 'GET,POST,DELETE,OPTIONS',
+          'access-control-allow-headers': 'content-type,x-admin-token',
+        },
+      });
+    }
+
+    // PUBLIC: list all updates
+    if (url.pathname === '/updates' && request.method === 'GET') {
+      const list = await env.UPDATES_KV.get('all_updates');
+      const updates = list ? JSON.parse(list) : [];
+      return new Response(JSON.stringify(updates), {
+        headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
+      });
+    }
+
+    // ADMIN: post a new update
+    if (url.pathname === '/updates' && request.method === 'POST') {
+      const token = request.headers.get('x-admin-token');
+      if (token !== env.ADMIN_TOKEN) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
+        });
+      }
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
+        });
+      }
+      const { title, description, version } = body;
+      if (!title || !description) {
+        return new Response(JSON.stringify({ error: 'Missing title or description' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
+        });
+      }
+      const existingRaw = await env.UPDATES_KV.get('all_updates');
+      const updates = existingRaw ? JSON.parse(existingRaw) : [];
+      updates.unshift({
+        title,
+        description,
+        version: version || '',
+        date: new Date().toISOString().slice(0, 10),
+      });
+      const trimmed = updates.slice(0, 30);
+      await env.UPDATES_KV.put('all_updates', JSON.stringify(trimmed));
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
+      });
+    }
+
+    // ADMIN: delete an update by index
+    if (url.pathname === '/updates' && request.method === 'DELETE') {
+      const token = request.headers.get('x-admin-token');
+      if (token !== env.ADMIN_TOKEN) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
+        });
+      }
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
+      }
+      const existingRaw = await env.UPDATES_KV.get('all_updates');
+      const updates = existingRaw ? JSON.parse(existingRaw) : [];
+      updates.splice(body.index, 1);
+      await env.UPDATES_KV.put('all_updates', JSON.stringify(updates));
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
+      });
+    }
+
+
     if (url.pathname !== '/command' || request.method !== 'POST') {
       return new Response('Not Found', { status: 404 });
     }

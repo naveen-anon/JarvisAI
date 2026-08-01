@@ -14,6 +14,8 @@ import com.jarvis.assistant.model.ActionType
 import com.jarvis.assistant.model.AssistantCommand
 import com.jarvis.assistant.security.AppLockManager
 import com.jarvis.assistant.vision.VisionActivity
+import com.jarvis.assistant.util.MessagingHelper
+import com.jarvis.assistant.accessibility.JarvisAccessibilityService
 
 class CommandExecutor(private val context: Context) {
 
@@ -35,6 +37,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
             ActionType.SET_PIN -> setPin(cmd.target)
             ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
+            ActionType.TELEGRAM_MESSAGE -> telegramMessage(cmd.target, cmd.message)
             ActionType.READ_SCREEN -> "Reading screen requires the Accessibility Service overlay."
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
@@ -268,7 +271,8 @@ class CommandExecutor(private val context: Context) {
      * WhatsApp gives no official API for a regular app to silently send a message —
      * only the user tapping Send inside WhatsApp itself can do that (by design, to
      * prevent spam). This opens WhatsApp's chat with the contact and the message already
-     * typed in, so all that's left is one tap.
+     * typed in, then the Accessibility Service (if enabled) auto-taps Send for a
+     * hands-free flow.
      */
     private fun whatsappMessage(target: String?, message: String?): String {
         if (target.isNullOrBlank()) return "Send a WhatsApp message to whom?"
@@ -276,8 +280,6 @@ class CommandExecutor(private val context: Context) {
         val rawNumber = lookupContactNumber(target) ?: return "No number found for $target"
 
         val digits = rawNumber.filter { it.isDigit() }
-        // wa.me needs a full international number; assume India (+91) for a bare 10-digit
-        // local number, since that's the common case for this app's contact books.
         val intlNumber = if (digits.length == 10) "91$digits" else digits
 
         val uri = Uri.parse("https://wa.me/$intlNumber?text=${Uri.encode(message)}")
@@ -286,18 +288,44 @@ class CommandExecutor(private val context: Context) {
                 setPackage("com.whatsapp")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             })
-            "Opening WhatsApp to message $target — just tap send."
+            JarvisAccessibilityService.instance?.autoTapSend()
+            if (JarvisAccessibilityService.instance != null) "Message sent to $target on WhatsApp."
+            else "Opening WhatsApp to message $target — just tap send (enable Accessibility Service for hands-free sending)."
         } catch (e: Exception) {
             try {
                 context.startActivity(Intent(Intent.ACTION_VIEW, uri).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 })
-                "Opening WhatsApp to message $target — just tap send."
+                JarvisAccessibilityService.instance?.autoTapSend()
+                if (JarvisAccessibilityService.instance != null) "Message sent to $target on WhatsApp."
+                else "Opening WhatsApp to message $target — just tap send (enable Accessibility Service for hands-free sending)."
             } catch (e2: Exception) {
                 "Couldn't open WhatsApp. Is it installed?"
             }
         }
     }
+
+    /**
+     * Telegram gives no official API for silently sending either — same
+     * restriction as WhatsApp. Opens Telegram's chat with the message
+     * pre-filled, then Accessibility Service auto-taps Send if enabled.
+     */
+    private fun telegramMessage(target: String?, message: String?): String {
+        if (target.isNullOrBlank()) return "Send a Telegram message to whom?"
+        if (message.isNullOrBlank()) return "What should the message say?"
+
+        val messagingHelper = MessagingHelper(context)
+        val sent = messagingHelper.sendTelegram(target, message)
+
+        return if (sent) {
+            JarvisAccessibilityService.instance?.autoTapSend()
+            if (JarvisAccessibilityService.instance != null) "Message sent to $target on Telegram."
+            else "Opening Telegram to message $target — just tap send (enable Accessibility Service for hands-free sending)."
+        } else {
+            "Couldn't open Telegram. Is it installed?"
+        }
+    }
+
 
     private fun lockApp(appName: String?): String {
         if (appName.isNullOrBlank()) return "Which app should I lock?"

@@ -329,6 +329,33 @@ class OfflineBrain(
         }
 
 
+        // Telegram — "telegram pe NAME ko sms kro MESSAGE"
+        Regex("""telegram\s*(?:pe|par)?\s+(.+?)\s+ko\s+(?:sms|message|msg|text)?\s*(?:karo|kro|kar do|bhejo|bhej do|bhejna)?\s+(.+)""")
+            .find(cmd)?.let { m ->
+                val target = m.groupValues[1].trim()
+                val msg = m.groupValues[2].trim()
+                if (target.isNotEmpty() && msg.isNotEmpty())
+                    return AssistantCommand("telegram_message", extractTail(original, target), msg)
+            }
+
+        // Telegram — "NAME ko telegram pe sms kro MESSAGE"
+        Regex("""(.+?)\s+ko\s+telegram\s*(?:pe|par)?\s*(?:sms|message|msg|text)?\s*(?:karo|kro|kar do|bhejo)?\s*(?:ki|saying|bolna|bolo)?\s*(.+)""")
+            .find(cmd)?.let { m ->
+                val target = m.groupValues[1].trim()
+                val msg = m.groupValues[2].trim()
+                if (target.isNotEmpty() && msg.isNotEmpty())
+                    return AssistantCommand("telegram_message", extractTail(original, target, fromStart = true), msg)
+            }
+
+        // Telegram — English
+        Regex("""(?:send\s+)?telegram\s+(?:to\s+)?(.+?)\s+saying\s+(.+)""").find(cmd)?.let { m ->
+            return AssistantCommand("telegram_message", extractTail(original, m.groupValues[1]), m.groupValues[2].trim())
+        }
+        Regex("""(?:message|send)\s+(.+?)\s+on\s+telegram\s+saying\s+(.+)""").find(cmd)?.let { m ->
+            return AssistantCommand("telegram_message", extractTail(original, m.groupValues[1]), m.groupValues[2].trim())
+        }
+
+
         // Message/SMS — Hindi word order first, same reasoning as above.
         Regex("""(.+?)\s+ko\s+(?:message|text|sms)\s*(?:karo|kar do|bhejo|karna)?\s*$""").find(cmd)?.let { m ->
             return AssistantCommand("send_sms", extractTail(original, m.groupValues[1], fromStart = true), null)

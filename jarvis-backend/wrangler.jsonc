@@ -24,6 +24,11 @@
 			"binding": "RATE_LIMIT_KV",
 			"id": "42eb101f56d04159985ccd5524814716",
 			"remote": true
+		},
+		{
+			"binding": "UPDATES_KV",
+			"id": "fbb91845097047d0b7a7f7efae303109",
+			"remote": true
 		}
 	]
 	/**
