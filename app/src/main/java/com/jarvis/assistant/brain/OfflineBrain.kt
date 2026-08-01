@@ -305,54 +305,58 @@ class OfflineBrain(
         // WhatsApp — "whatsapp pe NAME ko sms kro MESSAGE"
         Regex("""whatsapp\s*(?:pe|par)?\s+(.+?)\s+ko\s+(?:sms|message|msg|text)?\s*(?:karo|kro|kar do|bhejo|bhej do|bhejna)?\s+(.+)""")
             .find(cmd)?.let { m ->
-                val target = m.groupValues[1].trim()
+                val target = original.substring(m.groups[1]!!.range).trim()
                 val msg = m.groupValues[2].trim()
                 if (target.isNotEmpty() && msg.isNotEmpty())
-                    return AssistantCommand("whatsapp_message", extractTail(original, target), msg)
+                    return AssistantCommand("whatsapp_message", target, msg)
             }
 
         // WhatsApp — "NAME ko whatsapp pe sms kro MESSAGE"
         Regex("""(.+?)\s+ko\s+whatsapp\s*(?:pe|par)?\s*(?:sms|message|msg|text)?\s*(?:karo|kro|kar do|bhejo)?\s*(?:ki|saying|bolna|bolo)?\s*(.+)""")
             .find(cmd)?.let { m ->
-                val target = m.groupValues[1].trim()
+                val target = original.substring(m.groups[1]!!.range).trim()
                 val msg = m.groupValues[2].trim()
                 if (target.isNotEmpty() && msg.isNotEmpty())
-                    return AssistantCommand("whatsapp_message", extractTail(original, target, fromStart = true), msg)
+                    return AssistantCommand("whatsapp_message", target, msg)
             }
 
         // WhatsApp — English
         Regex("""(?:send\s+)?whatsapp\s+(?:to\s+)?(.+?)\s+saying\s+(.+)""").find(cmd)?.let { m ->
-            return AssistantCommand("whatsapp_message", extractTail(original, m.groupValues[1]), m.groupValues[2].trim())
+            val target = original.substring(m.groups[1]!!.range).trim()
+            return AssistantCommand("whatsapp_message", target, m.groupValues[2].trim())
         }
         Regex("""(?:message|send)\s+(.+?)\s+on\s+whatsapp\s+saying\s+(.+)""").find(cmd)?.let { m ->
-            return AssistantCommand("whatsapp_message", extractTail(original, m.groupValues[1]), m.groupValues[2].trim())
+            val target = original.substring(m.groups[1]!!.range).trim()
+            return AssistantCommand("whatsapp_message", target, m.groupValues[2].trim())
         }
 
 
         // Telegram — "telegram pe NAME ko sms kro MESSAGE"
         Regex("""telegram\s*(?:pe|par)?\s+(.+?)\s+ko\s+(?:sms|message|msg|text)?\s*(?:karo|kro|kar do|bhejo|bhej do|bhejna)?\s+(.+)""")
             .find(cmd)?.let { m ->
-                val target = m.groupValues[1].trim()
+                val target = original.substring(m.groups[1]!!.range).trim()
                 val msg = m.groupValues[2].trim()
                 if (target.isNotEmpty() && msg.isNotEmpty())
-                    return AssistantCommand("telegram_message", extractTail(original, target), msg)
+                    return AssistantCommand("telegram_message", target, msg)
             }
 
         // Telegram — "NAME ko telegram pe sms kro MESSAGE"
         Regex("""(.+?)\s+ko\s+telegram\s*(?:pe|par)?\s*(?:sms|message|msg|text)?\s*(?:karo|kro|kar do|bhejo)?\s*(?:ki|saying|bolna|bolo)?\s*(.+)""")
             .find(cmd)?.let { m ->
-                val target = m.groupValues[1].trim()
+                val target = original.substring(m.groups[1]!!.range).trim()
                 val msg = m.groupValues[2].trim()
                 if (target.isNotEmpty() && msg.isNotEmpty())
-                    return AssistantCommand("telegram_message", extractTail(original, target, fromStart = true), msg)
+                    return AssistantCommand("telegram_message", target, msg)
             }
 
         // Telegram — English
         Regex("""(?:send\s+)?telegram\s+(?:to\s+)?(.+?)\s+saying\s+(.+)""").find(cmd)?.let { m ->
-            return AssistantCommand("telegram_message", extractTail(original, m.groupValues[1]), m.groupValues[2].trim())
+            val target = original.substring(m.groups[1]!!.range).trim()
+            return AssistantCommand("telegram_message", target, m.groupValues[2].trim())
         }
         Regex("""(?:message|send)\s+(.+?)\s+on\s+telegram\s+saying\s+(.+)""").find(cmd)?.let { m ->
-            return AssistantCommand("telegram_message", extractTail(original, m.groupValues[1]), m.groupValues[2].trim())
+            val target = original.substring(m.groups[1]!!.range).trim()
+            return AssistantCommand("telegram_message", target, m.groupValues[2].trim())
         }
 
 
