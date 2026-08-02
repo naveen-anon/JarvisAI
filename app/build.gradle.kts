@@ -34,6 +34,11 @@ android {
         versionName = "1.0"
         buildConfigField("String", "GEMINI_API_KEY", "\"${System.getenv("GEMINI_API_KEY") ?: ""}\"")
         buildConfigField("String", "OPENWEATHER_API_KEY", "\"${System.getenv("OPENWEATHER_API_KEY") ?: ""}\"")
+        val _jarvisLocalProps = java.util.Properties().apply {
+            val f = rootProject.file("local.properties")
+            if (f.exists()) f.inputStream().use { load(it) }
+        }
+        buildConfigField("String", "GROQ_API_KEY", "\"${_jarvisLocalProps.getProperty("GROQ_API_KEY", System.getenv("GROQ_API_KEY") ?: "")}\"")
     }
 
     buildTypes {

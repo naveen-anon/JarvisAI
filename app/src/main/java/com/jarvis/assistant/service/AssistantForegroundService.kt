@@ -28,6 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import com.jarvis.assistant.ai.JarvisLlmClient
+import com.jarvis.assistant.BuildConfig
 
 /**
  * Always-alive foreground service. Wake-word detection (Porcupine) should call
@@ -176,14 +178,28 @@ class AssistantForegroundService : Service() {
         val result = if (offlineReply != null) {
             offlineReply to false
         } else if (networkStatus.isOnline()) {
-            try {
-                val command = gemini.getCommand(speech)
-                executor.execute(command) to true
+            val groq = try {
+                JarvisLlmClient(apiKeyProvider = { BuildConfig.GROQ_API_KEY }).chat(speech)
             } catch (e: Exception) {
-                "I couldn't reach the cloud brain just now. Try a device command instead." to true
+                null
+            }
+            if (groq != null && groq.ok && groq.text.isNotBlank()) {
+                groq.text to true
+            } else {
+                try {
+                    val command = gemini.getCommand(speech)
+                    executor.execute(command) to true
+                } catch (e: Exception) {
+                    val hint = groq?.error.orEmpty()
+                    if (hint.contains("API key", ignoreCase = true)) {
+                        "Online intelligence isn't configured yet, sir. Device commands still work offline." to true
+                    } else {
+                        "I couldn't reach the cloud brain just now, sir. Try a device command instead." to true
+                    }
+                }
             }
         } else {
-            "I'm offline right now and don't have a local command for that yet." to false
+            "I'm offline right now and don't have a local command for that yet, sir." to false
         }
 
         offlineBrain.recordInteraction()
