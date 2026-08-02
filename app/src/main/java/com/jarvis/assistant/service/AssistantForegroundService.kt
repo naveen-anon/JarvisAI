@@ -29,7 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import com.jarvis.assistant.ai.JarvisLlmClient
-import com.jarvis.assistant.BuildConfig
 
 /**
  * Always-alive foreground service. Wake-word detection (Porcupine) should call
