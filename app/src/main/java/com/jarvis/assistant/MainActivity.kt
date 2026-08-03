@@ -40,6 +40,9 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
     private lateinit var weatherClient: WeatherClient
     private lateinit var networkStatus: NetworkStatusManager
     private lateinit var perfMonitor: PerformanceMonitor
+    private lateinit var settings: com.jarvis.assistant.util.SettingsManager
+    private val feedbackHandler = Handler(Looper.getMainLooper())
+    private var feedbackCheckPosted = false
     private val activityScope = CoroutineScope(Dispatchers.Main)
     private val perfHandler = Handler(Looper.getMainLooper())
 
@@ -121,10 +124,6 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
         }
 
-        findViewById<TextView>(R.id.txtChatBtn).setOnClickListener {
-            startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
-        }
-
         systemStatus = SystemStatusManager(
             context = this,
             onClockUpdate = { time -> txtClock.text = time },
@@ -141,6 +140,10 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         // Get a free key at openweathermap.org -> API keys tab, or set OPENWEATHER_API_KEY
         // as an env var / gradle property the same way GEMINI_API_KEY is handled.
         weatherClient = WeatherClient(apiKey = BuildConfig.OPENWEATHER_API_KEY)
+
+        settings = com.jarvis.assistant.util.SettingsManager(this)
+        settings.getFirstLaunchTime() // records it on the very first call, no-op after that
+        scheduleFeedbackPromptCheck()
 
         permissionLauncher.launch(requiredPermissions)
     }
@@ -165,6 +168,43 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             .setTitle("Jarvis crashed last time")
             .setView(scroll)
             .setPositiveButton("OK", null)
+            .setCancelable(true)
+            .show()
+    }
+
+    /**
+     * Fires the feedback prompt a fixed delay after the app's very first launch — not per
+     * session — so it works whether the person keeps the app open that whole time or closes
+     * and reopens it later. Only ever shown once (see SettingsManager.markFeedbackPromptShown).
+     */
+    private fun scheduleFeedbackPromptCheck() {
+        if (settings.hasShownFeedbackPrompt()) return
+
+        val delayMs = 2 * 60 * 1000L + 30 * 1000L // 2.5 minutes after first-ever launch
+        val elapsed = System.currentTimeMillis() - settings.getFirstLaunchTime()
+        val remaining = delayMs - elapsed
+
+        if (remaining <= 0) {
+            showFeedbackPrompt()
+        } else if (!feedbackCheckPosted) {
+            feedbackCheckPosted = true
+            feedbackHandler.postDelayed({
+                feedbackCheckPosted = false
+                if (!isFinishing) showFeedbackPrompt()
+            }, remaining)
+        }
+    }
+
+    private fun showFeedbackPrompt() {
+        if (isFinishing || settings.hasShownFeedbackPrompt()) return
+        settings.markFeedbackPromptShown()
+        AlertDialog.Builder(this)
+            .setTitle("Enjoying Jarvis so far?")
+            .setMessage("We'd love a quick bit of feedback — takes less than a minute and goes straight to the developer.")
+            .setPositiveButton("Give Feedback") { _, _ ->
+                startActivity(Intent(this, com.jarvis.assistant.settings.FeedbackActivity::class.java))
+            }
+            .setNegativeButton("Maybe Later", null)
             .setCancelable(true)
             .show()
     }
@@ -241,9 +281,18 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         Typewriter.animate(txtResponse, prefix + text)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Catches the case where the process was killed and relaunched after the Handler
+        // callback below would have fired — re-checks elapsed time rather than relying only
+        // on the originally scheduled callback surviving.
+        if (::settings.isInitialized) scheduleFeedbackPromptCheck()
+    }
+
     override fun onDestroy() {
         systemStatus.stop()
         perfHandler.removeCallbacksAndMessages(null)
+        feedbackHandler.removeCallbacksAndMessages(null)
         if (bound) {
             service?.listener = null
             unbindService(connection)
