@@ -124,6 +124,10 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
         }
 
+        findViewById<TextView>(R.id.txtChatBtn).setOnClickListener {
+            startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
+        }
+
         systemStatus = SystemStatusManager(
             context = this,
             onClockUpdate = { time -> txtClock.text = time },
