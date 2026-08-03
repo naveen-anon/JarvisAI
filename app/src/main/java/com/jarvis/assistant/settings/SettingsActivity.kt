@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
@@ -17,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.jarvis.assistant.R
 import com.jarvis.assistant.util.PersistentMemory
 import com.jarvis.assistant.util.SettingsManager
 import com.jarvis.assistant.voice.TextToSpeechHelper
@@ -26,12 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Everything here previously existed only as voice commands ("change voice to male",
- * "remember X") with zero visible confirmation that anything actually happened. This
- * screen makes the same settings visible and directly editable, and — combined with the
- * TextToSpeechHelper fix — actually audible when you change voice type.
- */
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var settings: SettingsManager
@@ -56,126 +52,184 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(buildUi())
     }
 
+    private val cyan = Color.parseColor("#00E5FF")
+    private val hudText = Color.parseColor("#B8D4E0")
+    private val hudTextDim = Color.parseColor("#5A8A9A")
+
+    private fun hudButton(label: String, filled: Boolean = false, onClick: () -> Unit) = Button(this).apply {
+        text = label
+        isAllCaps = false
+        textSize = 15f
+        setTextColor(if (filled) Color.parseColor("#03080E") else cyan)
+        background = ContextCompat.getDrawable(
+            this@SettingsActivity,
+            if (filled) R.drawable.hud_button_filled else R.drawable.hud_button_bg
+        )
+        setPadding(32, 28, 32, 28)
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.topMargin = 16
+        layoutParams = lp
+        setOnClickListener { onClick() }
+    }
+
+    private fun sectionCard(builder: LinearLayout.() -> Unit) = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_card_bg)
+        setPadding(36, 32, 36, 32)
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.topMargin = 32
+        layoutParams = lp
+        builder()
+    }
+
+    private fun sectionTitle(text: String) = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        addView(TextView(this@SettingsActivity).apply {
+            layoutParams = LinearLayout.LayoutParams(6, 36)
+            background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_accent_bar)
+        })
+        addView(TextView(this@SettingsActivity).apply {
+            this.text = "  ${text.uppercase()}"
+            setTextColor(cyan)
+            textSize = 14f
+            typeface = Typeface.MONOSPACE
+            letterSpacing = 0.05f
+        })
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.bottomMargin = 16
+        layoutParams = lp
+    }
+
+    private fun bodyText(text: String) = TextView(this).apply {
+        this.text = text
+        setTextColor(hudText)
+        textSize = 13f
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.bottomMargin = 12
+        layoutParams = lp
+    }
+
+    private fun hudEditText(initial: String) = EditText(this).apply {
+        setText(initial)
+        setTextColor(Color.WHITE)
+        setHintTextColor(hudTextDim)
+        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_button_bg)
+        setPadding(28, 20, 28, 20)
+    }
+
     private fun buildUi(): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#050A0F"))
-            setPadding(48, 64, 48, 64)
+            setBackgroundColor(Color.parseColor("#03080E"))
+            setPadding(40, 56, 40, 80)
         }
 
-        fun sectionTitle(text: String) = TextView(this).apply {
-            this.text = text
-            setTextColor(Color.parseColor("#00D4FF"))
-            textSize = 16f
-            setPadding(0, 40, 0, 12)
-        }
-        fun bodyText(text: String) = TextView(this).apply {
-            this.text = text
-            setTextColor(Color.parseColor("#8FC7D6"))
-            textSize = 13f
-        }
-
-        root.addView(TextView(this).apply {
-            text = "Jarvis Settings"
-            setTextColor(Color.WHITE)
-            textSize = 22f
-        })
-
-        root.addView(Button(this).apply {
-            text = "📊 Usage Stats"
-            setOnClickListener {
-                startActivity(Intent(this@SettingsActivity, StatsActivity::class.java))
-            }
-        })
-
-        root.addView(Button(this).apply {
-            text = "💬 Send Feedback"
-            setOnClickListener {
-                startActivity(Intent(this@SettingsActivity, FeedbackActivity::class.java))
-            }
-        })
-
-        // --- Voice type ---
-        root.addView(sectionTitle("Voice Type"))
-        voiceTypeLabel = bodyText("Current: ${settings.getVoiceType()}")
-        root.addView(voiceTypeLabel)
-
-        val voiceRow = LinearLayout(this).apply {
+        root.addView(LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-        }
-        listOf("male", "female", "robot").forEach { type ->
-            voiceRow.addView(Button(this).apply {
-                text = type.replaceFirstChar { it.uppercase() }
-                setOnClickListener {
-                    settings.setVoiceType(type)
-                    voiceTypeLabel.text = "Current: $type"
-                    tts.speak("This is what my $type voice sounds like.")
-                }
+            gravity = Gravity.CENTER_VERTICAL
+            addView(TextView(this@SettingsActivity).apply {
+                layoutParams = LinearLayout.LayoutParams(8, 48)
+                background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_accent_bar)
             })
-        }
-        root.addView(voiceRow)
-
-        // --- Voice speed ---
-        root.addView(sectionTitle("Voice Speed"))
-        val speedLabel = bodyText("${settings.getVoiceSpeed()}x")
-        root.addView(speedLabel)
-        root.addView(SeekBar(this).apply {
-            max = 20 // maps to 0.3x .. 2.3x
-            progress = ((settings.getVoiceSpeed() - 0.3f) * 10).toInt().coerceIn(0, 20)
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(sb: SeekBar?, value: Int, fromUser: Boolean) {
-                    val speed = 0.3f + value / 10f
-                    settings.setVoiceSpeed(speed)
-                    speedLabel.text = "${"%.1f".format(speed)}x"
-                }
-                override fun onStartTrackingTouch(sb: SeekBar?) {}
-                override fun onStopTrackingTouch(sb: SeekBar?) {
-                    tts.speak("Voice speed test.")
-                }
+            addView(TextView(this@SettingsActivity).apply {
+                text = "  J.A.R.V.I.S — SETTINGS"
+                setTextColor(Color.WHITE)
+                textSize = 20f
+                typeface = Typeface.MONOSPACE
             })
         })
 
-        // --- User name ---
-        root.addView(sectionTitle("Your Name"))
-        val nameInput = EditText(this).apply {
-            setText(settings.getUserName())
-            setTextColor(Color.WHITE)
-        }
-        root.addView(nameInput)
-        root.addView(Button(this).apply {
-            text = "Save Name"
-            setOnClickListener {
-                val name = nameInput.text.toString().trim()
-                if (name.isNotBlank()) settings.setUserName(name)
+        root.addView(sectionCard {
+            addView(hudButton("\uD83D\uDCCA  USAGE STATS") {
+                startActivity(Intent(this@SettingsActivity, StatsActivity::class.java))
+            })
+            addView(hudButton("\uD83D\uDCAC  SEND FEEDBACK") {
+                startActivity(Intent(this@SettingsActivity, FeedbackActivity::class.java))
+            })
+        })
+
+        root.addView(sectionCard {
+            addView(sectionTitle("Voice Type"))
+            voiceTypeLabel = bodyText("Current: ${settings.getVoiceType()}")
+            addView(voiceTypeLabel)
+
+            val voiceRow = LinearLayout(this@SettingsActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
             }
+            listOf("male", "female", "robot").forEach { type ->
+                voiceRow.addView(Button(this@SettingsActivity).apply {
+                    text = type.uppercase()
+                    isAllCaps = false
+                    textSize = 13f
+                    setTextColor(cyan)
+                    background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_chip_bg)
+                    val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                    lp.marginEnd = 12
+                    layoutParams = lp
+                    setOnClickListener {
+                        settings.setVoiceType(type)
+                        voiceTypeLabel.text = "Current: $type"
+                        tts.speak("This is what my $type voice sounds like.")
+                    }
+                })
+            }
+            addView(voiceRow)
         })
 
-        // --- Memory ---
-        root.addView(sectionTitle("Remembered Note"))
-        noteText = bodyText(memory.recall("last_note") ?: "(nothing remembered yet)")
-        root.addView(noteText)
-        root.addView(Button(this).apply {
-            text = "Clear Note"
-            setOnClickListener {
+        root.addView(sectionCard {
+            addView(sectionTitle("Voice Speed"))
+            val speedLabel = bodyText("${settings.getVoiceSpeed()}x")
+            addView(speedLabel)
+            addView(SeekBar(this@SettingsActivity).apply {
+                max = 20
+                progress = ((settings.getVoiceSpeed() - 0.3f) * 10).toInt().coerceIn(0, 20)
+                progressTintList = android.content.res.ColorStateList.valueOf(cyan)
+                thumbTintList = android.content.res.ColorStateList.valueOf(cyan)
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(sb: SeekBar?, value: Int, fromUser: Boolean) {
+                        val speed = 0.3f + value / 10f
+                        settings.setVoiceSpeed(speed)
+                        speedLabel.text = "${"%.1f".format(speed)}x"
+                    }
+                    override fun onStartTrackingTouch(sb: SeekBar?) {}
+                    override fun onStopTrackingTouch(sb: SeekBar?) { tts.speak("Voice speed test.") }
+                })
+            })
+        })
+
+        root.addView(sectionCard {
+            addView(sectionTitle("Your Name"))
+            val nameInput = hudEditText(settings.getUserName())
+            addView(nameInput)
+            addView(hudButton("SAVE NAME") {
+                val name = nameInput.text.toString().trim()
+                if (name.isNotBlank()) { settings.setUserName(name); toast("Saved.") }
+            })
+        })
+
+        root.addView(sectionCard {
+            addView(sectionTitle("Remembered Note"))
+            noteText = bodyText(memory.recall("last_note") ?: "(nothing remembered yet)")
+            addView(noteText)
+            addView(hudButton("CLEAR NOTE") {
                 memory.forget("last_note")
                 noteText.text = "(nothing remembered yet)"
-            }
+            })
         })
 
-        // --- Voice Authentication ---
-        root.addView(sectionTitle("Voice Authentication"))
-        root.addView(bodyText(
-            "Approximate on-device voice matching — not a bank-grade biometric, but good " +
-            "enough to reject an obviously different voice. Checked once per app session, " +
-            "not on every command."
-        ))
-        voiceAuthStatus = bodyText(voiceAuthStatusText())
-        root.addView(voiceAuthStatus)
+        root.addView(sectionCard {
+            addView(sectionTitle("Voice Authentication"))
+            addView(bodyText(
+                "Approximate on-device voice matching — not a bank-grade biometric, but good " +
+                "enough to reject an obviously different voice. Checked once per app session, " +
+                "not on every command."
+            ))
+            voiceAuthStatus = bodyText(voiceAuthStatusText())
+            addView(voiceAuthStatus)
 
-        root.addView(Button(this).apply {
-            text = "🎙️ Enroll My Voice"
-            setOnClickListener {
+            addView(hudButton("\uD83C\uDF99\uFE0F  ENROLL MY VOICE", filled = true) {
                 if (ContextCompat.checkSelfPermission(this@SettingsActivity, Manifest.permission.RECORD_AUDIO)
                     == PackageManager.PERMISSION_GRANTED
                 ) {
@@ -183,59 +237,57 @@ class SettingsActivity : AppCompatActivity() {
                 } else {
                     micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 }
-            }
-        })
+            })
 
-        val voiceAuthToggle = Button(this).apply {
-            text = if (voiceAuth.isEnabled()) "Disable Voice Lock" else "Enable Voice Lock"
-            setOnClickListener {
+            lateinit var voiceAuthToggle: Button
+            voiceAuthToggle = hudButton(
+                if (voiceAuth.isEnabled()) "DISABLE VOICE LOCK" else "ENABLE VOICE LOCK"
+            ) {
                 if (!voiceAuth.isEnrolled()) {
                     toast("Enroll your voice first.")
-                    return@setOnClickListener
+                } else {
+                    val nowEnabled = !voiceAuth.isEnabled()
+                    voiceAuth.setEnabled(nowEnabled)
+                    voiceAuthStatus.text = voiceAuthStatusText()
                 }
-                val nowEnabled = !voiceAuth.isEnabled()
-                voiceAuth.setEnabled(nowEnabled)
-                text = if (nowEnabled) "Disable Voice Lock" else "Enable Voice Lock"
-                voiceAuthStatus.text = voiceAuthStatusText()
             }
-        }
-        root.addView(voiceAuthToggle)
+            addView(voiceAuthToggle)
 
-        root.addView(Button(this).apply {
-            text = "Reset Voice Enrollment"
-            setOnClickListener {
+            addView(hudButton("RESET VOICE ENROLLMENT") {
                 voiceAuth.resetEnrollment()
                 voiceAuthStatus.text = voiceAuthStatusText()
-                voiceAuthToggle.text = "Enable Voice Lock"
+                voiceAuthToggle.text = "ENABLE VOICE LOCK"
                 toast("Voice enrollment cleared.")
-            }
+            })
         })
 
-        // --- Lock Screen ---
-        root.addView(sectionTitle("Lock Screen"))
-        root.addView(bodyText(
-            "Android no longer allows regular apps to set or change your device's lock " +
-            "screen PIN/pattern directly (a security restriction since Android 8) — only " +
-            "this shortcut into system settings is possible. For an in-app lock instead, " +
-            "use \"lock [app name]\" by voice, which is Jarvis's own PIN-gated app lock."
-        ))
-        root.addView(Button(this).apply {
-            text = "Open Lock Screen Settings"
-            setOnClickListener {
+        root.addView(sectionCard {
+            addView(sectionTitle("Lock Screen"))
+            addView(bodyText(
+                "Android no longer allows regular apps to set or change your device's lock " +
+                "screen PIN/pattern directly (a security restriction since Android 8) — only " +
+                "this shortcut into system settings is possible. For an in-app lock instead, " +
+                "use \"lock [app name]\" by voice, which is Jarvis's own PIN-gated app lock."
+            ))
+            addView(hudButton("OPEN LOCK SCREEN SETTINGS") {
                 try {
                     startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
                 } catch (e: Exception) {
                     toast("Couldn't open security settings on this device.")
                 }
-            }
+            })
         })
 
-        root.addView(Button(this).apply {
-            text = "Close"
-            setOnClickListener { finish() }
+        root.addView(hudButton("\u2190  CLOSE") { finish() }.apply {
+            val lp = layoutParams as LinearLayout.LayoutParams
+            lp.topMargin = 48
+            layoutParams = lp
         })
 
-        return ScrollView(this).apply { addView(root) }
+        return ScrollView(this).apply {
+            setBackgroundColor(Color.parseColor("#03080E"))
+            addView(root)
+        }
     }
 
     private fun voiceAuthStatusText(): String = when {
@@ -244,7 +296,6 @@ class SettingsActivity : AppCompatActivity() {
         else -> "Enrolled — voice lock is OFF."
     }
 
-    /** Captures 3 short samples with prompts between each, then stores the averaged voiceprint. */
     private fun runEnrollment() {
         toast("Enrolling — say a short phrase 3 times when prompted.")
         scope.launch {
