@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
      * and reopens it later. Only ever shown once (see SettingsManager.markFeedbackPromptShown).
      */
     private fun scheduleFeedbackPromptCheck() {
-        if (settings.hasShownFeedbackPrompt()) return
+        if (settings.hasGivenFeedback()) return
 
         val delayMs = 2 * 60 * 1000L + 30 * 1000L // 2.5 minutes after first-ever launch
         val elapsed = System.currentTimeMillis() - settings.getFirstLaunchTime()
@@ -196,8 +196,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
     }
 
     private fun showFeedbackPrompt() {
-        if (isFinishing || settings.hasShownFeedbackPrompt()) return
-        settings.markFeedbackPromptShown()
+        if (isFinishing || settings.hasGivenFeedback()) return
         AlertDialog.Builder(this)
             .setTitle("Enjoying Jarvis so far?")
             .setMessage("We'd love a quick bit of feedback — takes less than a minute and goes straight to the developer.")

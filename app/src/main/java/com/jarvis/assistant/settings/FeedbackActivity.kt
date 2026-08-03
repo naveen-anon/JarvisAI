@@ -6,12 +6,14 @@ import android.view.Gravity
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.jarvis.assistant.util.FeedbackClient
+import com.jarvis.assistant.util.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class FeedbackActivity : AppCompatActivity() {
     private val client = FeedbackClient()
+    private val settings by lazy { SettingsManager(this) }
     private val scope = CoroutineScope(Dispatchers.Main)
     private var selectedRating = 0
     private lateinit var starViews: List<TextView>
@@ -108,6 +110,7 @@ class FeedbackActivity : AppCompatActivity() {
                         rating = selectedRating.takeIf { it > 0 }
                     )
                     if (ok) {
+                        settings.markFeedbackGiven()
                         Toast.makeText(this@FeedbackActivity, "Thanks! Feedback sent.", Toast.LENGTH_SHORT).show()
                         finish()
                     } else {

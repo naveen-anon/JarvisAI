@@ -51,4 +51,16 @@ class SettingsManager(context: Context) {
     fun setUseShortAnswers(use: Boolean) = prefs.edit().putBoolean("short_answers", use).apply()
 
     fun clear() = prefs.edit().clear().apply()
+
+    fun getFirstLaunchTime(): Long {
+        val t = prefs.getLong("first_launch_time", 0L)
+        return if (t == 0L) {
+            val now = System.currentTimeMillis()
+            prefs.edit().putLong("first_launch_time", now).apply()
+            now
+        } else t
+    }
+
+    fun hasGivenFeedback(): Boolean = prefs.getBoolean("feedback_given", false)
+    fun markFeedbackGiven() = prefs.edit().putBoolean("feedback_given", true).apply()
 }
