@@ -23,14 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // ---------- Color palette matching the HUD theme ----------
-private val BgDeep = Color(0xFF02040A)
-private val PanelBg = Color(0xFF0B1520)
-private val BorderCyan = Color(0xFF16303D)
-private val Cyan = Color(0xFF00D4FF)
-private val CyanDim = Color(0xFF4A8A9A)
-private val TextMain = Color(0xFFEAF6FA)
-private val TextDim = Color(0xFF7FA3AD)
-private val Success = Color(0xFF00FF88)
+val BgDeep = Color(0xFF02040A)
+val PanelBg = Color(0xFF0B1520)
+val BorderCyan = Color(0xFF16303D)
+val Cyan = Color(0xFF00D4FF)
+val CyanDim = Color(0xFF4A8A9A)
+val TextMain = Color(0xFFEAF6FA)
+val TextDim = Color(0xFF7FA3AD)
+val Success = Color(0xFF00FF88)
 
 data class ChatMessage(val text: String, val isUser: Boolean)
 
