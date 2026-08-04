@@ -42,7 +42,6 @@ import com.jarvis.assistant.ui.theme.HudGreenOnline
 import com.jarvis.assistant.ui.theme.HudTextDim
 import com.jarvis.assistant.ui.theme.HudWhite
 
-data class ChatMessage(val text: String, val isUser: Boolean)
 
 @Composable
 fun JarvisChatScreen(
