@@ -136,7 +136,7 @@ class SettingsActivity : AppCompatActivity() {
         builder()
     }
 
-    private fun sectionTitle(text: String) = LinearLayout(this).apply {
+    private fun sectionTitle(text: String, icon: String = "") = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         addView(TextView(this@SettingsActivity).apply {
@@ -144,7 +144,8 @@ class SettingsActivity : AppCompatActivity() {
             background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_accent_bar)
         })
         addView(TextView(this@SettingsActivity).apply {
-            this.text = "  ${text.uppercase()}"
+            val prefix = if (icon.isNotEmpty()) "  $icon " else "  "
+            this.text = "$prefix${text.uppercase()}"
             setTextColor(cyan)
             textSize = 14f
             typeface = Typeface.MONOSPACE
@@ -311,7 +312,7 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         root.addView(sectionCard {
-            addView(sectionTitle("Voice Authentication"))
+            addView(sectionTitle("Voice Authentication", "\uD83C\uDF99\uFE0F"))
             addView(bodyText(
                 "Approximate on-device voice matching — not a bank-grade biometric, but good " +
                 "enough to reject an obviously different voice. Checked once per app session, " +
@@ -353,7 +354,7 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         root.addView(sectionCard {
-            addView(sectionTitle("Lock Screen"))
+            addView(sectionTitle("Lock Screen", "\uD83D\uDD12"))
             addView(bodyText(
                 "Android no longer allows regular apps to set or change your device's lock " +
                 "screen PIN/pattern directly (a security restriction since Android 8) — only " +

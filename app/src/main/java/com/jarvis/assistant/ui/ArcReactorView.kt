@@ -20,7 +20,8 @@ enum class HudState { IDLE, LISTENING, THINKING, SPEAKING }
 
 /**
  * Iron Man Arc Reactor — pure round (no triangle).
- * Concentric metal rings, rotating segments, white-hot core, cyan glow.
+ * Concentric metal rings, rotating segments, white-hot core, cyan glow,
+ * plus a bright rotating highlight arc for extra "energized" feel.
  */
 class ArcReactorView @JvmOverloads constructor(
     context: Context,
@@ -46,6 +47,7 @@ class ArcReactorView @JvmOverloads constructor(
     private var rotOuter = 0f
     private var rotMid = 0f
     private var rotInner = 0f
+    private var rotHighlight = 0f
     private var pulse = 1f
     private var glowA = 0.7f
 
@@ -68,6 +70,11 @@ class ArcReactorView @JvmOverloads constructor(
         interpolator = LinearInterpolator()
         addUpdateListener { rotInner = it.animatedValue as Float; invalidate() }
     }
+    private val aHighlight = ValueAnimator.ofFloat(0f, 360f).apply {
+        duration = 3200; repeatCount = ValueAnimator.INFINITE
+        interpolator = LinearInterpolator()
+        addUpdateListener { rotHighlight = it.animatedValue as Float; invalidate() }
+    }
     private val aPulse = ValueAnimator.ofFloat(0.90f, 1.10f).apply {
         duration = 1300; repeatCount = ValueAnimator.INFINITE; repeatMode = ValueAnimator.REVERSE
         addUpdateListener {
@@ -78,7 +85,7 @@ class ArcReactorView @JvmOverloads constructor(
     }
 
     init {
-        aOuter.start(); aMid.start(); aInner.start(); aPulse.start()
+        aOuter.start(); aMid.start(); aInner.start(); aPulse.start(); aHighlight.start()
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
@@ -97,16 +104,16 @@ class ArcReactorView @JvmOverloads constructor(
         }
         when (state) {
             HudState.IDLE -> {
-                aOuter.duration = 14000; aMid.duration = 9000; aInner.duration = 6000; aPulse.duration = 1600
+                aOuter.duration = 14000; aMid.duration = 9000; aInner.duration = 6000; aPulse.duration = 1600; aHighlight.duration = 4000
             }
             HudState.LISTENING -> {
-                aOuter.duration = 3000; aMid.duration = 2200; aInner.duration = 1600; aPulse.duration = 500
+                aOuter.duration = 3000; aMid.duration = 2200; aInner.duration = 1600; aPulse.duration = 500; aHighlight.duration = 900
             }
             HudState.THINKING -> {
-                aOuter.duration = 1100; aMid.duration = 800; aInner.duration = 600; aPulse.duration = 300
+                aOuter.duration = 1100; aMid.duration = 800; aInner.duration = 600; aPulse.duration = 300; aHighlight.duration = 500
             }
             HudState.SPEAKING -> {
-                aOuter.duration = 2000; aMid.duration = 1400; aInner.duration = 1000; aPulse.duration = 700
+                aOuter.duration = 2000; aMid.duration = 1400; aInner.duration = 1000; aPulse.duration = 700; aHighlight.duration = 700
             }
         }
     }
@@ -117,7 +124,7 @@ class ArcReactorView @JvmOverloads constructor(
         val cy = height / 2f
         val R = min(width, height) / 2f * 0.88f
 
-        drawBloom(canvas, cx, cy, R * 1.55f)
+        drawBloom(canvas, cx, cy, R * 1.65f)
 
         // Thick metal housing
         pStroke.style = Paint.Style.STROKE
@@ -140,6 +147,9 @@ class ArcReactorView @JvmOverloads constructor(
 
         // Outer segmented ring
         drawSegments(canvas, cx, cy, R * 0.80f, rotOuter, 18, R * 0.032f, 5f)
+
+        // Bright rotating highlight arc — gives an "energized scan" feel
+        drawHighlightArc(canvas, cx, cy, R * 0.80f, rotHighlight, R * 0.032f)
 
         // Solid mid ring
         pStroke.color = accent
@@ -196,6 +206,16 @@ class ArcReactorView @JvmOverloads constructor(
         }
     }
 
+    // A single bright, wider arc that sweeps around the outer ring like a scanning beam
+    private fun drawHighlightArc(canvas: Canvas, cx: Float, cy: Float, radius: Float, rot: Float, sw: Float) {
+        pStroke.strokeCap = Paint.Cap.ROUND
+        pStroke.strokeWidth = sw * 1.6f
+        pStroke.color = Color.WHITE
+        pStroke.alpha = 200
+        val rect = RectF(cx - radius, cy - radius, cx + radius, cy + radius)
+        canvas.drawArc(rect, rot, 22f, false, pStroke)
+    }
+
     private fun drawTicks(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
         pStroke.color = accent
         pStroke.strokeWidth = 2f
@@ -242,16 +262,16 @@ class ArcReactorView @JvmOverloads constructor(
         val r = base * pulse
 
         pGlow.shader = RadialGradient(
-            cx, cy, r * 3.4f,
+            cx, cy, r * 3.8f,
             intArrayOf(
-                Color.argb((glowA * 160).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
-                Color.argb((glowA * 55).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
+                Color.argb((glowA * 170).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
+                Color.argb((glowA * 60).toInt(), Color.red(accent), Color.green(accent), Color.blue(accent)),
                 Color.TRANSPARENT
             ),
             floatArrayOf(0f, 0.35f, 1f),
             Shader.TileMode.CLAMP
         )
-        canvas.drawCircle(cx, cy, r * 3.4f, pGlow)
+        canvas.drawCircle(cx, cy, r * 3.8f, pGlow)
         pGlow.shader = null
 
         pFill.shader = RadialGradient(
@@ -275,7 +295,7 @@ class ArcReactorView @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
-        aOuter.cancel(); aMid.cancel(); aInner.cancel(); aPulse.cancel()
+        aOuter.cancel(); aMid.cancel(); aInner.cancel(); aPulse.cancel(); aHighlight.cancel()
         colorAnim?.cancel()
         super.onDetachedFromWindow()
     }
