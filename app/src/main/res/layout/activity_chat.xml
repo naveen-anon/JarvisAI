@@ -29,6 +29,33 @@
             android:fontFamily="monospace"
             android:letterSpacing="0.08" />
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/chip_online_bg"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:layout_marginEnd="8dp">
+
+            <View
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:background="@drawable/dot_online"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ONLINE"
+                android:textColor="#00FF88"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/btnCloseChat"
             android:layout_width="wrap_content"

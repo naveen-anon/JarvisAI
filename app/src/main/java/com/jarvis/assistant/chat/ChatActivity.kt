@@ -16,6 +16,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.jarvis.assistant.R
 import com.jarvis.assistant.brain.BrainState
 import com.jarvis.assistant.service.AssistantForegroundService
@@ -78,30 +79,62 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         }
     }
 
-    private fun addBubble(text: String, isUser: Boolean) {
-        val bubble = TextView(this).apply {
-            this.text = text
-            setTextColor(if (isUser) Color.parseColor("#F0FBFF") else Color.parseColor("#00E5FF"))
-            textSize = 14f
-            typeface = Typeface.MONOSPACE
-            setPadding(28, 20, 28, 20)
-            background = GradientDrawable().apply {
-                setColor(if (isUser) Color.parseColor("#122230") else Color.parseColor("#0A1520"))
-                cornerRadius = 18f
-                setStroke(2, Color.parseColor(if (isUser) "#1A3A4A" else "#0B7A94"))
-            }
+    private fun avatar(isUser: Boolean) = TextView(this).apply {
+        text = if (isUser) "" else ""
+        val size = 90
+        layoutParams = LinearLayout.LayoutParams(size, size).apply {
+            if (isUser) marginStart = 10 else marginEnd = 10
         }
-        val lp = LinearLayout.LayoutParams(
+        background = ContextCompat.getDrawable(
+            this@ChatActivity,
+            if (isUser) R.drawable.avatar_user_bg else R.drawable.avatar_reactor_bg
+        )
+        gravity = Gravity.CENTER
+        textSize = 16f
+    }
+
+    private fun bubbleText(text: String, isUser: Boolean) = TextView(this).apply {
+        this.text = text
+        setTextColor(if (isUser) Color.parseColor("#F0FBFF") else Color.parseColor("#00E5FF"))
+        textSize = 14f
+        typeface = Typeface.MONOSPACE
+        background = ContextCompat.getDrawable(
+            this@ChatActivity,
+            if (isUser) R.drawable.bubble_user_bg else R.drawable.bubble_jarvis_bg
+        )
+    }
+
+    private fun addBubble(text: String, isUser: Boolean) {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = if (isUser) Gravity.END else Gravity.START
+        }
+
+        val bubble = bubbleText(text, isUser)
+        val bubbleLp = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            marginStart = if (isUser) 48 else 0
+            marginEnd = if (isUser) 0 else 48
+        }
+
+        if (isUser) {
+            row.addView(bubble, bubbleLp)
+            row.addView(avatar(true))
+        } else {
+            row.addView(avatar(false))
+            row.addView(bubble, bubbleLp)
+        }
+
+        val rowLp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply {
             topMargin = 10
             bottomMargin = 4
-            gravity = if (isUser) Gravity.END else Gravity.START
-            marginStart = if (isUser) 64 else 0
-            marginEnd = if (isUser) 0 else 64
         }
-        chatMessages.addView(bubble, lp)
+        chatMessages.addView(row, rowLp)
         chatScroll.post { chatScroll.fullScroll(ScrollView.FOCUS_DOWN) }
     }
 
