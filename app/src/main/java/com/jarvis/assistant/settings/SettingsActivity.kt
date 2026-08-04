@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
@@ -37,6 +38,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var voiceTypeLabel: TextView
     private lateinit var noteText: TextView
     private lateinit var voiceAuthStatus: TextView
+    private val voiceChipRefs = mutableMapOf<String, LinearLayout>()
     private val scope = CoroutineScope(Dispatchers.Main)
 
     private val micPermissionLauncher = registerForActivityResult(
@@ -53,8 +55,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private val cyan = Color.parseColor("#00E5FF")
+    private val cyanDim = Color.parseColor("#0B7A94")
     private val hudText = Color.parseColor("#B8D4E0")
     private val hudTextDim = Color.parseColor("#5A8A9A")
+    private val bg = Color.parseColor("#03080E")
 
     private fun hudButton(label: String, filled: Boolean = false, onClick: () -> Unit) = Button(this).apply {
         text = label
@@ -69,6 +73,56 @@ class SettingsActivity : AppCompatActivity() {
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         lp.topMargin = 16
         layoutParams = lp
+        setOnClickListener { onClick() }
+    }
+
+    // A tappable row with a circular icon, title, subtitle, and a chevron — matches "USAGE STATS" / "SEND FEEDBACK" cards
+    private fun linkRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        isClickable = true
+        isFocusable = true
+        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_button_bg)
+        setPadding(28, 24, 28, 24)
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.bottomMargin = 14
+        layoutParams = lp
+
+        addView(TextView(this@SettingsActivity).apply {
+            text = icon
+            textSize = 20f
+            gravity = Gravity.CENTER
+            val size = 88
+            layoutParams = LinearLayout.LayoutParams(size, size).apply { marginEnd = 24 }
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setStroke(2, cyanDim)
+                setColor(Color.parseColor("#0B1520"))
+            }
+        })
+
+        addView(LinearLayout(this@SettingsActivity).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            addView(TextView(this@SettingsActivity).apply {
+                text = title
+                setTextColor(cyan)
+                textSize = 15f
+                typeface = Typeface.MONOSPACE
+            })
+            addView(TextView(this@SettingsActivity).apply {
+                text = subtitle
+                setTextColor(hudTextDim)
+                textSize = 12f
+            })
+        })
+
+        addView(TextView(this@SettingsActivity).apply {
+            text = "\u203A"
+            setTextColor(cyanDim)
+            textSize = 22f
+        })
+
         setOnClickListener { onClick() }
     }
 
@@ -118,10 +172,45 @@ class SettingsActivity : AppCompatActivity() {
         setPadding(28, 20, 28, 20)
     }
 
+    // Voice type selector card — icon + label, highlighted border when selected
+    private fun voiceTypeChip(type: String, icon: String, selected: Boolean, onClick: () -> Unit) = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        gravity = Gravity.CENTER
+        isClickable = true
+        isFocusable = true
+        setPadding(16, 32, 16, 32)
+        background = GradientDrawable().apply {
+            cornerRadius = 28f
+            setColor(if (selected) Color.parseColor("#1F00E5FF") else Color.TRANSPARENT)
+            setStroke(3, if (selected) cyan else Color.parseColor("#16303D"))
+        }
+        val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        lp.marginEnd = 12
+        layoutParams = lp
+
+        addView(TextView(this@SettingsActivity).apply {
+            text = icon
+            textSize = 26f
+            gravity = Gravity.CENTER
+        })
+        addView(TextView(this@SettingsActivity).apply {
+            text = type.uppercase()
+            setTextColor(if (selected) cyan else hudTextDim)
+            textSize = 12f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER
+            val tlp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            tlp.topMargin = 8
+            layoutParams = tlp
+        })
+
+        setOnClickListener { onClick() }
+    }
+
     private fun buildUi(): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#03080E"))
+            setBackgroundColor(bg)
             setPadding(40, 56, 40, 80)
         }
 
@@ -140,11 +229,17 @@ class SettingsActivity : AppCompatActivity() {
             })
         })
 
-        root.addView(sectionCard {
-            addView(hudButton("\uD83D\uDCCA  USAGE STATS") {
+        // Usage stats + feedback as icon link-rows
+        root.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            lp.topMargin = 28
+            layoutParams = lp
+
+            addView(linkRow("\uD83D\uDCCA", "USAGE STATS", "View system usage and activity") {
                 startActivity(Intent(this@SettingsActivity, StatsActivity::class.java))
             })
-            addView(hudButton("\uD83D\uDCAC  SEND FEEDBACK") {
+            addView(linkRow("\uD83D\uDCAC", "SEND FEEDBACK", "Help improve J.A.R.V.I.S") {
                 startActivity(Intent(this@SettingsActivity, FeedbackActivity::class.java))
             })
         })
@@ -158,23 +253,19 @@ class SettingsActivity : AppCompatActivity() {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER
             }
-            listOf("male", "female", "robot").forEach { type ->
-                voiceRow.addView(Button(this@SettingsActivity).apply {
-                    text = type.uppercase()
-                    isAllCaps = false
-                    textSize = 13f
-                    setTextColor(cyan)
-                    background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_chip_bg)
-                    val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                    lp.marginEnd = 12
-                    layoutParams = lp
-                    setOnClickListener {
+            val icons = mapOf("male" to "\uD83D\uDC68", "female" to "\uD83D\uDC69", "robot" to "\uD83E\uDD16")
+            fun refreshChips(current: String) {
+                voiceRow.removeAllViews()
+                listOf("male", "female", "robot").forEach { type ->
+                    voiceRow.addView(voiceTypeChip(type, icons[type] ?: "\u25CF", type == current) {
                         settings.setVoiceType(type)
                         voiceTypeLabel.text = "Current: $type"
                         tts.speak("This is what my $type voice sounds like.")
-                    }
-                })
+                        refreshChips(type)
+                    })
+                }
             }
+            refreshChips(settings.getVoiceType())
             addView(voiceRow)
         })
 
@@ -285,7 +376,7 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         return ScrollView(this).apply {
-            setBackgroundColor(Color.parseColor("#03080E"))
+            setBackgroundColor(bg)
             addView(root)
         }
     }
