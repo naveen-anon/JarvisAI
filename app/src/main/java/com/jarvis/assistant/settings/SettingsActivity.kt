@@ -216,7 +216,6 @@ class SettingsActivity : AppCompatActivity() {
     private fun buildUi(): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(bg)
             setPadding(40, 56, 40, 80)
         }
 
@@ -382,7 +381,6 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         return ScrollView(this).apply {
-            setBackgroundColor(bg)
             addView(root)
         }
     }
