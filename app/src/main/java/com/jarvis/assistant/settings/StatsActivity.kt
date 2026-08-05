@@ -8,10 +8,12 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.jarvis.assistant.ui.CornerFrameView
 import com.jarvis.assistant.util.AutoLearnEngine
 
 class StatsActivity : AppCompatActivity() {
@@ -43,7 +45,11 @@ class StatsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val stats = AutoLearnEngine(this).getUsageStats()
-        setContentView(buildUi(stats))
+        setContentView(FrameLayout(this).apply {
+            setBackgroundColor(C_BG)
+            addView(CornerFrameView(this@StatsActivity))
+            addView(buildUi(stats))
+        })
     }
 
     private fun buildUi(stats: AutoLearnEngine.UsageStats): ScrollView {
