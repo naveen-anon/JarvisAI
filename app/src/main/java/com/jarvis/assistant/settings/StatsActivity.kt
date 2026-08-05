@@ -55,7 +55,6 @@ class StatsActivity : AppCompatActivity() {
     private fun buildUi(stats: AutoLearnEngine.UsageStats): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(C_BG)
             setPadding(dp(20), dp(48), dp(20), dp(40))
         }
 
@@ -238,7 +237,6 @@ class StatsActivity : AppCompatActivity() {
         })
 
         return ScrollView(this).apply {
-            setBackgroundColor(C_BG)
             addView(root)
         }
     }
