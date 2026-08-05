@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.view.Gravity
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.SeekBar
@@ -51,7 +52,11 @@ class SettingsActivity : AppCompatActivity() {
         memory = PersistentMemory(this)
         tts = TextToSpeechHelper(this)
         voiceAuth = VoiceAuthManager(this)
-        setContentView(buildUi())
+        setContentView(FrameLayout(this).apply {
+            setBackgroundColor(bg)
+            addView(com.jarvis.assistant.ui.CornerFrameView(this@SettingsActivity))
+            addView(buildUi())
+        })
     }
 
     private val cyan = Color.parseColor("#00E5FF")
