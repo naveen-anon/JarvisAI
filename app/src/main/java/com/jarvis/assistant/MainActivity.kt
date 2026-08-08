@@ -291,6 +291,14 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         // callback below would have fired — re-checks elapsed time rather than relying only
         // on the originally scheduled callback surviving.
         if (::settings.isInitialized) scheduleFeedbackPromptCheck()
+
+        // Re-apply the arc reactor color every time this screen becomes visible again —
+        // setAccentColor() in onCreate() only ran once at launch, so a color changed in
+        // SettingsActivity never showed up here until a full app restart. onResume() fires
+        // every time the user backs out of Settings, so this is the actual fix.
+        if (::arcReactor.isInitialized && ::settings.isInitialized) {
+            arcReactor.setAccentColor(settings.getArcReactorColor())
+        }
     }
 
     override fun onDestroy() {
