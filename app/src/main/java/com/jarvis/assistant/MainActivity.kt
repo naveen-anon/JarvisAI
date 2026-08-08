@@ -147,6 +147,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
 
         settings = com.jarvis.assistant.util.SettingsManager(this)
         settings.getFirstLaunchTime() // records it on the very first call, no-op after that
+        arcReactor.setAccentColor(settings.getArcReactorColor())
         scheduleFeedbackPromptCheck()
 
         permissionLauncher.launch(requiredPermissions)

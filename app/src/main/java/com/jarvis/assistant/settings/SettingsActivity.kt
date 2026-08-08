@@ -65,6 +65,17 @@ class SettingsActivity : AppCompatActivity() {
     private val hudTextDim = Color.parseColor("#5A8A9A")
     private val bg = Color.parseColor("#03080E")
 
+    // Arc Reactor color palette — label shown to the user, hex stored via SettingsManager and
+    // read by ArcReactorView.setAccentColor() wherever the HUD ring is drawn.
+    private val reactorPalette = listOf(
+        "Cyan" to "#00E5FF",
+        "Amber" to "#FFB020",
+        "Emerald" to "#00E676",
+        "Violet" to "#B388FF",
+        "Crimson" to "#FF5252",
+        "Ice" to "#E0FBFF"
+    )
+
     private fun hudButton(label: String, filled: Boolean = false, onClick: () -> Unit) = Button(this).apply {
         text = label
         isAllCaps = false
@@ -213,6 +224,27 @@ class SettingsActivity : AppCompatActivity() {
         setOnClickListener { onClick() }
     }
 
+    // Circular color swatch for the Arc Reactor color picker — white ring border when selected
+    private fun colorSwatch(hex: String, selected: Boolean, onClick: () -> Unit) = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        gravity = Gravity.CENTER
+        isClickable = true
+        isFocusable = true
+        val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        layoutParams = lp
+
+        addView(TextView(this@SettingsActivity).apply {
+            val size = 64
+            layoutParams = LinearLayout.LayoutParams(size, size)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor(hex))
+                setStroke(if (selected) 6 else 0, Color.WHITE)
+            }
+        })
+        setOnClickListener { onClick() }
+    }
+
     private fun buildUi(): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -247,6 +279,39 @@ class SettingsActivity : AppCompatActivity() {
             addView(linkRow("\uD83D\uDCAC", "SEND FEEDBACK", "Help improve J.A.R.V.I.S") {
                 startActivity(Intent(this@SettingsActivity, FeedbackActivity::class.java))
             })
+        })
+
+        // Arc Reactor Color — live preview ring + tappable swatches, backed by SettingsManager.getArcReactorColor()
+        root.addView(sectionCard {
+            addView(sectionTitle("Arc Reactor Color", "\uD83C\uDFA8"))
+            addView(bodyText("Changes the HUD ring color everywhere in the app."))
+
+            val preview = com.jarvis.assistant.ui.ArcReactorView(this@SettingsActivity).apply {
+                layoutParams = LinearLayout.LayoutParams(220, 220)
+                setAccentColor(settings.getArcReactorColor())
+            }
+            addView(LinearLayout(this@SettingsActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
+                val rowLp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                rowLp.bottomMargin = 20
+                layoutParams = rowLp
+                addView(preview)
+            })
+
+            val swatchRow = LinearLayout(this@SettingsActivity).apply { orientation = LinearLayout.HORIZONTAL }
+            fun refreshSwatches(current: String) {
+                swatchRow.removeAllViews()
+                reactorPalette.forEach { (_, hex) ->
+                    swatchRow.addView(colorSwatch(hex, hex.equals(current, ignoreCase = true)) {
+                        settings.setArcReactorColor(hex)
+                        preview.setAccentColor(hex)
+                        refreshSwatches(hex)
+                    })
+                }
+            }
+            refreshSwatches(settings.getArcReactorColor())
+            addView(swatchRow)
         })
 
         root.addView(sectionCard {

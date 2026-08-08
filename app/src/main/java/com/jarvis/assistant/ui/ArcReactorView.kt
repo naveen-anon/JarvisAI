@@ -22,6 +22,9 @@ enum class HudState { IDLE, LISTENING, THINKING, SPEAKING }
  * Iron Man Arc Reactor — pure round (no triangle).
  * Concentric metal rings, rotating segments, white-hot core, cyan glow,
  * plus a bright rotating highlight arc for extra "energized" feel.
+ *
+ * Accent color is user-configurable via setAccentColor(hex) — see SettingsActivity's
+ * "Arc Reactor Color" picker, backed by SettingsManager.getArcReactorColor().
  */
 class ArcReactorView @JvmOverloads constructor(
     context: Context,
@@ -34,10 +37,11 @@ class ArcReactorView @JvmOverloads constructor(
             applyStateParams()
         }
 
-    private val cyan = Color.parseColor("#00E5FF")
-    private val cyanHi = Color.parseColor("#E0FBFF")
-    private val cyanDim = Color.parseColor("#0B7A94")
-    private val amber = Color.parseColor("#FFB020")
+    // These are now `var` (not `val`) so setAccentColor() can recompute them from a user-chosen base color
+    private var cyan = Color.parseColor("#00E5FF")
+    private var cyanHi = Color.parseColor("#E0FBFF")
+    private var cyanDim = Color.parseColor("#0B7A94")
+    private val amber = Color.parseColor("#FFB020") // kept fixed — THINKING state uses amber as a semantic "processing" color regardless of theme
     private val darkMetal = Color.parseColor("#0A1520")
     private val midMetal = Color.parseColor("#1A3A4A")
 
@@ -89,6 +93,42 @@ class ArcReactorView @JvmOverloads constructor(
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
+    /**
+     * Applies a user-chosen base color (e.g. from SettingsManager.getArcReactorColor()).
+     * Derives the "hi" (lighter, for SPEAKING) and "dim" (darker, for IDLE) shades from it,
+     * then re-runs applyStateParams() so the ring animates smoothly to the new palette.
+     * Invalid hex strings are ignored — the reactor keeps whatever color it had before.
+     */
+    fun setAccentColor(hex: String) {
+        val base = try {
+            Color.parseColor(hex)
+        } catch (e: IllegalArgumentException) {
+            return
+        }
+        cyan = base
+        cyanHi = lighten(base, 0.55f)
+        cyanDim = darken(base, 0.55f)
+        applyStateParams()
+    }
+
+    private fun lighten(color: Int, factor: Float): Int {
+        val r = Color.red(color); val g = Color.green(color); val b = Color.blue(color)
+        return Color.rgb(
+            (r + (255 - r) * factor).toInt().coerceIn(0, 255),
+            (g + (255 - g) * factor).toInt().coerceIn(0, 255),
+            (b + (255 - b) * factor).toInt().coerceIn(0, 255)
+        )
+    }
+
+    private fun darken(color: Int, factor: Float): Int {
+        val r = Color.red(color); val g = Color.green(color); val b = Color.blue(color)
+        return Color.rgb(
+            (r * (1 - factor)).toInt().coerceIn(0, 255),
+            (g * (1 - factor)).toInt().coerceIn(0, 255),
+            (b * (1 - factor)).toInt().coerceIn(0, 255)
+        )
+    }
+
     private fun applyStateParams() {
         val target = when (state) {
             HudState.IDLE -> cyanDim
@@ -126,7 +166,6 @@ class ArcReactorView @JvmOverloads constructor(
 
         drawBloom(canvas, cx, cy, R * 1.65f)
 
-        // Thick metal housing
         pStroke.style = Paint.Style.STROKE
         pStroke.strokeCap = Paint.Cap.ROUND
         pStroke.color = darkMetal
@@ -139,36 +178,28 @@ class ArcReactorView @JvmOverloads constructor(
         canvas.drawCircle(cx, cy, R * 0.99f, pStroke)
         canvas.drawCircle(cx, cy, R * 0.88f, pStroke)
 
-        // Outer accent rim
         pStroke.color = accent
         pStroke.strokeWidth = R * 0.010f
         pStroke.alpha = 140
         canvas.drawCircle(cx, cy, R * 0.86f, pStroke)
 
-        // Outer segmented ring
         drawSegments(canvas, cx, cy, R * 0.80f, rotOuter, 18, R * 0.032f, 5f)
-
-        // Bright rotating highlight arc — gives an "energized scan" feel
         drawHighlightArc(canvas, cx, cy, R * 0.80f, rotHighlight, R * 0.032f)
 
-        // Solid mid ring
         pStroke.color = accent
         pStroke.strokeWidth = R * 0.014f
         pStroke.alpha = 200
         canvas.drawCircle(cx, cy, R * 0.68f, pStroke)
 
-        // Mid segmented ring (opposite)
         drawSegments(canvas, cx, cy, R * 0.58f, rotMid, 12, R * 0.026f, 8f)
 
         drawTicks(canvas, cx, cy, R * 0.50f)
 
-        // Inner solid ring
         pStroke.color = accent
         pStroke.strokeWidth = R * 0.012f
         pStroke.alpha = 220
         canvas.drawCircle(cx, cy, R * 0.40f, pStroke)
 
-        // Inner dashed ring
         drawSegments(canvas, cx, cy, R * 0.32f, rotInner, 8, R * 0.020f, 12f)
 
         drawOrbitNodes(canvas, cx, cy, R * 0.58f, rotMid)
@@ -206,7 +237,6 @@ class ArcReactorView @JvmOverloads constructor(
         }
     }
 
-    // A single bright, wider arc that sweeps around the outer ring like a scanning beam
     private fun drawHighlightArc(canvas: Canvas, cx: Float, cy: Float, radius: Float, rot: Float, sw: Float) {
         pStroke.strokeCap = Paint.Cap.ROUND
         pStroke.strokeWidth = sw * 1.6f
