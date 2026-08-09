@@ -116,7 +116,7 @@ class LockScreenActivity : AppCompatActivity() {
             orientation = GradientDrawable.Orientation.TOP_BOTTOM
         } else {
             setColor(0x26122230)
-            setStroke(3, 0x8000E5FF)
+            setStroke(3, 0x8000E5FF.toInt())
         }
     }
 
