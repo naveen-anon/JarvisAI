@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#03080E">
+    android:background="@drawable/glass_screen_bg">
 
     <com.jarvis.assistant.ui.CornerFrameView
         android:layout_width="match_parent"
@@ -72,7 +72,7 @@
                 android:textColor="#00E5FF"
                 android:textSize="12sp"
                 android:fontFamily="monospace"
-                android:background="@drawable/hud_button_bg"
+                android:background="@drawable/glass_button_bg"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:paddingTop="6dp"
@@ -111,7 +111,7 @@
                 android:textColorHint="#5A8A9A"
                 android:textSize="14sp"
                 android:fontFamily="monospace"
-                android:background="@drawable/hud_panel_bg"
+                android:background="@drawable/glass_panel_bg"
                 android:padding="12dp"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="4"
@@ -126,7 +126,7 @@
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:fontFamily="monospace"
-                android:background="@drawable/hud_button_filled"
+                android:background="@drawable/glass_button_filled"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:paddingTop="12dp"

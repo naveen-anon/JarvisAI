@@ -1,6 +1,7 @@
 package com.jarvis.assistant.security
 
 import android.content.Intent
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -41,7 +42,7 @@ class LockScreenActivity : AppCompatActivity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setBackgroundColor(0xFF050A0F.toInt())
+            setBackgroundColor(0xFF03080E.toInt())
             setPadding(48, 48, 48, 48)
         }
 
@@ -76,6 +77,8 @@ class LockScreenActivity : AppCompatActivity() {
 
         val unlockBtn = Button(this).apply {
             text = "UNLOCK"
+            background = glassButtonDrawable(filled = true)
+            setTextColor(0xFF03080E.toInt())
             setOnClickListener {
                 val entered = pinInput.text.toString()
                 if (lockManager.checkPin(entered)) {
@@ -90,6 +93,8 @@ class LockScreenActivity : AppCompatActivity() {
 
         val cancelBtn = Button(this).apply {
             text = "GO HOME"
+            background = glassButtonDrawable(filled = false)
+            setTextColor(0xFF00D4FF.toInt())
             setOnClickListener { goHome() }
         }
 
@@ -100,6 +105,19 @@ class LockScreenActivity : AppCompatActivity() {
         root.addView(unlockBtn)
         root.addView(cancelBtn)
         return root
+    }
+
+    /** Built in code, not as an XML resource — keeps this screen's "must always render even
+     *  if something else broke" guarantee intact while still matching the app's glass look. */
+    private fun glassButtonDrawable(filled: Boolean) = GradientDrawable().apply {
+        cornerRadius = 24f
+        if (filled) {
+            colors = intArrayOf(0xFF00E5FF.toInt(), 0xFF00A8CC.toInt())
+            orientation = GradientDrawable.Orientation.TOP_BOTTOM
+        } else {
+            setColor(0x26122230)
+            setStroke(3, 0x8000E5FF)
+        }
     }
 
     private fun goHome() {

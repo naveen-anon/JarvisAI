@@ -53,7 +53,7 @@ class SettingsActivity : AppCompatActivity() {
         tts = TextToSpeechHelper(this)
         voiceAuth = VoiceAuthManager(this)
         setContentView(FrameLayout(this).apply {
-            setBackgroundColor(bg)
+            setBackgroundResource(R.drawable.glass_screen_bg)
             addView(com.jarvis.assistant.ui.CornerFrameView(this@SettingsActivity))
             addView(buildUi())
         })
@@ -83,7 +83,7 @@ class SettingsActivity : AppCompatActivity() {
         setTextColor(if (filled) Color.parseColor("#03080E") else cyan)
         background = ContextCompat.getDrawable(
             this@SettingsActivity,
-            if (filled) R.drawable.hud_button_filled else R.drawable.hud_button_bg
+            if (filled) R.drawable.glass_button_filled else R.drawable.glass_button_bg
         )
         setPadding(32, 28, 32, 28)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -98,7 +98,7 @@ class SettingsActivity : AppCompatActivity() {
         gravity = Gravity.CENTER_VERTICAL
         isClickable = true
         isFocusable = true
-        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_button_bg)
+        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.glass_button_bg)
         setPadding(28, 24, 28, 24)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         lp.bottomMargin = 14
@@ -144,7 +144,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun sectionCard(builder: LinearLayout.() -> Unit) = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_card_bg)
+        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.glass_card_bg)
         setPadding(36, 32, 36, 32)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         lp.topMargin = 32
@@ -185,7 +185,7 @@ class SettingsActivity : AppCompatActivity() {
         setText(initial)
         setTextColor(Color.WHITE)
         setHintTextColor(hudTextDim)
-        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_button_bg)
+        background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.glass_button_bg)
         setPadding(28, 20, 28, 20)
     }
 

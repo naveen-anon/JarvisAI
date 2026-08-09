@@ -19,8 +19,8 @@ import com.jarvis.assistant.util.AutoLearnEngine
 class StatsActivity : AppCompatActivity() {
 
     private val C_BG = Color.parseColor("#03080E")
-    private val C_CARD = Color.parseColor("#0A1520")
-    private val C_BORDER = Color.parseColor("#1A3A4A")
+    private val C_CARD = Color.parseColor("#241A2E38") // translucent — glass fill
+    private val C_BORDER = Color.parseColor("#4000E5FF") // translucent cyan edge
     private val C_CYAN = Color.parseColor("#00E5FF")
     private val C_CYAN_DIM = Color.parseColor("#0B7A94")
     private val C_TEXT = Color.parseColor("#B8D4E0")
@@ -37,16 +37,16 @@ class StatsActivity : AppCompatActivity() {
     }
 
     private fun outlinedBtnBg() = GradientDrawable().apply {
-        setColor(Color.parseColor("#122230"))
+        setColor(Color.parseColor("#26122230")) // translucent — glass fill
         cornerRadius = dp(10).toFloat()
-        setStroke(dp(1), C_CYAN)
+        setStroke(dp(1), Color.parseColor("#8000E5FF"))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val stats = AutoLearnEngine(this).getUsageStats()
         setContentView(FrameLayout(this).apply {
-            setBackgroundColor(C_BG)
+            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_screen_bg)
             addView(CornerFrameView(this@StatsActivity))
             addView(buildUi(stats))
         })

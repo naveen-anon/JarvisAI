@@ -26,7 +26,7 @@ class FeedbackActivity : AppCompatActivity() {
     private fun buildUi(): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#050A0F"))
+            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_screen_bg)
             setPadding(48, 64, 48, 64)
         }
 
@@ -94,6 +94,8 @@ class FeedbackActivity : AppCompatActivity() {
 
         val sendBtn = Button(this).apply {
             text = "Send Feedback"
+            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_button_filled)
+            setTextColor(Color.parseColor("#03080E"))
             setOnClickListener {
                 val msg = messageInput.text.toString().trim()
                 if (msg.length < 3) {
@@ -125,6 +127,8 @@ class FeedbackActivity : AppCompatActivity() {
 
         root.addView(Button(this).apply {
             text = "Cancel"
+            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_button_bg)
+            setTextColor(Color.parseColor("#00E5FF"))
             setOnClickListener { finish() }
         })
 
