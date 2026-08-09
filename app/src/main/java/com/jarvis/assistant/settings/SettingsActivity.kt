@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.view.Gravity
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -75,8 +76,7 @@ class SettingsActivity : AppCompatActivity() {
         "Crimson" to "#FF5252",
         "Ice" to "#E0FBFF"
     )
-
-    private fun hudButton(label: String, filled: Boolean = false, onClick: () -> Unit) = Button(this).apply {
+    private fun hudButton(label: String, filled: Boolean = false, iconRes: Int? = null, onClick: () -> Unit) = Button(this).apply {
         text = label
         isAllCaps = false
         textSize = 15f
@@ -85,6 +85,10 @@ class SettingsActivity : AppCompatActivity() {
             this@SettingsActivity,
             if (filled) R.drawable.glass_button_filled else R.drawable.glass_button_bg
         )
+        if (iconRes != null) {
+            setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+            compoundDrawablePadding = 20
+        }
         setPadding(32, 28, 32, 28)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         lp.topMargin = 16
@@ -92,8 +96,7 @@ class SettingsActivity : AppCompatActivity() {
         setOnClickListener { onClick() }
     }
 
-    // A tappable row with a circular icon, title, subtitle, and a chevron — matches "USAGE STATS" / "SEND FEEDBACK" cards
-    private fun linkRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) = LinearLayout(this).apply {
+    private fun linkRow(iconRes: Int, title: String, subtitle: String, onClick: () -> Unit) = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         isClickable = true
@@ -103,11 +106,9 @@ class SettingsActivity : AppCompatActivity() {
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         lp.bottomMargin = 14
         layoutParams = lp
-
-        addView(TextView(this@SettingsActivity).apply {
-            text = icon
-            textSize = 20f
-            gravity = Gravity.CENTER
+        addView(ImageView(this@SettingsActivity).apply {
+            setImageResource(iconRes)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
             val size = 88
             layoutParams = LinearLayout.LayoutParams(size, size).apply { marginEnd = 24 }
             background = GradientDrawable().apply {
@@ -115,6 +116,7 @@ class SettingsActivity : AppCompatActivity() {
                 setStroke(2, cyanDim)
                 setColor(Color.parseColor("#0B1520"))
             }
+            setPadding(20, 20, 20, 20)
         })
 
         addView(LinearLayout(this@SettingsActivity).apply {
@@ -152,16 +154,21 @@ class SettingsActivity : AppCompatActivity() {
         builder()
     }
 
-    private fun sectionTitle(text: String, icon: String = "") = LinearLayout(this).apply {
+    private fun sectionTitle(text: String, iconRes: Int = 0) = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         addView(TextView(this@SettingsActivity).apply {
             layoutParams = LinearLayout.LayoutParams(6, 36)
             background = ContextCompat.getDrawable(this@SettingsActivity, R.drawable.hud_accent_bar)
         })
+        if (iconRes != 0) {
+            addView(ImageView(this@SettingsActivity).apply {
+                setImageResource(iconRes)
+                layoutParams = LinearLayout.LayoutParams(32, 32).apply { marginStart = 12; marginEnd = 4 }
+            })
+        }
         addView(TextView(this@SettingsActivity).apply {
-            val prefix = if (icon.isNotEmpty()) "  $icon " else "  "
-            this.text = "$prefix${text.uppercase()}"
+            this.text = "  ${text.uppercase()}"
             setTextColor(cyan)
             textSize = 14f
             typeface = Typeface.MONOSPACE
@@ -190,7 +197,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     // Voice type selector card — icon + label, highlighted border when selected
-    private fun voiceTypeChip(type: String, icon: String, selected: Boolean, onClick: () -> Unit) = LinearLayout(this).apply {
+    private fun voiceTypeChip(type: String, iconRes: Int, selected: Boolean, onClick: () -> Unit) = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER
         isClickable = true
@@ -205,10 +212,9 @@ class SettingsActivity : AppCompatActivity() {
         lp.marginEnd = 12
         layoutParams = lp
 
-        addView(TextView(this@SettingsActivity).apply {
-            text = icon
-            textSize = 26f
-            gravity = Gravity.CENTER
+        addView(ImageView(this@SettingsActivity).apply {
+            setImageResource(iconRes)
+            layoutParams = LinearLayout.LayoutParams(48, 48)
         })
         addView(TextView(this@SettingsActivity).apply {
             text = type.uppercase()
@@ -272,18 +278,17 @@ class SettingsActivity : AppCompatActivity() {
             val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             lp.topMargin = 28
             layoutParams = lp
-
-            addView(linkRow("\uD83D\uDCCA", "USAGE STATS", "View system usage and activity") {
+            addView(linkRow(R.drawable.ic_stats, "USAGE STATS", "View system usage and activity") {
                 startActivity(Intent(this@SettingsActivity, StatsActivity::class.java))
             })
-            addView(linkRow("\uD83D\uDCAC", "SEND FEEDBACK", "Help improve J.A.R.V.I.S") {
+            addView(linkRow(R.drawable.ic_feedback, "SEND FEEDBACK", "Help improve J.A.R.V.I.S") {
                 startActivity(Intent(this@SettingsActivity, FeedbackActivity::class.java))
             })
         })
 
         // Arc Reactor Color — live preview ring + tappable swatches, backed by SettingsManager.getArcReactorColor()
         root.addView(sectionCard {
-            addView(sectionTitle("Arc Reactor Color", "\uD83C\uDFA8"))
+            addView(sectionTitle("Arc Reactor Color", R.drawable.ic_palette))
             addView(bodyText("Changes the HUD ring color everywhere in the app."))
 
             val preview = com.jarvis.assistant.ui.ArcReactorView(this@SettingsActivity).apply {
@@ -323,11 +328,11 @@ class SettingsActivity : AppCompatActivity() {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER
             }
-            val icons = mapOf("male" to "\uD83D\uDC68", "female" to "\uD83D\uDC69", "robot" to "\uD83E\uDD16")
+            val icons = mapOf("male" to R.drawable.ic_person, "female" to R.drawable.ic_person, "robot" to R.drawable.ic_robot)
             fun refreshChips(current: String) {
                 voiceRow.removeAllViews()
                 listOf("male", "female", "robot").forEach { type ->
-                    voiceRow.addView(voiceTypeChip(type, icons[type] ?: "\u25CF", type == current) {
+                    voiceRow.addView(voiceTypeChip(type, icons[type] ?: R.drawable.ic_person, type == current) {
                         settings.setVoiceType(type)
                         voiceTypeLabel.text = "Current: $type"
                         tts.speak("This is what my $type voice sounds like.")
@@ -381,7 +386,7 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         root.addView(sectionCard {
-            addView(sectionTitle("Voice Authentication", "\uD83C\uDF99\uFE0F"))
+            addView(sectionTitle("Voice Authentication", R.drawable.ic_mic))
             addView(bodyText(
                 "Approximate on-device voice matching — not a bank-grade biometric, but good " +
                 "enough to reject an obviously different voice. Checked once per app session, " +
@@ -390,7 +395,7 @@ class SettingsActivity : AppCompatActivity() {
             voiceAuthStatus = bodyText(voiceAuthStatusText())
             addView(voiceAuthStatus)
 
-            addView(hudButton("\uD83C\uDF99\uFE0F  ENROLL MY VOICE", filled = true) {
+            addView(hudButton("ENROLL MY VOICE", filled = true, iconRes = R.drawable.ic_mic) {
                 if (ContextCompat.checkSelfPermission(this@SettingsActivity, Manifest.permission.RECORD_AUDIO)
                     == PackageManager.PERMISSION_GRANTED
                 ) {
@@ -423,7 +428,7 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         root.addView(sectionCard {
-            addView(sectionTitle("Lock Screen", "\uD83D\uDD12"))
+            addView(sectionTitle("Lock Screen", R.drawable.ic_lock))
             addView(bodyText(
                 "Android no longer allows regular apps to set or change your device's lock " +
                 "screen PIN/pattern directly (a security restriction since Android 8) — only " +
@@ -439,7 +444,7 @@ class SettingsActivity : AppCompatActivity() {
             })
         })
 
-        root.addView(hudButton("\u2190  CLOSE") { finish() }.apply {
+        root.addView(hudButton("CLOSE", iconRes = R.drawable.ic_back) { finish() }.apply {
             val lp = layoutParams as LinearLayout.LayoutParams
             lp.topMargin = 48
             layoutParams = lp

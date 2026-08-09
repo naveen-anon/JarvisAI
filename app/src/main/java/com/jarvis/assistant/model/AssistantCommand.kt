@@ -34,6 +34,6 @@ enum class ActionType(val key: String) {
     UNKNOWN("unknown");
 
     companion object {
-        fun fromKey(key: String): ActionType = values().find { it.key == key } ?: UNKNOWN
+        fun fromKey(key: String): ActionType = entries.find { it.key == key } ?: UNKNOWN
     }
 }
