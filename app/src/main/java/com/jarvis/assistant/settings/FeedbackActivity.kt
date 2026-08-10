@@ -1,10 +1,15 @@
 package com.jarvis.assistant.settings
 
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.jarvis.assistant.R
+import com.jarvis.assistant.ui.CornerFrameView
 import com.jarvis.assistant.util.FeedbackClient
 import com.jarvis.assistant.util.SettingsManager
 import kotlinx.coroutines.CoroutineScope
@@ -18,45 +23,86 @@ class FeedbackActivity : AppCompatActivity() {
     private var selectedRating = 0
     private lateinit var starViews: List<TextView>
 
+    private val cyan = Color.parseColor("#00E5FF")
+    private val hudTextDim = Color.parseColor("#5A8A9A")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(buildUi())
+        setContentView(FrameLayout(this).apply {
+            setBackgroundResource(R.drawable.glass_screen_bg)
+            addView(CornerFrameView(this@FeedbackActivity))
+            addView(buildUi())
+        })
+    }
+
+    private fun glassField(hintText: String, multiline: Boolean = false) = EditText(this).apply {
+        hint = hintText
+        setHintTextColor(hudTextDim)
+        setTextColor(Color.WHITE)
+        textSize = 14f
+        typeface = Typeface.MONOSPACE
+        background = ContextCompat.getDrawable(this@FeedbackActivity, R.drawable.glass_panel_bg)
+        setPadding(28, 24, 28, 24)
+        if (multiline) {
+            minLines = 3
+            gravity = Gravity.TOP
+        }
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.topMargin = 8
+        layoutParams = lp
     }
 
     private fun buildUi(): ScrollView {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_screen_bg)
-            setPadding(48, 64, 48, 64)
+            setPadding(40, 56, 40, 80)
         }
 
-        fun label(t: String) = TextView(this).apply {
-            text = t
-            setTextColor(Color.parseColor("#8FC7D6"))
-            textSize = 13f
-            setPadding(0, 24, 0, 6)
-        }
-
-        root.addView(TextView(this).apply {
-            text = "Send Feedback"
-            setTextColor(Color.WHITE)
-            textSize = 22f
+        root.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(View(this@FeedbackActivity).apply {
+                layoutParams = LinearLayout.LayoutParams(8, 48)
+                background = ContextCompat.getDrawable(this@FeedbackActivity, R.drawable.hud_accent_bar)
+            })
+            addView(TextView(this@FeedbackActivity).apply {
+                text = "  SEND FEEDBACK"
+                setTextColor(Color.WHITE)
+                textSize = 20f
+                typeface = Typeface.MONOSPACE
+                letterSpacing = 0.05f
+            })
         })
         root.addView(TextView(this).apply {
             text = "Bugs, ideas, or just how it's going — goes straight to the developer."
-            setTextColor(Color.parseColor("#5C8A94"))
+            setTextColor(hudTextDim)
             textSize = 12f
-            setPadding(0, 8, 0, 0)
+            typeface = Typeface.MONOSPACE
+            setPadding(0, 8, 0, 20)
         })
 
+        fun label(t: String) = TextView(this).apply {
+            text = t.uppercase()
+            setTextColor(cyan)
+            textSize = 11f
+            typeface = Typeface.MONOSPACE
+            letterSpacing = 0.08f
+            setPadding(0, 20, 0, 8)
+        }
+
         root.addView(label("Rating (optional)"))
-        val starRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val starRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            background = ContextCompat.getDrawable(this@FeedbackActivity, R.drawable.glass_panel_bg)
+            setPadding(20, 16, 20, 16)
+        }
         starViews = (1..5).map { i ->
             TextView(this).apply {
-                text = "☆"
+                text = "\u2606"
                 textSize = 28f
-                setTextColor(Color.parseColor("#4A6B75"))
-                setPadding(8, 0, 8, 0)
+                setTextColor(hudTextDim)
+                setPadding(10, 0, 10, 0)
                 setOnClickListener {
                     selectedRating = if (selectedRating == i) 0 else i
                     updateStars()
@@ -67,35 +113,27 @@ class FeedbackActivity : AppCompatActivity() {
         root.addView(starRow)
 
         root.addView(label("Message *"))
-        val messageInput = EditText(this).apply {
-            hint = "What's on your mind?"
-            setHintTextColor(Color.parseColor("#4A6B75"))
-            setTextColor(Color.WHITE)
-            minLines = 3
-            gravity = Gravity.TOP
-        }
+        val messageInput = glassField("What's on your mind?", multiline = true)
         root.addView(messageInput)
 
         root.addView(label("Name (optional)"))
-        val nameInput = EditText(this).apply {
-            hint = "Anonymous"
-            setHintTextColor(Color.parseColor("#4A6B75"))
-            setTextColor(Color.WHITE)
-        }
+        val nameInput = glassField("Anonymous")
         root.addView(nameInput)
 
         root.addView(label("Contact (optional)"))
-        val contactInput = EditText(this).apply {
-            hint = "Email or phone, if you want a reply"
-            setHintTextColor(Color.parseColor("#4A6B75"))
-            setTextColor(Color.WHITE)
-        }
+        val contactInput = glassField("Email or phone, if you want a reply")
         root.addView(contactInput)
 
         val sendBtn = Button(this).apply {
-            text = "Send Feedback"
-            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_button_filled)
+            text = "SEND FEEDBACK"
+            isAllCaps = false
+            background = ContextCompat.getDrawable(this@FeedbackActivity, R.drawable.glass_button_filled)
             setTextColor(Color.parseColor("#03080E"))
+            typeface = Typeface.MONOSPACE
+            textSize = 14f
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            lp.topMargin = 28
+            layoutParams = lp
             setOnClickListener {
                 val msg = messageInput.text.toString().trim()
                 if (msg.length < 3) {
@@ -103,7 +141,7 @@ class FeedbackActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
                 isEnabled = false
-                text = "Sending…"
+                text = "SENDING\u2026"
                 scope.launch {
                     val ok = client.send(
                         message = msg,
@@ -118,7 +156,7 @@ class FeedbackActivity : AppCompatActivity() {
                     } else {
                         Toast.makeText(this@FeedbackActivity, "Couldn't send — check connection.", Toast.LENGTH_SHORT).show()
                         isEnabled = true
-                        text = "Send Feedback"
+                        text = "SEND FEEDBACK"
                     }
                 }
             }
@@ -126,9 +164,15 @@ class FeedbackActivity : AppCompatActivity() {
         root.addView(sendBtn)
 
         root.addView(Button(this).apply {
-            text = "Cancel"
-            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_button_bg)
-            setTextColor(Color.parseColor("#00E5FF"))
+            text = "CANCEL"
+            isAllCaps = false
+            background = ContextCompat.getDrawable(this@FeedbackActivity, R.drawable.glass_button_bg)
+            setTextColor(cyan)
+            typeface = Typeface.MONOSPACE
+            textSize = 13f
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            lp.topMargin = 12
+            layoutParams = lp
             setOnClickListener { finish() }
         })
 
@@ -138,8 +182,8 @@ class FeedbackActivity : AppCompatActivity() {
     private fun updateStars() {
         starViews.forEachIndexed { i, star ->
             val filled = i < selectedRating
-            star.text = if (filled) "★" else "☆"
-            star.setTextColor(if (filled) Color.parseColor("#FFB300") else Color.parseColor("#4A6B75"))
+            star.text = if (filled) "\u2605" else "\u2606"
+            star.setTextColor(if (filled) Color.parseColor("#FFB300") else hudTextDim)
         }
     }
 }

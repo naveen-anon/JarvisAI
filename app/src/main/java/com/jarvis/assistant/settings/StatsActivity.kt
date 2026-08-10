@@ -2,7 +2,6 @@ package com.jarvis.assistant.settings
 
 import android.graphics.Color
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -13,14 +12,13 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.jarvis.assistant.R
 import com.jarvis.assistant.ui.CornerFrameView
 import com.jarvis.assistant.util.AutoLearnEngine
 
 class StatsActivity : AppCompatActivity() {
 
-    private val C_BG = Color.parseColor("#03080E")
-    private val C_CARD = Color.parseColor("#241A2E38") // translucent — glass fill
-    private val C_BORDER = Color.parseColor("#4000E5FF") // translucent cyan edge
     private val C_CYAN = Color.parseColor("#00E5FF")
     private val C_CYAN_DIM = Color.parseColor("#0B7A94")
     private val C_TEXT = Color.parseColor("#B8D4E0")
@@ -30,23 +28,15 @@ class StatsActivity : AppCompatActivity() {
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
-    private fun cardBg() = GradientDrawable().apply {
-        setColor(C_CARD)
-        cornerRadius = dp(14).toFloat()
-        setStroke(dp(1), C_BORDER)
-    }
-
-    private fun outlinedBtnBg() = GradientDrawable().apply {
-        setColor(Color.parseColor("#26122230")) // translucent — glass fill
-        cornerRadius = dp(10).toFloat()
-        setStroke(dp(1), Color.parseColor("#8000E5FF"))
-    }
+    private fun glassCard() = ContextCompat.getDrawable(this, R.drawable.glass_card_bg)
+    private fun glassChip() = ContextCompat.getDrawable(this, R.drawable.glass_chip_bg)
+    private fun glassButton() = ContextCompat.getDrawable(this, R.drawable.glass_button_bg)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val stats = AutoLearnEngine(this).getUsageStats()
         setContentView(FrameLayout(this).apply {
-            setBackgroundResource(com.jarvis.assistant.R.drawable.glass_screen_bg)
+            setBackgroundResource(R.drawable.glass_screen_bg)
             addView(CornerFrameView(this@StatsActivity))
             addView(buildUi(stats))
         })
@@ -88,7 +78,7 @@ class StatsActivity : AppCompatActivity() {
         val col1 = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            background = cardBg()
+            background = glassCard()
             setPadding(dp(12), dp(18), dp(12), dp(18))
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
                 marginEnd = dp(8)
@@ -112,11 +102,11 @@ class StatsActivity : AppCompatActivity() {
         val col2 = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            background = cardBg()
+            background = glassCard()
             setPadding(dp(12), dp(18), dp(12), dp(18))
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             addView(TextView(this@StatsActivity).apply {
-                text = "${stats.currentStreak}🔥"
+                text = "${stats.currentStreak}"
                 setTextColor(C_AMBER)
                 textSize = 28f
                 typeface = Typeface.MONOSPACE
@@ -165,18 +155,24 @@ class StatsActivity : AppCompatActivity() {
         fun rankRow(rank: Int, name: String, count: Int) = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            background = cardBg()
+            background = glassCard()
             setPadding(dp(14), dp(12), dp(14), dp(12))
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = dp(6) }
+
             addView(TextView(this@StatsActivity).apply {
                 text = "#$rank"
                 setTextColor(if (rank == 1) C_AMBER else C_CYAN_DIM)
-                textSize = 13f
+                textSize = 12f
                 typeface = Typeface.MONOSPACE
-                layoutParams = LinearLayout.LayoutParams(dp(36), ViewGroup.LayoutParams.WRAP_CONTENT)
+                gravity = Gravity.CENTER
+                background = glassChip()
+                setPadding(dp(10), dp(4), dp(10), dp(4))
+                layoutParams = LinearLayout.LayoutParams(dp(44), ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    marginEnd = dp(12)
+                }
             })
             addView(TextView(this@StatsActivity).apply {
                 text = name
@@ -186,7 +182,7 @@ class StatsActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
             })
             addView(TextView(this@StatsActivity).apply {
-                text = "${count}×"
+                text = "${count}\u00d7"
                 setTextColor(C_CYAN)
                 textSize = 13f
                 typeface = Typeface.MONOSPACE
@@ -222,8 +218,8 @@ class StatsActivity : AppCompatActivity() {
         }
 
         root.addView(Button(this).apply {
-            text = "←  Close"
-            background = outlinedBtnBg()
+            text = "\u2190  Close"
+            background = glassButton()
             setTextColor(C_CYAN)
             isAllCaps = false
             textSize = 13f
