@@ -288,17 +288,34 @@ class OfflineBrain(
     }
 
     private fun toDeviceCommand(cmd: String, original: String): AssistantCommand? {
-        // Call — Hindi word order first: "ashu ko call karo", "priya ko call lagao".
+        // Call — Hindi word order first: "ashu ko call karo", "priya ko call lagao",
+        // "priya ko phone karo" ("phone" is safe as a verb ONLY here, because the
+        // "ko ... karo" sentence structure makes the verb usage unambiguous).
         // Checked BEFORE the English pattern below, because "ashu ko call karo" also
         // contains "call karo" — matching English-first would wrongly capture "karo"
         // as the contact name instead of "ashu".
-        Regex("""(.+?)\s+ko\s+call\s*(?:karo|kar do|lagao|milao)?\s*$""").find(cmd)?.let { m ->
+        Regex("""(.+?)\s+ko\s+(?:call|phone)\s*(?:karo|kar do|lagao|milao)?\s*$""").find(cmd)?.let { m ->
             return AssistantCommand("call", extractTail(original, m.groupValues[1], fromStart = true))
         }
 
-        // Call — English order: "call X", "please call X", "phone X", "dial X"
-        Regex("""\b(?:call|phone|dial|ring)\s+(.+)""").find(cmd)?.let { m ->
-            return AssistantCommand("call", extractTail(original, m.groupValues[1]))
+        // Call — English order: "call X", "please call X", "dial X", "ring X".
+        // NOTE: "phone" is deliberately NOT included as a trigger here. In casual
+        // Hindi-English speech "phone" is overwhelmingly used as a NOUN ("mujhe
+        // phone lena hai" = "I need to buy a phone"), not a verb. Matching it
+        // generically caused false positives like treating "sabse best kona h"
+        // as a contact name. "call"/"dial"/"ring" don't have this ambiguity.
+        Regex("""\b(?:call|dial|ring)\s+(.+)""").find(cmd)?.let { m ->
+            val target = extractTail(original, m.groupValues[1])
+            // Extra guard: if what follows "call" looks like a question/recommendation
+            // rather than a name (contains comparison/help words), don't treat it as
+            // a contact — let it fall through to other handlers instead.
+            val looksLikeQuestion = containsAny(
+                target.lowercase(Locale.getDefault()),
+                "best", "sabse", "which", "kaunsa", "kaun sa", "suggest", "recommend", "compare", "acha"
+            )
+            if (!looksLikeQuestion) {
+                return AssistantCommand("call", target)
+            }
         }
 
 
