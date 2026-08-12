@@ -4,6 +4,35 @@ This document lists what was broken, what was fixed, and what was added across p
 
 ---
 
+## 🔄 Documentation sync pass
+
+README and the website were updated to catch up with features that had landed in code but
+weren't documented anywhere yet:
+
+- **Telegram messaging** — same pre-filled-chat pattern as WhatsApp (`telegram_message` action,
+  Hindi + English word order both supported).
+- **Voice authentication** — optional on-device voiceprint enrollment/check (Settings screen),
+  gates command execution once per app session rather than per command.
+- **Home screen widget** — one-tap listening trigger without opening the app.
+- **Lock-screen quick action** — a "🎙 Listen" button on the persistent notification, tappable
+  without unlocking the device.
+- **Feedback screen** — sends star rating + message straight to the `jarvis-site` Cloudflare
+  Worker's feedback store, visible in that project's own `/admin` dashboard.
+- **Smart App Navigator** — handles compound commands like "open Flipkart and search watches
+  under 500" instead of just plain app-launch commands.
+- **Dual cloud brain** — Groq (fast, free-tier Llama-based) added alongside Gemini as a second
+  online fallback option.
+- **Liquid glass UI** — translucent frosted-panel styling (semi-transparent fill + top-edge
+  specular highlight) applied across the HUD, Settings, Stats, Feedback, and Chat screens.
+- Fixed: arc reactor accent color chosen in Settings wasn't reflected on the HUD until a full
+  app restart — `MainActivity.onResume()` now re-applies it every time the screen becomes
+  visible again, not just once in `onCreate()`.
+- Fixed: a Kotlin compile error in `LockScreenActivity` (`setStroke(3, 0x8000E5FF)`) — the hex
+  literal exceeds `Int.MAX_VALUE` and defaults to `Long`, which doesn't match either `setStroke`
+  overload. Fixed with an explicit `.toInt()`.
+
+---
+
 ## 🔄 Pass 6 — Soft-voice STT + WhatsApp command fix
 
 ### Soft / quiet voice listening (`voice/SpeechToText.kt`)

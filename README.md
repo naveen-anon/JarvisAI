@@ -30,6 +30,14 @@ https://github.com/naveen-anon/JarvisAI/releases/latest/download/app-debug.apk
 - 🔐 **App lock by voice** — PIN-gated apps via Accessibility Service
 - 💻 **PC bridge** — same-Wi-Fi TCP commands on port 8765
 - 📰 **Product updates API** — Cloudflare Worker + KV (`jarvis-backend`) for a public updates feed + admin posts
+- 📲 **Telegram messages** — same pre-filled-chat pattern as WhatsApp
+- 🎙️ **Voice authentication** — optional on-device voiceprint match, checked once per session
+- 🧩 **Home screen widget** — one tap to start listening without opening the app
+- 🔔 **Lock-screen quick action** — "🎙 Listen" button on the notification, tappable without unlocking
+- 💬 **Feedback screen** — sends straight to the developer's `jarvis-site` backend
+- 🧭 **Smart App Navigator** — handles compound commands like "open Flipkart and search watches under 500"
+- 🤖 **Dual cloud brain** — Gemini or Groq (fast, free-tier Llama) as the online fallback
+- 🌊 **Liquid glass UI** — translucent frosted panels with specular top-edge highlights, app-wide
 
 ---
 
@@ -41,6 +49,7 @@ https://github.com/naveen-anon/JarvisAI/releases/latest/download/app-debug.apk
 | **Calls** | "call mom", "priya ko call karo" |
 | **SMS** | "text john saying I'm on my way", "mummy ko sms bhejo" |
 | **WhatsApp** | "whatsapp pe Priya ko sms kro hello", "Priya ko whatsapp pe message bhejo ki aa raha hoon", "whatsapp mom saying I'm coming" |
+| **Telegram** | "telegram pe Priya ko sms kro hello", "Priya ko telegram pe message bhejo ki aa raha hoon" |
 | **Device settings** | "torch jalao", "wifi", "bluetooth", "airplane mode" |
 | **Volume / music** | "awaaz badhao", "mute", "gaana chalao/roko", "next song" |
 | **Alarm & timer** | "set alarm for 7:30", "5 minute ka timer laga do" |
