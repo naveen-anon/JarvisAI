@@ -171,7 +171,7 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
                     append("```\n").append(content).append("\n```\n\n")
                     append(if (text.isNotBlank()) text else "Please review this file.")
                 }
-                if (bound) service?.submitText(combined) else addBubble("Service not ready — try again in a second.", isUser = false)
+                sendFileText(combined)
             }
             else -> {
                 Toast.makeText(this, "Only images and text/code files are supported right now.", Toast.LENGTH_SHORT).show()
@@ -194,6 +194,20 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
                 addBubble(result.text, isUser = false)
             } else {
                 addBubble("Image analysis failed: ${result.error}", isUser = false)
+            }
+        }
+    }
+
+    private fun sendFileText(combined: String) {
+        addBubble("Reading file\u2026", isUser = false)
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                JarvisLlmClient(apiKeyProvider = { BuildConfig.GROQ_API_KEY }).chat(combined)
+            }
+            if (result.ok) {
+                addBubble(result.text, isUser = false)
+            } else {
+                addBubble("Couldn't process the file: ${result.error}", isUser = false)
             }
         }
     }
