@@ -205,24 +205,26 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         null
     }
 
-    private fun readImageAsBase64(uri: Uri, maxDimension: Int = 1280): String? = try {
-        val input = contentResolver.openInputStream(uri) ?: return null
-        val original = BitmapFactory.decodeStream(input)
-        input.close()
-        if (original == null) return null
+    private fun readImageAsBase64(uri: Uri, maxDimension: Int = 1280): String? {
+        return try {
+            val input = contentResolver.openInputStream(uri) ?: return null
+            val original = BitmapFactory.decodeStream(input)
+            input.close()
+            if (original == null) return null
 
-        val scale = maxDimension.toFloat() / maxOf(original.width, original.height)
-        val bitmap = if (scale < 1f) {
-            Bitmap.createScaledBitmap(original, (original.width * scale).toInt(), (original.height * scale).toInt(), true)
-        } else {
-            original
+            val scale = maxDimension.toFloat() / maxOf(original.width, original.height)
+            val bitmap = if (scale < 1f) {
+                Bitmap.createScaledBitmap(original, (original.width * scale).toInt(), (original.height * scale).toInt(), true)
+            } else {
+                original
+            }
+
+            val out = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+            Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
+        } catch (e: Exception) {
+            null
         }
-
-        val out = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
-        Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
-    } catch (e: Exception) {
-        null
     }
 
     private fun avatar(isUser: Boolean) = TextView(this).apply {
