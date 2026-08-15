@@ -50,8 +50,8 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
 
     private var attachedUri: Uri? = null
     private var attachedMime: String? = null
+    private var pendingSaveContent: String? = null
 
-    // Anything not clearly text/code is treated as unsupported for now.
     private val textLikeExtensions = setOf(
         "txt", "py", "kt", "java", "js", "ts", "json", "xml", "md", "csv",
         "html", "css", "yml", "yaml", "gradle", "properties", "sh", "log", "c", "cpp", "h"
@@ -59,6 +59,19 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
 
     private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) onFilePicked(uri)
+    }
+
+    private val createFileLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
+        val content = pendingSaveContent
+        pendingSaveContent = null
+        if (uri != null && content != null) {
+            val ok = writeToUri(uri, content)
+            Toast.makeText(
+                this,
+                if (ok) "Saved." else "Couldn't save the file.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     private val connection = object : ServiceConnection {
@@ -101,6 +114,8 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         startForegroundService(intent)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
+
+    // ---------- Attachment handling ----------
 
     private fun onFilePicked(uri: Uri) {
         attachedUri = uri
@@ -199,7 +214,7 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
     }
 
     private fun sendFileText(combined: String) {
-        addBubble("Reading file\u2026", isUser = false)
+        addBubble("Reading file…", isUser = false)
         scope.launch {
             val result = withContext(Dispatchers.IO) {
                 JarvisLlmClient(apiKeyProvider = { BuildConfig.GROQ_API_KEY }).chat(combined)
@@ -241,6 +256,51 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         }
     }
 
+    // ---------- Save-as-file (for code blocks in Jarvis's replies) ----------
+
+    /** Returns (language, code) for the first fenced code block found, or null if there isn't one. */
+    private fun extractCodeBlock(text: String): Pair<String, String>? {
+        val regex = Regex("```(\\w*)\\n?([\\s\\S]*?)```")
+        val match = regex.find(text) ?: return null
+        val lang = match.groupValues[1].trim()
+        val code = match.groupValues[2].trim()
+        if (code.isEmpty()) return null
+        return lang to code
+    }
+
+    private fun extensionFor(lang: String): String = when (lang.lowercase()) {
+        "python", "py" -> "py"
+        "kotlin", "kt" -> "kt"
+        "java" -> "java"
+        "javascript", "js" -> "js"
+        "typescript", "ts" -> "ts"
+        "html" -> "html"
+        "css" -> "css"
+        "json" -> "json"
+        "xml" -> "xml"
+        "bash", "sh", "shell" -> "sh"
+        "yaml", "yml" -> "yml"
+        "c" -> "c"
+        "cpp", "c++" -> "cpp"
+        "sql" -> "sql"
+        else -> "txt"
+    }
+
+    private fun writeToUri(uri: Uri, content: String): Boolean = try {
+        contentResolver.openOutputStream(uri)?.use { it.write(content.toByteArray(Charsets.UTF_8)) }
+        true
+    } catch (e: Exception) {
+        false
+    }
+
+    private fun promptSaveFile(code: String, lang: String) {
+        pendingSaveContent = code
+        val suggested = "jarvis_output.${extensionFor(lang)}"
+        createFileLauncher.launch(suggested)
+    }
+
+    // ---------- Chat bubbles ----------
+
     private fun avatar(isUser: Boolean) = TextView(this).apply {
         text = if (isUser) "" else ""
         val size = 90
@@ -266,14 +326,40 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         )
     }
 
+    private fun saveFileButton(code: String, lang: String) = TextView(this).apply {
+        text = "\uD83D\uDCBE  SAVE FILE"
+        setTextColor(Color.parseColor("#00E5FF"))
+        textSize = 11f
+        typeface = Typeface.MONOSPACE
+        background = ContextCompat.getDrawable(this@ChatActivity, R.drawable.glass_button_bg)
+        setPadding(24, 12, 24, 12)
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.topMargin = 6
+        layoutParams = lp
+        setOnClickListener { promptSaveFile(code, lang) }
+    }
+
     private fun addBubble(text: String, isUser: Boolean) {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = if (isUser) Gravity.END else Gravity.START
         }
 
+        val codeBlock = if (!isUser) extractCodeBlock(text) else null
+
+        val bubbleColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val bubble = bubbleText(text, isUser)
         val bubbleLp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        bubbleColumn.addView(bubble, bubbleLp)
+        if (codeBlock != null) {
+            val (lang, code) = codeBlock
+            bubbleColumn.addView(saveFileButton(code, lang))
+        }
+
+        val columnLp = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply {
@@ -282,11 +368,11 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         }
 
         if (isUser) {
-            row.addView(bubble, bubbleLp)
+            row.addView(bubbleColumn, columnLp)
             row.addView(avatar(true))
         } else {
             row.addView(avatar(false))
-            row.addView(bubble, bubbleLp)
+            row.addView(bubbleColumn, columnLp)
         }
 
         val rowLp = LinearLayout.LayoutParams(
