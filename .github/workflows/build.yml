@@ -41,26 +41,34 @@ jobs:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
+      - name: Rename APK to Jarvis.apk
+        run: |
+          if [ -f app/build/outputs/apk/debug/Jarvis-debug.apk ]; then
+            mv app/build/outputs/apk/debug/Jarvis-debug.apk app/build/outputs/apk/debug/Jarvis.apk
+          elif [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+            mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/Jarvis.apk
+          else
+            echo "APK not found!" && ls -la app/build/outputs/apk/debug/ && exit 1
+          fi
+          ls -lh app/build/outputs/apk/debug/Jarvis.apk
+
       - uses: actions/upload-artifact@v4
         with:
-          name: JarvisAI-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Jarvis-apk
+          path: app/build/outputs/apk/debug/Jarvis.apk
           retention-days: 30
 
-      # Publishes a public, no-login-required download at a stable URL:
-      # github.com/<user>/JarvisAI/releases/latest — this is what you'd
-      # actually share in groups/channels, not the Actions artifact above.
       - name: Publish public download
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Jarvis AI — Latest Build"
+          name: "J.A.R.V.I.S. — Latest Build"
           body: |
-            Automatically built from the latest `main` branch.
-            Download `app-debug.apk` below and install it (you'll need to allow
-            "install from unknown sources" the first time).
-          files: app/build/outputs/apk/debug/app-debug.apk
+            **J.A.R.V.I.S.** — Tony Stark style offline-first voice assistant.
+            Download `Jarvis.apk` below and install it.
+            Say **"Jarvis"** to activate.
+          files: app/build/outputs/apk/debug/Jarvis.apk
           prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

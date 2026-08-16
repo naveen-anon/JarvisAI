@@ -26,6 +26,8 @@ android {
     namespace = "com.jarvis.assistant"
     compileSdk = 34
 
+    setProperty("archivesBaseName", "Jarvis")
+
     defaultConfig {
         applicationId = "com.jarvis.assistant"
         minSdk = 26
