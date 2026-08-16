@@ -34,9 +34,17 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "GEMINI_API_KEY", "\"${System.getenv("GEMINI_API_KEY") ?: ""}\"")
-        buildConfigField("String", "OPENWEATHER_API_KEY", "\"${System.getenv("OPENWEATHER_API_KEY") ?: ""}\"")
-        buildConfigField("String", "GROQ_API_KEY", "\"${System.getenv("GROQ_API_KEY") ?: ""}\"")
+
+        // Prefer CI env vars; fall back to local.properties for local builds
+        val localProps = java.util.Properties()
+        val localFile = rootProject.file("local.properties")
+        if (localFile.exists()) localFile.inputStream().use { localProps.load(it) }
+        fun prop(name: String) = System.getenv(name) ?: localProps.getProperty(name) ?: ""
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${prop("GEMINI_API_KEY")}\"")
+        buildConfigField("String", "OPENWEATHER_API_KEY", "\"${prop("OPENWEATHER_API_KEY")}\"")
+        buildConfigField("String", "GROQ_API_KEY", "\"${prop("GROQ_API_KEY")}\"")
+    }\"")
     }
 
     buildTypes {
