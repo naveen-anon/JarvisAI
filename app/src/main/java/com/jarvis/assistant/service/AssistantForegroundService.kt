@@ -18,6 +18,7 @@ import com.jarvis.assistant.brain.BrainState
 import com.jarvis.assistant.brain.OfflineBrain
 import com.jarvis.assistant.executor.CommandExecutor
 import com.jarvis.assistant.network.PcBridgeServer
+import com.jarvis.assistant.util.FileFinder
 import com.jarvis.assistant.util.LocationHelper
 import com.jarvis.assistant.util.NetworkStatusManager
 import com.jarvis.assistant.util.WeatherClient
@@ -138,7 +139,16 @@ class AssistantForegroundService : Service() {
 
             listener?.onStateChanged(BrainState.SPEAKING)
             listener?.onResponse(resultText, fromCloud)
-            tts.speak(resultText)
+
+            // A full code listing read aloud is useless and slow — speak a short line
+            // instead when the reply is a code block or unusually long, while the full
+            // text still reaches the screen via onResponse() above.
+            val speechText = if (resultText.contains("```") || resultText.length > 400) {
+                "I've put the details on screen for you, sir."
+            } else {
+                resultText
+            }
+            tts.speak(speechText)
             listener?.onStateChanged(BrainState.IDLE)
         }
     }
@@ -146,7 +156,8 @@ class AssistantForegroundService : Service() {
     /**
      * Shared reasoning pipeline used both by on-device voice input and by the PC bridge
      * (Phase 5). Order: weather (needs network+location, handled specially since it doesn't
-     * fit the pure offline/cloud split) → offline brain → Gemini cloud fallback.
+     * fit the pure offline/cloud split) → file lookup (if a filename was mentioned) →
+     * offline brain → Gemini cloud fallback.
      */
     private suspend fun processSpeech(speech: String): Pair<String, Boolean> {
         // Voice authentication — checked at most once per service session (not per command),
@@ -164,6 +175,13 @@ class AssistantForegroundService : Service() {
         weatherReplyIfAsked(speech)?.let {
             offlineBrain.recordInteraction()
             return it to false
+        }
+
+        // Checked before the offline brain so a filename like "upi_osint.py" isn't
+        // misread as a "check <contact>"-style command.
+        fileCommandReplyIfAsked(speech)?.let {
+            offlineBrain.recordInteraction()
+            return it to true
         }
 
         val offlineReply = try {
@@ -203,6 +221,49 @@ class AssistantForegroundService : Service() {
 
         offlineBrain.recordInteraction()
         return result
+    }
+
+    /**
+     * If the user mentioned a filename (e.g. "upi_osint.py padho" or "fix errors in main.py"),
+     * finds it on shared storage, reads it, and hands it to the cloud LLM along with the
+     * user's original phrasing. Returns null if no filename was mentioned so the normal
+     * pipeline continues untouched.
+     */
+    private suspend fun fileCommandReplyIfAsked(speech: String): String? {
+        val fileName = FileFinder.extractFileName(speech) ?: return null
+
+        if (!FileFinder.hasStorageAccess()) {
+            return "I need storage access to read files, sir. Please grant \"All files access\" " +
+                "for Jarvis in Settings, then try again."
+        }
+        if (!networkStatus.isOnline()) {
+            return "I found that you mean a file, sir, but reading it needs the cloud brain and I'm offline right now."
+        }
+
+        val file = withContext(Dispatchers.IO) { FileFinder.findFile(fileName) }
+            ?: return "I couldn't find a file named \"$fileName\" on this device, sir."
+
+        val content = withContext(Dispatchers.IO) { FileFinder.readTextCapped(file) }
+            ?: return "I found \"$fileName\" but couldn't read it, sir — it may not be a text file."
+
+        val combined = buildString {
+            append("The user said: \"").append(speech).append("\"\n\n")
+            append("Attached file \"").append(fileName).append("\" (path: ").append(file.absolutePath).append("):\n\n")
+            append("```\n").append(content).append("\n```\n\n")
+            append("Respond to their request about this file.")
+        }
+
+        val result = try {
+            JarvisLlmClient(apiKeyProvider = { BuildConfig.GROQ_API_KEY }).chat(combined)
+        } catch (e: Exception) {
+            null
+        }
+
+        return if (result != null && result.ok && result.text.isNotBlank()) {
+            result.text
+        } else {
+            "I found the file but couldn't process it right now, sir."
+        }
     }
 
     /** Phase 5 — "Live weather aur location". Returns null if the speech isn't a weather question. */
