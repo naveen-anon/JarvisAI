@@ -1,21 +1,20 @@
 # Security Policy
 
-## Supported Versions
+## API Keys
+Never commit `local.properties` or any file containing `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENWEATHER_API_KEY`.
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Keys are injected at build time via `BuildConfig` from environment variables / GitHub Secrets.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Permissions
+The app requests sensitive permissions (microphone, contacts, SMS, call, camera, storage).
+All offline commands that use them degrade gracefully with a spoken error if the permission is missing.
 
-## Reporting a Vulnerability
+## Accessibility Service
+Used only for optional auto-tap of the Send button in WhatsApp / Telegram and for the app-lock overlay.
+It does not read passwords or send data off-device.
 
-Use this section to tell people how to report a vulnerability.
+## PC Bridge
+Listens only on the local Wi-Fi network (port 8765). Do not expose it to the public internet.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+## Reporting
+Open a GitHub issue or contact the maintainer for security concerns.

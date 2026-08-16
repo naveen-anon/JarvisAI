@@ -88,7 +88,7 @@ class AssistantForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIF_ID, buildNotification("Say \"Jarvis\" to activate"))
+        startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — say \"Jarvis\" to activate"))
         startWakeWordListening()
         if (intent?.action == com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING) {
             startListeningCycle()
@@ -144,7 +144,7 @@ class AssistantForegroundService : Service() {
             // instead when the reply is a code block or unusually long, while the full
             // text still reaches the screen via onResponse() above.
             val speechText = if (resultText.contains("```") || resultText.length > 400) {
-                "I've put the details on screen for you, sir."
+                "I've displayed the full details on screen for your review, sir."
             } else {
                 resultText
             }
@@ -167,7 +167,7 @@ class AssistantForegroundService : Service() {
             val sample = withContext(Dispatchers.IO) { voiceAuth.captureSample() }
             val passed = sample != null && voiceAuth.verify(sample)
             if (!passed) {
-                return "Voice not recognized. This command wasn't run — try speaking again." to false
+                return "Voice authentication failed, sir. The command was not executed. Please try again." to false
             }
             voiceSessionVerified = true
         }
@@ -209,14 +209,14 @@ class AssistantForegroundService : Service() {
                 } catch (e: Exception) {
                     val hint = groq?.error.orEmpty()
                     if (hint.contains("API key", ignoreCase = true)) {
-                        "Online intelligence isn't configured yet, sir. Device commands still work offline." to true
+                        "Cloud intelligence is not configured, sir. On-device commands remain fully operational." to true
                     } else {
-                        "I couldn't reach the cloud brain just now, sir. Try a device command instead." to true
+                        "I was unable to reach external systems, sir. Please try an on-device command." to true
                     }
                 }
             }
         } else {
-            "I'm offline right now and don't have a local command for that yet, sir." to false
+            "I'm currently offline and lack a local protocol for that request, sir." to false
         }
 
         offlineBrain.recordInteraction()
@@ -331,7 +331,7 @@ class AssistantForegroundService : Service() {
             this, 0, listenIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Jarvis")
+            .setContentTitle("J.A.R.V.I.S.")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_mic)
             .setOngoing(true)

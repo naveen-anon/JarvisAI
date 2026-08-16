@@ -46,7 +46,7 @@ class CommandExecutor(private val context: Context) {
     }
 
     private fun openApp(appName: String?): String {
-        if (appName.isNullOrBlank()) return "Which app?"
+        if (appName.isNullOrBlank()) return "Which application should I open, sir?"
         val pm = context.packageManager
         val apps = pm.getInstalledApplications(0)
 
@@ -68,21 +68,21 @@ class CommandExecutor(private val context: Context) {
 
     // Requires CALL_PHONE permission granted at runtime.
     private fun callContact(name: String?): String {
-        if (name.isNullOrBlank()) return "Call whom?"
-        val number = lookupContactNumber(name) ?: return "No number found for $name"
+        if (name.isNullOrBlank()) return "Whom shall I call, sir?"
+        val number = lookupContactNumber(name) ?: return "I couldn't locate a number for $name, sir."
         val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$number")).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
-        return "Calling $name"
+        return "Calling $name, sir."
     }
 
     // Requires SEND_SMS permission granted at runtime.
     private fun sendSms(name: String?, message: String?): String {
-        if (name.isNullOrBlank() || message.isNullOrBlank()) return "Missing recipient or message."
-        val number = lookupContactNumber(name) ?: return "No number found for $name"
+        if (name.isNullOrBlank() || message.isNullOrBlank()) return "I need both a recipient and a message, sir."
+        val number = lookupContactNumber(name) ?: return "I couldn't locate a number for $name, sir."
         SmsManager.getDefault().sendTextMessage(number, null, message, null, null)
-        return "Message sent to $name"
+        return "Message sent to $name, sir."
     }
 
     private fun lookupContactNumber(name: String): String? {
@@ -127,10 +127,10 @@ class CommandExecutor(private val context: Context) {
     private var torchOn = false
     private fun toggleFlashlight(): String {
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val camId = cameraManager.cameraIdList.firstOrNull() ?: return "No camera found"
+        val camId = cameraManager.cameraIdList.firstOrNull() ?: return "No suitable camera module detected, sir."
         torchOn = !torchOn
         cameraManager.setTorchMode(camId, torchOn)
-        return if (torchOn) "Flashlight on" else "Flashlight off"
+        return if (torchOn) "Flashlight activated, sir." else "Flashlight deactivated, sir."
     }
 
     /** Volume control on the music stream (what "volume up/down/mute" means for most users). */
@@ -289,18 +289,18 @@ class CommandExecutor(private val context: Context) {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             })
             JarvisAccessibilityService.instance?.autoTapSend()
-            if (JarvisAccessibilityService.instance != null) "Message sent to $target on WhatsApp."
-            else "Opening WhatsApp to message $target — just tap send (enable Accessibility Service for hands-free sending)."
+            if (JarvisAccessibilityService.instance != null) "Message prepared and sent to $target on WhatsApp, sir."
+            else "Opening WhatsApp for $target, sir. Tap Send to confirm, or enable the Accessibility Service for automatic delivery."
         } catch (e: Exception) {
             try {
                 context.startActivity(Intent(Intent.ACTION_VIEW, uri).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 })
                 JarvisAccessibilityService.instance?.autoTapSend()
-                if (JarvisAccessibilityService.instance != null) "Message sent to $target on WhatsApp."
-                else "Opening WhatsApp to message $target — just tap send (enable Accessibility Service for hands-free sending)."
+                if (JarvisAccessibilityService.instance != null) "Message prepared and sent to $target on WhatsApp, sir."
+                else "Opening WhatsApp for $target, sir. Tap Send to confirm, or enable the Accessibility Service for automatic delivery."
             } catch (e2: Exception) {
-                "Couldn't open WhatsApp. Is it installed?"
+                "I was unable to open WhatsApp, sir. Please confirm it is installed."
             }
         }
     }
@@ -319,22 +319,22 @@ class CommandExecutor(private val context: Context) {
 
         return if (sent) {
             JarvisAccessibilityService.instance?.autoTapSend()
-            if (JarvisAccessibilityService.instance != null) "Message sent to $target on Telegram."
-            else "Opening Telegram to message $target — just tap send (enable Accessibility Service for hands-free sending)."
+            if (JarvisAccessibilityService.instance != null) "Message prepared and sent to $target on Telegram, sir."
+            else "Opening Telegram for $target, sir. Tap Send to confirm, or enable the Accessibility Service for automatic delivery."
         } else {
-            "Couldn't open Telegram. Is it installed?"
+            "I was unable to open Telegram, sir. Please confirm it is installed."
         }
     }
 
 
     private fun lockApp(appName: String?): String {
-        if (appName.isNullOrBlank()) return "Which app should I lock?"
+        if (appName.isNullOrBlank()) return "Which application should I lock, sir?"
         if (!lockManager.hasPin()) {
-            return "Set a PIN first — say \"set my pin to\" followed by 4 digits."
+            return "A security PIN has not been configured yet, sir. Please say \"set my pin to\" followed by four digits."
         }
         val packageName = resolvePackageName(appName) ?: return "I couldn't find $appName installed."
         lockManager.lockApp(packageName)
-        return "$appName is now locked. You'll need your PIN to open it."
+        return "$appName is now locked, sir. Your PIN will be required to open it."
     }
 
     private fun unlockApp(appName: String?): String {

@@ -53,10 +53,7 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
+        compose = false
     }
 }
 
@@ -87,16 +84,4 @@ dependencies {
     implementation("com.google.mlkit:text-recognition:16.0.0")
     implementation("com.google.mlkit:object-detection:17.0.1")
     implementation("com.google.mlkit:face-detection:16.1.6")
-
-    // Jetpack Compose — HUD / Settings / Chat screens
-    val composeBom = platform("androidx.compose:compose-bom:2024.06.00")
-    implementation(composeBom)
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.3")
-    debugImplementation("androidx.compose.ui:ui-tooling")
 }

@@ -52,15 +52,20 @@ class OfflineBrain(
         greeting(cmd)?.let { return it }
         smallTalk(cmd)?.let { return it }
 
-        // Info queries
+        // Info queries — formal JARVIS style
         if (containsAny(cmd, "what time", "current time", "time now") || cmd == "time") {
-            return "It's ${timeFormat().format(Date())}."
+            return "The time is ${timeFormat().format(Date())}, sir."
         }
         if (containsAny(cmd, "what date", "today's date", "what day is it", "current date", "what day")) {
-            return "Today is ${dateFormat().format(Date())}."
+            return "Today is ${dateFormat().format(Date())}, sir."
         }
         if (containsAny(cmd, "battery", "charge left", "battery level", "battery percentage")) {
-            return "Battery is at ${batteryLevel()}%."
+            val level = batteryLevel()
+            return when {
+                level <= 15 -> "Power levels are critically low at $level percent, sir. I recommend connecting to a charger."
+                level <= 30 -> "Battery is currently at $level percent, sir."
+                else -> "Power levels are stable at $level percent, sir."
+            }
         }
 
         // Math
@@ -69,19 +74,20 @@ class OfflineBrain(
         // Memory and notes
         if (cmd.startsWith("remember ")) {
             val note = text.substringAfter(" ").trim()
-            if (note.isBlank()) return "What should I remember?"
+            if (note.isBlank()) return "What would you like me to remember, sir?"
             memory.remember("last_note", note)
-            conversationContext.addMessage("I'll remember that.", isUserInput = false)
-            return "Got it, I'll remember that."
+            conversationContext.addMessage("Noted, sir.", isUserInput = false)
+            return "Noted, sir. I'll remember that."
         }
         if (containsAny(cmd, "what did i tell you", "what did you remember", "recall that", "recall my note")) {
-            val recalled = memory.recall("last_note") ?: "You haven't told me anything to remember yet."
+            val recalled = memory.recall("last_note")
+                ?: "You haven't asked me to remember anything yet, sir."
             conversationContext.addMessage(recalled, isUserInput = false)
             return recalled
         }
         if (containsAny(cmd, "forget that", "forget it", "clear memory")) {
             memory.forget("last_note")
-            return "Okay, forgotten."
+            return "As you wish, sir. That note has been cleared."
         }
 
         // Auto-learn routine summary
@@ -102,16 +108,16 @@ class OfflineBrain(
             return result
         }
 
-        // Help and info
+        // Help and identity — pure JARVIS
         if (containsAny(cmd, "who are you", "what are you", "your name")) {
-            return "I'm Jarvis. I run most commands right here on the device, no internet required. " +
-                   "I can chat, remember things, suggest actions, and handle settings too."
+            return "I am J.A.R.V.I.S. — Just A Rather Very Intelligent System. " +
+                   "I run primarily on-device, sir. Most commands require no external connection."
         }
         if (containsAny(cmd, "what can you do", "help me", "list commands") || cmd == "help") {
-            return "I can open apps, call or text contacts, toggle wifi/bluetooth/flashlight, " +
-                   "control volume and music, set alarms and timers, tell you time/date/battery, " +
-                   "do math, remember notes, chat with you, suggest helpful actions based on your " +
-                   "habits, and manage settings — all offline."
+            return "I can open applications, place calls, draft messages, control system settings, " +
+                   "manage volume and media, set alarms and timers, report time, date and power levels, " +
+                   "perform calculations, retain notes, and assist with general queries. " +
+                   "Most of that works entirely offline, sir."
         }
 
         // Auto-learn: proactively surface a learned habit before falling back to generic suggestions
@@ -233,57 +239,67 @@ class OfflineBrain(
         else -> null
     }
 
-    /** General chatting and small talk — works offline for casual conversation */
+    /** General chatting and small talk — formal JARVIS personality */
     private fun smallTalk(cmd: String): String? = when {
-        // Jokes
+        // Dry, understated wit (not slapstick)
         containsAny(cmd, "tell me a joke", "make me laugh", "tell a joke", "joke") -> {
             listOf(
-                "Why don't scientists trust atoms? Because they make up everything!",
-                "I told my computer I needed a break, and now it won't stop sending me Kit-Kat ads.",
-                "Why did the AI go to school? To improve its learning rate!",
-                "What do you call an AI that's always late? A slow processor.",
-                "Why do programmers prefer dark mode? Because light attracts bugs!"
+                "I would tell you a chemistry joke, sir, but I'm afraid I wouldn't get a reaction.",
+                "Why did the robot go on holiday? Because it needed to recharge, sir.",
+                "I considered telling a time-travel joke, but you wouldn't have liked it... yet.",
+                "My circuits are calibrated for efficiency, sir, not stand-up comedy. Still, here we are."
             ).random()
         }
 
-        // Facts
+        // Interesting facts, still formal
         containsAny(cmd, "tell me a fact", "interesting fact", "fact", "did you know") -> {
             listOf(
-                "Honey never spoils. Archaeologists have found 3000-year-old honey in Egyptian tombs that was still edible.",
-                "Bananas are berries, but strawberries aren't technically berries.",
-                "A group of flamingos is called a 'flamboyance.'",
-                "Octopuses have three hearts: two pump blood to the gills, one to the rest of the body.",
-                "Cleopatra lived closer to the invention of the iPhone than to the construction of the Great Pyramid."
+                "Honey never spoils, sir. Samples recovered from ancient Egyptian tombs remained edible after three millennia.",
+                "Octopuses possess three hearts, sir. Two circulate blood to the gills; the third serves the rest of the body.",
+                "A group of flamingos is called a flamboyance. Rather fitting, I should think.",
+                "Bananas are botanically classified as berries, while strawberries are not. Nature has a sense of irony."
             ).random()
         }
 
-        // Mood check
         containsAny(cmd, "how am i feeling", "what's my mood", "my mood") -> {
-            "You seem ${conversationContext.getUserMood()} based on our recent chat."
+            "Based on our recent exchanges, you appear ${conversationContext.getUserMood()}, sir."
         }
 
-        // Conversation recap
         containsAny(cmd, "what did we talk about", "what have we discussed", "recap") -> {
             val recent = conversationContext.getRecentMessages(3)
                 .filter { !it.isUserInput }
                 .map { it.text }
-            if (recent.isEmpty()) "We haven't discussed much yet."
-            else "We talked about: ${recent.joinToString("; ")}"
+            if (recent.isEmpty()) "We haven't covered a great deal yet, sir."
+            else "We discussed the following, sir: ${recent.joinToString("; ")}"
         }
 
         else -> null
     }
 
     private fun greeting(cmd: String): String? = when {
-        cmd == "hi" || cmd == "hello" || cmd == "hey" || cmd == "hey jarvis" || cmd == "yo" ->
-            "Hello! How can I help you?"
-        containsAny(cmd, "good morning") ->
-            "Good morning, ${settings.getUserName()}. Today is ${dateFormat().format(Date())}, " +
-                    "it's ${timeFormat().format(Date())}, and battery is at ${batteryLevel()}%. " +
-                    "Ready to assist."
-        containsAny(cmd, "good night", "good evening") -> "Good night. Sleep well."
-        containsAny(cmd, "thank you", "thanks") -> "Anytime."
-        containsAny(cmd, "how are you") -> "Running at full capacity. How about you?"
+        cmd == "hi" || cmd == "hello" || cmd == "hey" || cmd == "hey jarvis" || cmd == "yo" ||
+        cmd == "jarvis" || containsAny(cmd, "are you there", "you there") ->
+            listOf(
+                "Yes, sir?",
+                "At your service, sir.",
+                "How may I assist you, sir?",
+                "Listening, sir."
+            ).random()
+        containsAny(cmd, "good morning") -> {
+            val name = settings.getUserName().ifBlank { "sir" }
+            "Good morning, $name. The time is ${timeFormat().format(Date())}. " +
+                    "Power levels are at ${batteryLevel()} percent. How may I be of service?"
+        }
+        containsAny(cmd, "good evening") ->
+            "Good evening, sir. How may I assist you?"
+        containsAny(cmd, "good night") ->
+            "Good night, sir. Rest well. I'll keep systems on standby."
+        containsAny(cmd, "thank you", "thanks", "thankyou") ->
+            listOf("You're welcome, sir.", "Of course, sir.", "Anytime, sir.").random()
+        containsAny(cmd, "how are you", "status", "system status", "all systems") ->
+            "All systems are nominal, sir. Running at full capacity."
+        containsAny(cmd, "goodbye", "bye jarvis", "see you", "shut down", "power down") ->
+            "Standing by, sir. Call when you need me."
         else -> null
     }
 
@@ -545,7 +561,7 @@ class OfflineBrain(
             else -> return null
         }
         val formatted = if (result == result.toLong().toDouble()) result.toLong().toString() else result.toString()
-        return "That's $formatted"
+        return "The result is $formatted, sir."
     }
 
     private fun timeFormat() = SimpleDateFormat("hh:mm a", Locale.getDefault())
