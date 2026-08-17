@@ -1,17 +1,15 @@
 package com.jarvis.assistant.util
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatDelegate
 
 /**
- * Manages user preferences — voice speed, colors, theme, etc.
- * Backed by SharedPreferences so settings persist across restarts.
+ * Manages user preferences — voice, language, theme, background listen, etc.
  */
 class SettingsManager(context: Context) {
 
     private val prefs = context.getSharedPreferences("jarvis_settings", Context.MODE_PRIVATE)
 
-    // Voice settings
+    // Voice
     fun getVoiceSpeed(): Float = prefs.getFloat("voice_speed", 1.0f)
     fun setVoiceSpeed(speed: Float) = prefs.edit().putFloat("voice_speed", speed).apply()
 
@@ -21,7 +19,11 @@ class SettingsManager(context: Context) {
     fun getVoiceType(): String = prefs.getString("voice_type", "male") ?: "male"
     fun setVoiceType(type: String) = prefs.edit().putString("voice_type", type).apply()
 
-    // UI settings
+    // Language: "auto" | "en" | "hi" | "en-GB"
+    fun getAssistantLanguage(): String = prefs.getString("assistant_lang", "auto") ?: "auto"
+    fun setAssistantLanguage(lang: String) = prefs.edit().putString("assistant_lang", lang).apply()
+
+    // UI
     fun getArcReactorColor(): String = prefs.getString("reactor_color", "#00D4FF") ?: "#00D4FF"
     fun setArcReactorColor(color: String) = prefs.edit().putString("reactor_color", color).apply()
 
@@ -31,9 +33,10 @@ class SettingsManager(context: Context) {
     fun getTheme(): String = prefs.getString("theme", "dark") ?: "dark"
     fun setTheme(theme: String) = prefs.edit().putString("theme", theme).apply()
 
-    // Behavior settings
+    // Behavior
     fun getSmartSuggestionsEnabled(): Boolean = prefs.getBoolean("smart_suggestions", true)
-    fun setSmartSuggestionsEnabled(enabled: Boolean) = prefs.edit().putBoolean("smart_suggestions", enabled).apply()
+    fun setSmartSuggestionsEnabled(enabled: Boolean) =
+        prefs.edit().putBoolean("smart_suggestions", enabled).apply()
 
     fun getMemoryRetentionDays(): Int = prefs.getInt("memory_days", 30)
     fun setMemoryRetentionDays(days: Int) = prefs.edit().putInt("memory_days", days).apply()
@@ -63,4 +66,9 @@ class SettingsManager(context: Context) {
 
     fun hasGivenFeedback(): Boolean = prefs.getBoolean("feedback_given", false)
     fun markFeedbackGiven() = prefs.edit().putBoolean("feedback_given", true).apply()
+
+    // Background wake-word listening (must stay INSIDE the class)
+    fun getBackgroundListen(): Boolean = prefs.getBoolean("bg_listen", true)
+    fun setBackgroundListen(enabled: Boolean) =
+        prefs.edit().putBoolean("bg_listen", enabled).apply()
 }
