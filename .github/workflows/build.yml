@@ -23,14 +23,27 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Android SDK (Google cmdline-tools)
+        run: |
+          ANDROID_ROOT=$HOME/android-sdk
+          mkdir -p "$ANDROID_ROOT/cmdline-tools"
+          curl -fsSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o /tmp/cmdtools.zip
+          unzip -q /tmp/cmdtools.zip -d "$ANDROID_ROOT/cmdline-tools"
+          mv "$ANDROID_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_ROOT/cmdline-tools/latest"
+          echo "ANDROID_HOME=$ANDROID_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_ROOT/platform-tools" >> $GITHUB_PATH
+
+      - name: Install platform & build-tools
+        run: |
+          yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses >/dev/null || true
+          sdkmanager --sdk_root=$ANDROID_HOME "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           validate-wrappers: false
           cache-read-only: false
-
-      - uses: android-actions/setup-android@v3
-
-      - run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - run: chmod +x gradlew
 
