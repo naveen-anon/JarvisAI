@@ -19,7 +19,13 @@ class SettingsManager(context: Context) {
     fun setVoicePitch(pitch: Float) = prefs.edit().putFloat("voice_pitch", pitch).apply()
 
     fun getVoiceType(): String = prefs.getString("voice_type", "male") ?: "male"
+    
     fun setVoiceType(type: String) = prefs.edit().putString("voice_type", type).apply()
+
+    /** Assistant language: "auto" | "en" | "hi" | "en-GB" */
+    fun getAssistantLanguage(): String = prefs.getString("assistant_lang", "auto") ?: "auto"
+    fun setAssistantLanguage(lang: String) = prefs.edit().putString("assistant_lang", lang).apply()
+
 
     // UI settings
     fun getArcReactorColor(): String = prefs.getString("reactor_color", "#00D4FF") ?: "#00D4FF"

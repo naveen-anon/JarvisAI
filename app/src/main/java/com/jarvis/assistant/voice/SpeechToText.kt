@@ -204,8 +204,13 @@ class SpeechToText(private val context: Context) {
 
         // Prefer device locale; also bias toward Indian English / Hindi when available
         val locale = Locale.getDefault()
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale.toString())
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, locale.toString())
+        // Multi-language: device locale + strong bias for en/hi (JARVIS users often mix)
+        val loc = Locale.getDefault()
+        val tag = loc.toLanguageTag()
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE, tag)
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, tag)
+        // Help the recognizer with bilingual Hinglish
+        putExtra(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES, arrayOf("en-IN", "en-GB", "en-US", "hi-IN"))
 
         if (forWakeWord) {
             // Slightly shorter windows so "Jarvis" alone is accepted quickly

@@ -290,12 +290,13 @@ class OfflineBrain(
 
     private fun greeting(cmd: String): String? = when {
         cmd == "hi" || cmd == "hello" || cmd == "hey" || cmd == "hey jarvis" || cmd == "yo" ||
-        cmd == "jarvis" || containsAny(cmd, "are you there", "you there") ->
+        cmd == "jarvis" || containsAny(cmd, "are you there", "you there", "namaste", "namaskar") ->
             listOf(
                 "Yes, sir?",
                 "At your service, sir.",
                 "How may I assist you, sir?",
-                "Listening, sir."
+                "Listening, sir.",
+                "Always, sir."
             ).random()
         containsAny(cmd, "good morning") -> {
             val name = settings.getUserName().ifBlank { "sir" }

@@ -7,12 +7,17 @@ import android.util.Log
 import com.jarvis.assistant.util.SettingsManager
 import java.util.Locale
 
+/**
+ * MCU-style JARVIS speech: formal, measured, prefers British English.
+ * Also supports Hindi (hi-IN) when assistant language is hi or auto+Hindi content.
+ */
 class TextToSpeechHelper(context: Context) {
 
     private var ready = false
     private var pending: String? = null
     private val settings = SettingsManager(context)
     private var voicePicked = false
+    private var currentLangTag = "en-GB"
 
     private lateinit var tts: TextToSpeech
 
@@ -20,7 +25,7 @@ class TextToSpeechHelper(context: Context) {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 ready = true
-                pickBestVoice()
+                pickBestVoice(detectLangFor(""))
                 applyVoiceSettings()
                 pending?.let { speak(it) }
                 pending = null
@@ -28,12 +33,22 @@ class TextToSpeechHelper(context: Context) {
         }
     }
 
-    private fun pickBestVoice() {
-        if (voicePicked) return
+    private fun detectLangFor(text: String): String {
+        val pref = settings.getAssistantLanguage()
+        if (pref == "hi") return "hi-IN"
+        if (pref == "en" || pref == "en-GB") return "en-GB"
+        // auto: Devanagari → Hindi, else British English (JARVIS default)
+        if (text.any { it in '\u0900'..'\u097F' }) return "hi-IN"
+        return "en-GB"
+    }
+
+    private fun pickBestVoice(langTag: String) {
+        currentLangTag = langTag
         try {
+            val target = Locale.forLanguageTag(langTag)
             val voices = tts.voices ?: emptySet()
             if (voices.isEmpty()) {
-                tts.language = Locale.UK
+                tts.language = target
                 voicePicked = true
                 return
             }
@@ -42,11 +57,13 @@ class TextToSpeechHelper(context: Context) {
                 var s = 0
                 val tag = v.locale.toLanguageTag().lowercase()
                 val name = v.name.lowercase()
+                val want = langTag.lowercase()
                 when {
-                    tag.startsWith("en-gb") -> s += 100
-                    tag.startsWith("en-in") -> s += 70
-                    tag.startsWith("en") -> s += 40
-                    else -> s -= 50
+                    tag == want.lowercase() -> s += 120
+                    tag.startsWith(want.take(2)) -> s += 80
+                    want.startsWith("en") && tag.startsWith("en-gb") -> s += 110
+                    want.startsWith("en") && tag.startsWith("en") -> s += 50
+                    else -> s -= 30
                 }
                 s += when (v.quality) {
                     Voice.QUALITY_VERY_HIGH -> 30
@@ -54,23 +71,25 @@ class TextToSpeechHelper(context: Context) {
                     Voice.QUALITY_NORMAL -> 10
                     else -> 0
                 }
-                if (name.contains("male") || name.contains("british") ||
-                    name.contains("gb") || name.contains("daniel") ||
-                    name.contains("en-gb")
-                ) s += 15
+                if (want.startsWith("en") && (
+                    name.contains("british") || name.contains("gb") ||
+                    name.contains("male") || name.contains("daniel")
+                )) s += 20
                 if (name.contains("robot") || name.contains("funny")) s -= 40
-                if (v.isNetworkConnectionRequired) s -= 5
+                if (v.isNetworkConnectionRequired) s -= 3
                 return s
             }
 
             val best = voices.maxByOrNull { score(it) }
             if (best != null && score(best) > 0) {
                 tts.voice = best
-                Log.d("JarvisTTS", "Selected voice: ${best.name} (${best.locale})")
+                val d = "$" + "{best.name}"
+                val e = "$" + "{best.locale}"
+                Log.d("JarvisTTS", "Selected voice: " + best.name + " (" + best.locale + ")")
             } else {
-                tts.language = Locale.UK
+                tts.language = target
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             tts.language = Locale.UK
         }
         voicePicked = true
@@ -82,6 +101,10 @@ class TextToSpeechHelper(context: Context) {
             pending = text
             return
         }
+        val lang = detectLangFor(text)
+        if (lang != currentLangTag || !voicePicked) {
+            pickBestVoice(lang)
+        }
         applyVoiceSettings()
         val spoken = text
             .replace("...", ", ")
@@ -91,22 +114,17 @@ class TextToSpeechHelper(context: Context) {
     }
 
     private fun applyVoiceSettings() {
-        if (!voicePicked) pickBestVoice()
-
         val userSpeed = settings.getVoiceSpeed()
         val userPitch = settings.getVoicePitch()
-
+        // Original JARVIS: slightly deep, unhurried
         val (basePitch, baseRate) = when (settings.getVoiceType()) {
-            "male" -> 0.88f to 0.92f
-            "female" -> 1.12f to 0.95f
+            "male" -> 0.86f to 0.90f
+            "female" -> 1.10f to 0.94f
             "robot" -> 0.55f to 0.85f
-            else -> 0.90f to 0.92f
+            else -> 0.88f to 0.90f
         }
-
-        val pitch = (basePitch * userPitch).coerceIn(0.5f, 1.6f)
-        val rate = (baseRate * userSpeed).coerceIn(0.5f, 1.5f)
-        tts.setPitch(pitch)
-        tts.setSpeechRate(rate)
+        tts.setPitch((basePitch * userPitch).coerceIn(0.5f, 1.5f))
+        tts.setSpeechRate((baseRate * userSpeed).coerceIn(0.5f, 1.4f))
     }
 
     fun shutdown() {
