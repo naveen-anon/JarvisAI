@@ -38,7 +38,15 @@ class CommandExecutor(private val context: Context) {
             ActionType.SET_PIN -> setPin(cmd.target)
             ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
             ActionType.TELEGRAM_MESSAGE -> telegramMessage(cmd.target, cmd.message)
-            ActionType.READ_SCREEN -> "Reading screen requires the Accessibility Service overlay."
+            ActionType.READ_SCREEN -> {
+                val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
+                if (svc == null) {
+                    "Accessibility Service is off, sir. Enable Jarvis under Settings → Accessibility to let me see the screen."
+                } else {
+                    val text = svc.getScreenText()
+                    if (text.length > 800) text.take(800) + "… (truncated)" else text
+                }
+            }
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
             ActionType.UNKNOWN -> "I didn't understand that command."

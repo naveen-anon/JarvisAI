@@ -91,7 +91,12 @@ class AssistantForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — say \"Jarvis\" to activate"))
-        startWakeWordListening()
+        val bg = com.jarvis.assistant.util.SettingsManager(this).getBackgroundListen()
+        if (bg) {
+            startWakeWordListening()
+        } else {
+            // Background listen off — still alive for notifications / manual listen / widget
+        }
         if (intent?.action == com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING) {
             startListeningCycle()
         }

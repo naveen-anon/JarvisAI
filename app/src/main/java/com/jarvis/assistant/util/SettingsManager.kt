@@ -70,3 +70,7 @@ class SettingsManager(context: Context) {
     fun hasGivenFeedback(): Boolean = prefs.getBoolean("feedback_given", false)
     fun markFeedbackGiven() = prefs.edit().putBoolean("feedback_given", true).apply()
 }
+
+    fun getBackgroundListen(): Boolean = prefs.getBoolean("bg_listen", true)
+    fun setBackgroundListen(enabled: Boolean) = prefs.edit().putBoolean("bg_listen", enabled).apply()
+

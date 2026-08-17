@@ -45,6 +45,23 @@ class OfflineBrain(
         // Add to conversation history
         conversationContext.addMessage(text, isUserInput = true)
 
+        // User macros (custom triggers) — highest priority after blank check
+        run {
+            val macroStore = com.jarvis.assistant.util.MacroStore(context)
+            val macro = macroStore.findMatch(cmd) ?: macroStore.findMatch(text)
+            if (macro != null) {
+                val parts = mutableListOf<String>()
+                for (step in macro.steps) {
+                    val result = executor.execute(
+                        com.jarvis.assistant.model.AssistantCommand(step.action, step.target, step.message)
+                    )
+                    parts.add(result)
+                }
+                return "Macro \"${macro.name}\" executed, sir. " + parts.joinToString(" ")
+            }
+        }
+
+
         // Settings management
         handleSettings(cmd, text)?.let { return it }
 
@@ -118,6 +135,23 @@ class OfflineBrain(
             val result = executor.execute(command)
             recordForAutoLearn(command)
             return result
+        }
+
+
+        // Real-time screen (Accessibility)
+        if (containsAny(cmd, "read screen", "what's on my screen", "what is on my screen",
+                "screen pe kya", "screen dikhao", "padho screen", "see my screen", "look at screen")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("read_screen"))
+        }
+
+
+        if (containsAny(cmd, "enable background listen", "background listen on", "always listen")) {
+            com.jarvis.assistant.util.SettingsManager(context).setBackgroundListen(true)
+            return "Background listening enabled, sir. I'll keep an ear out for the wake word."
+        }
+        if (containsAny(cmd, "disable background listen", "background listen off", "stop always listen")) {
+            com.jarvis.assistant.util.SettingsManager(context).setBackgroundListen(false)
+            return "Background listening disabled, sir. Use the widget or open the app to talk."
         }
 
         // Help and identity — pure JARVIS
