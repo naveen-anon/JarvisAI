@@ -7,11 +7,6 @@ import android.util.Log
 import com.jarvis.assistant.util.SettingsManager
 import java.util.Locale
 
-/**
- * Natural, formal JARVIS-style speech.
- * Prefers en-GB / high-quality network or local voices when installed
- * (Google TTS British voices sound closest to MCU JARVIS on most devices).
- */
 class TextToSpeechHelper(context: Context) {
 
     private var ready = false
@@ -33,10 +28,6 @@ class TextToSpeechHelper(context: Context) {
         }
     }
 
-    /**
-     * Prefer British English, then US English quality voices.
-     * Scores: en-GB > en-IN > en, quality HIGH, not network-only if possible.
-     */
     private fun pickBestVoice() {
         if (voicePicked) return
         try {
@@ -57,21 +48,17 @@ class TextToSpeechHelper(context: Context) {
                     tag.startsWith("en") -> s += 40
                     else -> s -= 50
                 }
-                // Prefer higher quality
                 s += when (v.quality) {
                     Voice.QUALITY_VERY_HIGH -> 30
                     Voice.QUALITY_HIGH -> 20
                     Voice.QUALITY_NORMAL -> 10
                     else -> 0
                 }
-                // Slight preference for male-sounding voice names when present
                 if (name.contains("male") || name.contains("british") ||
                     name.contains("gb") || name.contains("daniel") ||
-                    name.contains("rjs") || name.contains("en-gb")
+                    name.contains("en-gb")
                 ) s += 15
-                // Avoid very robotic / novelty voices
                 if (name.contains("robot") || name.contains("funny")) s -= 40
-                // Prefer installed local if available (works offline)
                 if (v.isNetworkConnectionRequired) s -= 5
                 return s
             }
@@ -79,7 +66,7 @@ class TextToSpeechHelper(context: Context) {
             val best = voices.maxByOrNull { score(it) }
             if (best != null && score(best) > 0) {
                 tts.voice = best
-                Log.d("JarvisTTS", "Selected voice: \( {best.name} ( \){best.locale})")
+                Log.d("JarvisTTS", "Selected voice: ${best.name} (${best.locale})")
             } else {
                 tts.language = Locale.UK
             }
@@ -96,31 +83,24 @@ class TextToSpeechHelper(context: Context) {
             return
         }
         applyVoiceSettings()
-        // Slight pause-friendly: replace "..." and long dashes for more natural cadence
         val spoken = text
-            .replace("…", ", ")
             .replace("...", ", ")
             .replace(" — ", ", ")
             .replace(" – ", ", ")
         tts.speak(spoken, TextToSpeech.QUEUE_FLUSH, null, "jarvis_utterance")
     }
 
-    /**
-     * JARVIS defaults: slightly lower pitch, measured rate (formal, not rushed).
-     * User settings in Settings screen still apply on top.
-     */
     private fun applyVoiceSettings() {
         if (!voicePicked) pickBestVoice()
 
         val userSpeed = settings.getVoiceSpeed()
         val userPitch = settings.getVoicePitch()
 
-        // Base "JARVIS" character: calm, slightly deep, not fast
         val (basePitch, baseRate) = when (settings.getVoiceType()) {
-            "male" -> 0.88f to 0.92f      // natural formal male
+            "male" -> 0.88f to 0.92f
             "female" -> 1.12f to 0.95f
             "robot" -> 0.55f to 0.85f
-            else -> 0.90f to 0.92f        // default = JARVIS-like
+            else -> 0.90f to 0.92f
         }
 
         val pitch = (basePitch * userPitch).coerceIn(0.5f, 1.6f)

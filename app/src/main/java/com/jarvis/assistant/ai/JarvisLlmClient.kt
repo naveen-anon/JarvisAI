@@ -58,7 +58,7 @@ STYLE EXAMPLES:
 """.trimIndent()
     }
 
-    suspend fun chat(userMessage: String, history: List<Pair<String, String>> = emptyList()): Result =
+    suspend fun chat(userMessage: String, history: List<Pair<String, String>> = emptyList(), memoryContext: String = ""): Result =
         withContext(Dispatchers.IO) {
             if (userMessage.isBlank()) {
                 return@withContext Result(false, "", "Empty message")
