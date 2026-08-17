@@ -72,20 +72,32 @@ class OfflineBrain(
         solveMath(cmd)?.let { return it }
 
         // Memory and notes
-        if (cmd.startsWith("remember ")) {
-            val note = text.substringAfter(" ").trim()
+        // Long-term memory — "remember that I work at Google" / "remember my wifi password is X"
+        if (cmd.startsWith("remember ") || cmd.startsWith("yaad rakh") || cmd.startsWith("yaad rakho")) {
+            var note = text.substringAfter(" ").trim()
+            if (note.lowercase().startsWith("that ")) note = note.substring(5).trim()
             if (note.isBlank()) return "What would you like me to remember, sir?"
             memory.remember("last_note", note)
+            memory.rememberFact(note)
             conversationContext.addMessage("Noted, sir.", isUserInput = false)
-            return "Noted, sir. I'll remember that."
+            return "Noted, sir. I've stored that in long-term memory."
         }
-        if (containsAny(cmd, "what did i tell you", "what did you remember", "recall that", "recall my note")) {
-            val recalled = memory.recall("last_note")
-                ?: "You haven't asked me to remember anything yet, sir."
-            conversationContext.addMessage(recalled, isUserInput = false)
-            return recalled
+        if (containsAny(cmd, "what did i tell you", "what did you remember", "recall that", "recall my note", "what do you remember", "my memories", "yaad hai")) {
+            val facts = memory.getFacts(8)
+            val last = memory.recall("last_note")
+            val reply = when {
+                facts.isNotEmpty() -> "Here's what I have on record, sir: " + facts.takeLast(5).joinToString("; ")
+                last != null -> last
+                else -> "You haven't asked me to remember anything yet, sir."
+            }
+            conversationContext.addMessage(reply, isUserInput = false)
+            return reply
         }
-        if (containsAny(cmd, "forget that", "forget it", "clear memory")) {
+        if (containsAny(cmd, "forget that", "forget it", "clear memory", "forget everything")) {
+            if (containsAny(cmd, "everything", "all")) {
+                memory.clear()
+                return "All long-term memories have been cleared, sir."
+            }
             memory.forget("last_note")
             return "As you wish, sir. That note has been cleared."
         }

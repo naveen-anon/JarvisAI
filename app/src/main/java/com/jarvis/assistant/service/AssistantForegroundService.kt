@@ -22,6 +22,8 @@ import com.jarvis.assistant.util.FileFinder
 import com.jarvis.assistant.util.LocationHelper
 import com.jarvis.assistant.util.NetworkStatusManager
 import com.jarvis.assistant.util.WeatherClient
+import com.jarvis.assistant.util.PersistentMemory
+import com.jarvis.assistant.util.SettingsManager
 import com.jarvis.assistant.voice.SpeechToText
 import com.jarvis.assistant.voice.TextToSpeechHelper
 import kotlinx.coroutines.CoroutineScope
@@ -196,7 +198,11 @@ class AssistantForegroundService : Service() {
             offlineReply to false
         } else if (networkStatus.isOnline()) {
             val groq = try {
-                JarvisLlmClient(apiKeyProvider = { BuildConfig.GROQ_API_KEY }).chat(speech)
+                JarvisLlmClient(apiKeyProvider = { BuildConfig.GROQ_API_KEY }).chat(
+                    speech,
+                    memoryContext = PersistentMemory(this@AssistantForegroundService)
+                        .buildMemoryContext(SettingsManager(this@AssistantForegroundService).getUserName())
+                )
             } catch (e: Exception) {
                 null
             }
