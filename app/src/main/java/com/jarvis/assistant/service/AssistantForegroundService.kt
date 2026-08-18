@@ -166,6 +166,20 @@ class AssistantForegroundService : Service() {
      * fit the pure offline/cloud split) → file lookup (if a filename was mentioned) →
      * offline brain → Gemini cloud fallback.
      */
+    
+    /** MCU-style context: long-term memory + current utterance for smarter cloud replies. */
+    private fun buildJarvisContext(currentSpeech: String): String {
+        val mem = PersistentMemory(this).buildMemoryContext(
+            SettingsManager(this).getUserName()
+        )
+        return buildString {
+            append(mem)
+            append("\n\nCurrent user utterance: ")
+            append(currentSpeech)
+            append("\nRespond as JARVIS: anticipate needs, be precise, stay in character.")
+        }
+    }
+
     private suspend fun processSpeech(speech: String): Pair<String, Boolean> {
         // Voice authentication — checked at most once per service session (not per command),
         // so it's a one-time gate rather than repeated friction. Once it passes, it stays
