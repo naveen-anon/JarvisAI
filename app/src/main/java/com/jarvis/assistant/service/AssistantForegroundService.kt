@@ -180,6 +180,61 @@ class AssistantForegroundService : Service() {
         }
     }
 
+    
+    private suspend fun buildMorningBriefing(): String {
+        val sb = StringBuilder()
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        val hello = when {
+            hour < 12 -> "Good morning"
+            hour < 17 -> "Good afternoon"
+            else -> "Good evening"
+        }
+        val name = SettingsManager(this).getUserName().let { if (it.isBlank() || it == "User") "sir" else it }
+        sb.append("$hello, $name. ")
+
+        // Time
+        val time = java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        sb.append("The time is $time. ")
+
+        // Battery
+        val bm = getSystemService(android.content.Context.BATTERY_SERVICE) as android.os.BatteryManager
+        val bat = bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        sb.append("Power levels are at $bat percent. ")
+
+        // Network
+        val net = if (networkStatus.isOnline()) "online" else "offline"
+        sb.append("Network is $net. ")
+
+        if (networkStatus.isOnline()) {
+            // Weather
+            try {
+                val loc = locationHelper.getCurrentLocation()
+                if (loc != null) {
+                    val w = weatherClient.getWeather(loc.lat, loc.lon)
+                    if (w != null) {
+                        sb.append("Weather in ${loc.cityName}: ${w.tempCelsius} degrees, ${w.condition}. ")
+                    }
+                }
+            } catch (_: Exception) { }
+
+            // News
+            try {
+                val headlines = com.jarvis.assistant.util.NewsClient().topHeadlines(3)
+                if (headlines.isNotEmpty()) {
+                    sb.append("Top headlines: ")
+                    sb.append(headlines.mapIndexed { i, h -> "${i + 1}. $h" }.joinToString(" "))
+                    sb.append(" ")
+                }
+            } catch (_: Exception) { }
+        } else {
+            sb.append("I am offline, so weather and news are unavailable. ")
+        }
+
+        sb.append("All systems are nominal. How may I assist you?")
+        return sb.toString()
+    }
+
     private suspend fun processSpeech(speech: String): Pair<String, Boolean> {
         // Voice authentication — checked at most once per service session (not per command),
         // so it's a one-time gate rather than repeated friction. Once it passes, it stays
@@ -213,7 +268,9 @@ class AssistantForegroundService : Service() {
             "Something went wrong running that command."
         }
 
-        val result = if (offlineReply != null) {
+        val result = if (offlineReply == "REQUEST_BRIEFING") {
+            buildMorningBriefing() to true
+        } else if (offlineReply != null) {
             offlineReply to false
         } else if (networkStatus.isOnline()) {
             val groq = try {
