@@ -40,10 +40,46 @@ class OfflineBrain(
     fun handle(rawText: String): String? {
         val text = rawText.trim()
         if (text.isBlank()) return null
-        val cmd = text.lowercase(Locale.getDefault())
+        val cmd = com.jarvis.assistant.util.SpeechNormalizer.normalize(text)
 
         // Add to conversation history
         conversationContext.addMessage(text, isUserInput = true)
+
+        // ===== HIGH_PRIORITY_ROUTER =====
+        run {
+            // Briefing
+            if (cmd == "hey jarvis" || cmd == "hi jarvis" || cmd == "hello jarvis" ||
+                cmd == "good morning jarvis" || cmd == "good morning" ||
+                containsAny(cmd, "brief me", "status report", "full status", "systems check", "morning briefing")
+            ) {
+                return "REQUEST_BRIEFING"
+            }
+            // Screen analyze / read
+            if (containsAny(cmd, "analyze my screen", "analyse my screen", "analyze screen",
+                    "what's on my screen", "what is on my screen", "what am i looking at",
+                    "read screen", "read my screen", "screen pe kya", "screen samjhao",
+                    "jo dekh raha", "jo dekh rhi", "screen analysis")
+                || (containsAny(cmd, "screen", "display") && containsAny(cmd, "analyze", "analyse", "read", "looking", "kya hai"))
+            ) {
+                if (!(containsAny(cmd, "reminder", "alarm") && !containsAny(cmd, "screen"))) {
+                    return executor.execute(com.jarvis.assistant.model.AssistantCommand("analyze_screen"))
+                }
+            }
+            // Weather
+            if (containsAny(cmd, "weather", "temperature", "mausam", "kitni garmi", "kitni thand")) {
+                return null // service weatherReplyIfAsked handles; or leave for service
+            }
+            // Cloud-only smart advice (any topic)
+            if (containsAny(cmd, "recommend", "suggest", "compare", "best ", "worth it",
+                    "should i", "budget", "under ", "kaunsa", "pros and cons", "alternative")
+                && !cmd.startsWith("open ") && !cmd.startsWith("call ")
+            ) {
+                return null
+            }
+        }
+        // ===== end HIGH_PRIORITY_ROUTER =====
+
+
 
         // HIGH PRIORITY: screen analyze (STT often mangles "analyze")
         run {

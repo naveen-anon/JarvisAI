@@ -183,14 +183,20 @@ class SpeechToText(private val context: Context) {
         }
 
     private fun bestTranscript(results: Bundle?): String {
-        val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            ?: return ""
+        val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) ?: return ""
         if (matches.isEmpty()) return ""
-        // Prefer the candidate that contains a wake word; else longest non-blank
-        val withWake = matches.firstOrNull { m ->
+        val boost = listOf(
+            "jarvis", "screen", "analyze", "analyse", "weather", "mausam",
+            "remember", "macro", "whatsapp", "call", "brief", "morning",
+            "chrome", "bluetooth", "flashlight", "volume", "alarm"
+        )
+        return matches.filter { it.isNotBlank() }.maxByOrNull { m ->
             val lower = m.lowercase()
-            wakeWords.any { matchesWake(lower, it) }
-        }
+            var score = m.length
+            boost.forEach { if (lower.contains(it)) score += 40 }
+            score
+        } ?: matches.first()
+    }
         if (withWake != null) return withWake
         return matches.filter { it.isNotBlank() }.maxByOrNull { it.trim().length }
             ?: matches.first()
