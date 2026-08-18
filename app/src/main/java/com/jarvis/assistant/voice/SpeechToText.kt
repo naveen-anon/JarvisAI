@@ -11,14 +11,6 @@ import android.speech.SpeechRecognizer
 import android.util.Log
 import java.util.Locale
 
-/**
- * Enhanced wake-word + speech pipeline for J.A.R.V.I.S.
- * - Many English / Hindi / romanized variants
- * - Partial-result early trigger (faster response)
- * - Word-boundary + fuzzy matching to cut false positives
- * - Soft-voice tuned silence windows
- * - Debounce so one "Jarvis" doesn't fire twice
- */
 class SpeechToText(private val context: Context) {
 
     private var recognizer: SpeechRecognizer? = null
@@ -26,16 +18,12 @@ class SpeechToText(private val context: Context) {
     private var lastWakeMs = 0L
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    // Primary + common mis-hearings from Android SpeechRecognizer
     private val wakeWords = listOf(
-        // English / romanized
         "jarvis", "jarwis", "jaarvis", "jarviz", "jarves", "jarvus",
-        "jervis", "jerves", "jarvish", "jarvis.", "jarvis,",
-        // Hindi Devanagari
-        "जार्विस", "जारविस", "जर्विस", "जारवीस",
-        // Phrases
+        "jervis", "jarvish",
+        "जार्विस", "जारविस", "जर्विस",
         "hey jarvis", "ok jarvis", "okay jarvis", "hi jarvis",
-        "yo jarvis", "hello jarvis", "jarvis ji", "jarvis bhai"
+        "hello jarvis", "jarvis ji"
     )
 
     fun listenOnce(onResult: (String) -> Unit, onError: () -> Unit) {
@@ -76,7 +64,6 @@ class SpeechToText(private val context: Context) {
             }
 
             override fun onError(error: Int) {
-                // 7 = ERROR_NO_MATCH, 6 = ERROR_SPEECH_TIMEOUT — normal for continuous
                 Log.d("SpeechToText", "Recognizer error: $error")
                 restartContinuous(onWakeWordDetected)
             }
@@ -97,32 +84,18 @@ class SpeechToText(private val context: Context) {
         onFired: () -> Unit
     ) {
         val now = System.currentTimeMillis()
-        if (now - lastWakeMs < 1800) return // debounce 1.8s
-
+        if (now - lastWakeMs < 1800) return
         val match = findWakeWord(heard) ?: return
         lastWakeMs = now
         onFired()
-
-        // Everything after the wake word is the command (may be empty → just open listen cycle)
         val trailing = extractTrailing(heard, match)
-        Log.d("SpeechToText", "Wake matched='$match' trailing='$trailing'")
+        Log.d("SpeechToText", "Wake matched=$match trailing=$trailing")
         onWakeWordDetected(trailing)
     }
 
-    /** Prefer longer phrase matches first (e.g. "hey jarvis" over "jarvis"). */
     private fun findWakeWord(heard: String): String? {
-        val sorted = wakeWords.sortedByDescending { it.length }
-        for (w in sorted) {
+        for (w in wakeWords.sortedByDescending { it.length }) {
             if (matchesWake(heard, w)) return w
-        }
-        // Fuzzy: allow 1-char drift on short english tokens (jarvis ↔ jarwis already listed)
-        val tokens = heard.split(Regex("\\s+"))
-        for (token in tokens) {
-            if (token.length in 5..8) {
-                for (w in wakeWords.filter { it.length in 5..8 && !it.contains(" ") }) {
-                    if (levenshtein(token, w) <= 1) return w
-                }
-            }
         }
         return null
     }
@@ -132,7 +105,6 @@ class SpeechToText(private val context: Context) {
         if (heard.startsWith("$wake ")) return true
         if (heard.endsWith(" $wake")) return true
         if (heard.contains(" $wake ")) return true
-        // Hindi / no-space edge cases
         if (wake.length >= 4 && heard.contains(wake)) return true
         return false
     }
@@ -197,53 +169,23 @@ class SpeechToText(private val context: Context) {
             score
         } ?: matches.first()
     }
-        if (withWake != null) return withWake
-        return matches.filter { it.isNotBlank() }.maxByOrNull { it.trim().length }
-            ?: matches.first()
-    }
 
     private fun buildIntent(forWakeWord: Boolean) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
         putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
-
-        // Prefer device locale; also bias toward Indian English / Hindi when available
-        val locale = Locale.getDefault()
-        // Multi-language: device locale + strong bias for en/hi (JARVIS users often mix)
-        val loc = Locale.getDefault()
-        val tag = loc.toLanguageTag()
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE, tag)
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, tag)
-        // Help the recognizer with bilingual Hinglish
-        putExtra(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES, arrayOf("en-IN", "en-GB", "en-US", "hi-IN"))
-
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-IN")
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en-IN")
         if (forWakeWord) {
-            // Slightly shorter windows so "Jarvis" alone is accepted quickly
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1200L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 800L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 300L)
         } else {
-            // Command capture — soft voice friendly
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1200L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 400L)
         }
-    }
-
-    private fun levenshtein(a: String, b: String): Int {
-        val m = a.length
-        val n = b.length
-        val dp = Array(m + 1) { IntArray(n + 1) }
-        for (i in 0..m) dp[i][0] = i
-        for (j in 0..n) dp[0][j] = j
-        for (i in 1..m) {
-            for (j in 1..n) {
-                val cost = if (a[i - 1] == b[j - 1]) 0 else 1
-                dp[i][j] = minOf(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
-            }
-        }
-        return dp[m][n]
     }
 
     fun destroy() {
