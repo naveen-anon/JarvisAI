@@ -38,6 +38,19 @@ class CommandExecutor(private val context: Context) {
             ActionType.SET_PIN -> setPin(cmd.target)
             ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
             ActionType.TELEGRAM_MESSAGE -> telegramMessage(cmd.target, cmd.message)
+            ActionType.ANALYZE_SCREEN -> {
+                val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
+                if (svc == null) {
+                    "Enable Accessibility for Jarvis first, sir — I need it to see on-screen content."
+                } else {
+                    val raw = svc.getScreenText()
+                    if (raw.isBlank() || raw.startsWith("No screen") || raw.startsWith("Screen appears")) {
+                        raw
+                    } else {
+                        "SCREEN_CONTENT_FOR_ANALYSIS:\n" + raw.take(2500)
+                    }
+                }
+            }
             ActionType.READ_SCREEN -> {
                 val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
                 if (svc == null) {

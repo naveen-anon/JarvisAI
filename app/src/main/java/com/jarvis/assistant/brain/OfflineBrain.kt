@@ -45,6 +45,31 @@ class OfflineBrain(
         // Add to conversation history
         conversationContext.addMessage(text, isUserInput = true)
 
+        // General advice / compare / shopping (any topic) → cloud JARVIS
+        if (containsAny(cmd,
+                "recommend", "suggestion", "suggest", "compare", " vs ", "versus",
+                "best ", "sabse best", "kaunsa", "which is better", "worth it",
+                "should i buy", "should i get", "under ", "budget", "sasta",
+                "low price", "alternative", "pros and cons"
+            ) && !cmd.startsWith("open ") && !cmd.startsWith("call ")
+            && !cmd.startsWith("create macro")
+        ) {
+            return null
+        }
+
+        // Analyze whatever is on screen (any app)
+        if (containsAny(cmd,
+                "analyze my screen", "analyse my screen", "analyze screen",
+                "what am i looking at", "what am i seeing",
+                "screen analysis", "is screen ko samjhao", "screen samjhao",
+                "analyze this", "analyse this", "jo dekh raha", "jo dekh rhi",
+                "jo dekh raha hu", "jo dekh rahi hu", "pdf analyze", "analyze pdf"
+            )) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("analyze_screen"))
+        }
+
+
+
         // User macros (custom triggers) — highest priority after blank check
         run {
             val macroStore = com.jarvis.assistant.util.MacroStore(context)
@@ -333,7 +358,12 @@ class OfflineBrain(
     }
 
     private fun greeting(cmd: String): String? = when {
-        cmd == "hi" || cmd == "hello" || cmd == "hey" || cmd == "hey jarvis" || cmd == "yo" ||
+        cmd == "hey jarvis" || cmd == "hi jarvis" || cmd == "hello jarvis" ||
+        cmd == "good morning jarvis" ||
+        containsAny(cmd, "brief me", "status report", "full status", "systems check") ->
+            "REQUEST_BRIEFING"
+
+        cmd == "hi" || cmd == "hello" || cmd == "hey" || cmd == "yo" ||
         cmd == "jarvis" || containsAny(cmd, "are you there", "you there", "namaste", "namaskar") ->
             listOf(
                 "Yes, sir?",

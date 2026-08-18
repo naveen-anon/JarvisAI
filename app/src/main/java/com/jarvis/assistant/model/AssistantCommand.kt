@@ -18,6 +18,7 @@ enum class ActionType(val key: String) {
     SEND_SMS("send_sms"),
     TOGGLE_SETTING("toggle_setting"),
     READ_SCREEN("read_screen"),
+    ANALYZE_SCREEN("analyze_screen"),
     SET_VOLUME("set_volume"),      // target = "up" | "down" | "mute" | "max" | a number string
     MEDIA_CONTROL("media_control"),// target = "play" | "pause" | "next" | "previous"
     SET_ALARM("set_alarm"),        // target = "HH:mm"
