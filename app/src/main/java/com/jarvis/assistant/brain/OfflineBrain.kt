@@ -45,6 +45,39 @@ class OfflineBrain(
         // Add to conversation history
         conversationContext.addMessage(text, isUserInput = true)
 
+        // HIGH PRIORITY: screen analyze (STT often mangles "analyze")
+        run {
+            val screenIntent = containsAny(cmd,
+                "analyze my screen", "analyse my screen", "analyze screen", "analyse screen",
+                "what am i looking at", "what am i seeing", "read my screen", "read screen",
+                "what's on my screen", "what is on my screen", "screen pe kya", "screen dikhao",
+                "screen analysis", "screen samjhao", "is screen", "jo dekh raha", "jo dekh rhi",
+                "padho screen", "screen padho"
+            ) || (
+                // Fuzzy: both a "see/read/analyze-ish" word AND screen
+                (containsAny(cmd, "screen", "display", "monitor") &&
+                    containsAny(cmd, "analyze", "analyse", "analysis", "read", "reading",
+                        "looking", "seeing", "samjhao", "batao", "kya hai", "what on", "whats on"))
+            ) || (
+                // Common mis-hears for "analyze my screen"
+                containsAny(cmd, "and lies my screen", "and lies the screen", "anna lies screen",
+                    "analyse ice cream", "analysis screen", "analyzer screen",
+                    "and my screen", "end my screen", "on my screen what")
+            )
+            // Do NOT treat pure "reminder" / "alarm" as screen
+            val isReminder = containsAny(cmd, "reminder", "remind me", "alarm", "wake me")
+                && !containsAny(cmd, "screen", "display")
+            if (screenIntent && !isReminder) {
+                return executor.execute(com.jarvis.assistant.model.AssistantCommand("analyze_screen"))
+            }
+            // Raw read (no cloud) 
+            if (containsAny(cmd, "read screen only", "raw screen", "screen text only")) {
+                return executor.execute(com.jarvis.assistant.model.AssistantCommand("read_screen"))
+            }
+        }
+
+
+
         // General advice / compare / shopping (any topic) → cloud JARVIS
         if (containsAny(cmd,
                 "recommend", "suggestion", "suggest", "compare", " vs ", "versus",
