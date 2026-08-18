@@ -205,8 +205,8 @@ class AssistantForegroundService : Service() {
             val groq = try {
                 JarvisLlmClient(apiKeyProvider = { BuildConfig.GROQ_API_KEY }).chat(
                     speech,
-                    memoryContext = PersistentMemory(this@AssistantForegroundService)
-                        .buildMemoryContext(SettingsManager(this@AssistantForegroundService).getUserName())
+                    history = emptyList(),
+                    memoryContext = buildJarvisContext(speech)
                 )
             } catch (e: Exception) {
                 null

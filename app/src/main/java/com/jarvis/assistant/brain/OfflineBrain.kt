@@ -154,6 +154,16 @@ class OfflineBrain(
             return "Background listening disabled, sir. Use the widget or open the app to talk."
         }
 
+
+        if (containsAny(cmd, "systems check", "system check", "status report", "full status")) {
+            val bat = batteryLevel()
+            val net = try {
+                val n = com.jarvis.assistant.util.NetworkStatusManager(context)
+                if (n.isOnline()) "online" else "offline"
+            } catch (_: Exception) { "unknown" }
+            return "Systems check complete, sir. Power at $bat percent. Network is $net. Core routines are operational."
+        }
+
         // Help and identity — pure JARVIS
         if (containsAny(cmd, "who are you", "what are you", "your name")) {
             return "I am J.A.R.V.I.S. — Just A Rather Very Intelligent System. " +
