@@ -60,6 +60,17 @@ class CommandExecutor(private val context: Context) {
                     if (text.length > 800) text.take(800) + "… (truncated)" else text
                 }
             }
+            
+            ActionType.SET_REMINDER -> {
+                val mins = cmd.target?.toIntOrNull() ?: 10
+                val msg = cmd.message ?: "Reminder"
+                com.jarvis.assistant.util.ReminderScheduler(context).scheduleInMinutes(mins, msg)
+            }
+            ActionType.READ_CLIPBOARD -> com.jarvis.assistant.util.ClipboardHelper(context).readAloudFriendly()
+            ActionType.OPEN_CLIPBOARD_LINK -> com.jarvis.assistant.util.ClipboardHelper(context).openIfUrl()
+            ActionType.NOTIF_SUMMARY -> com.jarvis.assistant.notifications.JarvisNotificationListener.summaryOrHelp()
+            ActionType.CALENDAR_NEXT -> com.jarvis.assistant.util.CalendarHelper(context).formatBrief(2)
+
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
             ActionType.UNKNOWN -> "I didn't understand that command."

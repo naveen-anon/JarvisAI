@@ -45,6 +45,43 @@ class OfflineBrain(
         // Add to conversation history
         conversationContext.addMessage(text, isUserInput = true)
 
+        com.jarvis.assistant.util.CommandHistoryStore(context).add(text)
+        if (containsAny(cmd, "notification summary", "what did i miss",
+                "brief notifications", "check notifications", "any notifications", "kya notification")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("notif_summary"))
+        }
+        if (containsAny(cmd, "next event", "next meeting", "what's on my calendar",
+                "upcoming events", "schedule today") || cmd == "calendar") {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("calendar_next"))
+        }
+        if (containsAny(cmd, "read clipboard", "what's on the clipboard", "clipboard padho") || cmd == "clipboard") {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("read_clipboard"))
+        }
+        if (containsAny(cmd, "open clipboard", "open clipboard link")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("open_clipboard_link"))
+        }
+        if (cmd.startsWith("remind me") || cmd.startsWith("set a reminder") || cmd.startsWith("reminder in")) {
+            val mins = Regex("""(\d+)\s*(minute|minutes|min|mins)""").find(cmd)?.groupValues?.get(1)?.toIntOrNull()
+                ?: Regex("""(\d+)\s*(hour|hours|hr|hrs)""").find(cmd)?.groupValues?.get(1)?.toIntOrNull()?.times(60)
+            val msg = when {
+                " to " in cmd -> text.substringAfter(" to ").trim()
+                " about " in cmd -> text.substringAfter(" about ").trim()
+                else -> "your reminder"
+            }
+            if (mins == null) return "Say: remind me in 10 minutes to check the oven, sir."
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("set_reminder", mins.toString(), msg))
+        }
+        if (containsAny(cmd, "do that again", "repeat last command")) {
+            val last = com.jarvis.assistant.util.CommandHistoryStore(context).last()
+            if (last.isNullOrBlank()) return "I don't have a previous command to repeat, sir."
+            if (last.equals(text, true) || last.lowercase().contains("do that again")) {
+                return "I can't repeat that safely, sir."
+            }
+            return handle(last)
+        }
+
+
+
         // ===== HIGH_PRIORITY_ROUTER =====
         run {
             // Briefing

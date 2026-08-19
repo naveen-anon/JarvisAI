@@ -31,6 +31,11 @@ enum class ActionType(val key: String) {
     PC_CONNECT("pc_connect"),      // toggles the PC bridge server on/off; target = "on" | "off"
     WHATSAPP_MESSAGE("whatsapp_message"), // target = contact name, message = text to pre-fill
     TELEGRAM_MESSAGE("telegram_message"),  // target = username/contact name, message = text to pre-fill
+    SET_REMINDER("set_reminder"),
+    READ_CLIPBOARD("read_clipboard"),
+    OPEN_CLIPBOARD_LINK("open_clipboard_link"),
+    NOTIF_SUMMARY("notif_summary"),
+    CALENDAR_NEXT("calendar_next"),
     REPLY("reply"),          // pure conversational reply, no system action
     UNKNOWN("unknown");
 
