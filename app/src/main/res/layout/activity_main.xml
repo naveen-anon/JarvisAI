@@ -345,8 +345,6 @@
         android:textAllCaps="true"
         android:textColor="#3A5A68"
         android:textSize="9sp"
-        android:letterSpacing="0.08"
-        android:fontFamily="monospace"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
