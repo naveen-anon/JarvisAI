@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Jarvis" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:statusBarColor">#03080E</item>
-        <item name="android:navigationBarColor">#03080E</item>
-        <item name="android:windowBackground">#03080E</item>
+        <item name="android:statusBarColor">#02060C</item>
+        <item name="android:navigationBarColor">#02060C</item>
+        <item name="android:windowBackground">#02060C</item>
         <item name="colorPrimary">#00E5FF</item>
-        <item name="colorPrimaryDark">#03080E</item>
+        <item name="colorPrimaryDark">#02060C</item>
         <item name="colorAccent">#00E5FF</item>
+        <item name="android:colorBackground">#02060C</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 </resources>

@@ -52,8 +52,8 @@
             android:textColor="#00E5FF"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:letterSpacing="0.12"
-            android:fontFamily="monospace" />
+            android:letterSpacing="0.14"
+            android:fontFamily="@font/share_tech_mono" />
 
         <TextView
             android:id="@+id/txtClock"
@@ -339,7 +339,10 @@
         android:id="@+id/txtFooter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="STARK INDUSTRIES  //  MARK II"
+        android:text="DEVELOPER NAVEEN KHATRI  //  JARVIS V7"
+        android:fontFamily="@font/share_tech_mono"
+        android:letterSpacing="0.08"
+        android:textAllCaps="true"
         android:textColor="#3A5A68"
         android:textSize="9sp"
         android:letterSpacing="0.08"
