@@ -4,20 +4,19 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Outline
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
-import android.view.animation.LinearInterpolator
+import android.view.View
+import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.jarvis.assistant.R
 
 enum class HudState { IDLE, LISTENING, THINKING, SPEAKING }
 
-/**
- * Photoreal arc reactor drawable + HUD states.
- * IDLE dim slow | LISTENING cyan fast | THINKING amber | SPEAKING bright
- */
+/** Photoreal reactor — NO rotation. States = tint / pulse only. */
 class ArcReactorView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -27,9 +26,10 @@ class ArcReactorView @JvmOverloads constructor(
         setImageResource(R.drawable.arc_reactor)
         scaleType = ImageView.ScaleType.FIT_CENTER
         adjustViewBounds = true
+        setBackgroundColor(Color.TRANSPARENT)
+        rotation = 0f
     }
 
-    private var rotateAnim: ObjectAnimator? = null
     private var pulseAnim: ObjectAnimator? = null
 
     var state: HudState = HudState.IDLE
@@ -39,6 +39,16 @@ class ArcReactorView @JvmOverloads constructor(
         }
 
     init {
+        setBackgroundColor(Color.TRANSPARENT)
+        clipToOutline = true
+        outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                val s = minOf(view.width, view.height)
+                val left = (view.width - s) / 2
+                val top = (view.height - s) / 2
+                outline.setOval(left, top, left + s, top + s)
+            }
+        }
         addView(image, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
         applyState()
     }
@@ -51,49 +61,45 @@ class ArcReactorView @JvmOverloads constructor(
     }
 
     private fun applyState() {
-        rotateAnim?.cancel()
         pulseAnim?.cancel()
+        image.rotation = 0f
 
-        val style = when (state) {
-            HudState.IDLE -> Style(0xFF4A90A8.toInt(), 28000L, 0.72f, false)
-            HudState.LISTENING -> Style(0xFF00C8E0.toInt(), 8000L, 1f, true)
-            HudState.THINKING -> Style(0xFFFFB020.toInt(), 4500L, 1f, true)
-            HudState.SPEAKING -> Style(0xFFE8FBFF.toInt(), 6000L, 1f, true)
-        }
-
-        image.alpha = style.alpha
-        image.colorFilter = PorterDuffColorFilter(style.tint, PorterDuff.Mode.MULTIPLY)
-
-        rotateAnim = ObjectAnimator.ofFloat(image, ROTATION, 0f, 360f).apply {
-            duration = style.spinMs
-            repeatCount = ValueAnimator.INFINITE
-            interpolator = LinearInterpolator()
-            start()
-        }
-
-        if (style.pulse) {
-            pulseAnim = ObjectAnimator.ofFloat(image, SCALE_X, 0.96f, 1.04f).apply {
-                duration = 900
-                repeatCount = ValueAnimator.INFINITE
-                repeatMode = ValueAnimator.REVERSE
-                addUpdateListener { image.scaleY = image.scaleX }
-                start()
+        when (state) {
+            HudState.IDLE -> {
+                image.alpha = 0.88f
+                image.colorFilter = null
+                image.scaleX = 1f
+                image.scaleY = 1f
             }
-        } else {
-            image.scaleX = 1f
-            image.scaleY = 1f
+            HudState.LISTENING -> {
+                image.alpha = 1f
+                image.colorFilter = null
+                startPulse()
+            }
+            HudState.THINKING -> {
+                image.alpha = 1f
+                image.colorFilter = PorterDuffColorFilter(0xFFFFB020.toInt(), PorterDuff.Mode.SRC_ATOP)
+                startPulse()
+            }
+            HudState.SPEAKING -> {
+                image.alpha = 1f
+                image.colorFilter = PorterDuffColorFilter(0xFFB8F4FF.toInt(), PorterDuff.Mode.SRC_ATOP)
+                startPulse()
+            }
         }
     }
 
-    private data class Style(
-        val tint: Int,
-        val spinMs: Long,
-        val alpha: Float,
-        val pulse: Boolean
-    )
+    private fun startPulse() {
+        pulseAnim = ObjectAnimator.ofFloat(image, SCALE_X, 0.97f, 1.03f).apply {
+            duration = 900
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.REVERSE
+            addUpdateListener { image.scaleY = image.scaleX }
+            start()
+        }
+    }
 
     override fun onDetachedFromWindow() {
-        rotateAnim?.cancel()
         pulseAnim?.cancel()
         super.onDetachedFromWindow()
     }
