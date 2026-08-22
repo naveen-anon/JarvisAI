@@ -11,7 +11,6 @@ import com.jarvis.assistant.R
 
 enum class HudState { IDLE, LISTENING, THINKING, SPEAKING }
 
-/** Static photoreal reactor — no rotation, no solid color fill. */
 class ArcReactorView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -44,7 +43,6 @@ class ArcReactorView @JvmOverloads constructor(
         pulseAnim?.cancel()
         image.rotation = 0f
         image.clearColorFilter()
-
         when (state) {
             HudState.IDLE -> {
                 image.alpha = 0.9f
