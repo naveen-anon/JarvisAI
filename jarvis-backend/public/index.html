@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis AI — Hindi/English Voice Assistant for Android</title>
+<meta name="description" content="An open-source, offline-first Hindi/English voice assistant for Android. Control your phone by voice, no internet required.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050A0F;
+    --bg-deep: #02040A;
+    --panel: #0B1520;
+    --border: #16303D;
+    --cyan: #00D4FF;
+    --cyan-dim: #4A8A9A;
+    --violet: #8B5CF6;
+    --amber: #FFB300;
+    --success: #00FF88;
+    --warning: #FFB300;
+    --text: #EAF6FA;
+    --text-dim: #7FA3AD;
+    --text-faint: #3D5B64;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: radial-gradient(ellipse 900px 500px at 50% -10%, #0A1A24, var(--bg-deep) 60%);
+    color: var(--text);
+    font-family: var(--body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--cyan); }
+  ::selection { background: var(--cyan); color: #001018; }
+
+  .bg-grid {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 800px 600px at 50% 0%, black 20%, transparent 75%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Reactor animations (shared by every <use> instance) ---------- */
+  .bloom { animation: bloom-pulse 2.4s ease-in-out infinite; transform-origin: 50% 50%; }
+  .spokes { transform-origin: 50% 50%; animation: spin-rev 22s linear infinite; }
+  .ring-outer { transform-origin: 50% 50%; animation: spin 14s linear infinite; }
+  .particles { transform-origin: 50% 50%; animation: spin 6s linear infinite; }
+  .ring-mid { transform-origin: 50% 50%; animation: spin-rev 9s linear infinite; }
+  .blades { transform-origin: 50% 50%; animation: spin 7s linear infinite; }
+  .core { animation: pulse 2.4s ease-in-out infinite; transform-origin: 50% 50%; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin-rev { to { transform: rotate(-360deg); } }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.75; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+  }
+  @keyframes bloom-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ring-outer, .ring-mid, .core, .bloom, .spokes, .particles, .blades { animation: none; }
+    .card, .mini-phone { opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(5,10,15,0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; max-width: 1080px; margin: 0 auto; }
+  .logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-weight: 700; color: var(--text); text-decoration: none; font-size: 17px; letter-spacing: 0.02em; }
+  .logo svg { width: 26px; height: 26px; }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 14px; transition: color 0.15s ease; }
+  .nav-links a:hover { color: var(--cyan); }
+  .btn-nav {
+    background: var(--cyan); color: #001018; font-family: var(--display); font-weight: 600;
+    font-size: 13px; padding: 9px 18px; border-radius: 8px; text-decoration: none; white-space: nowrap;
+  }
+  @media (max-width: 780px) { .nav-links { display: none; } }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 56px 0 60px; }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
+  @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; text-align: center; } }
+
+  .eyebrow-badge {
+    display: inline-block; border: 1px solid var(--border); color: var(--cyan-dim);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    padding: 6px 14px; border-radius: 20px; margin-bottom: 20px;
+  }
+  .hero-copy h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 58px); font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .hero-copy h1 span { color: var(--cyan); }
+  .hero-sub { font-family: var(--display); font-size: 19px; color: var(--text); margin: 0 0 14px; font-weight: 500; }
+  .hero-desc { color: var(--text-dim); font-size: 15px; max-width: 420px; margin: 0 0 30px; }
+  @media (max-width: 860px) { .hero-desc { margin-left: auto; margin-right: auto; } }
+
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+  @media (max-width: 860px) { .hero-ctas { justify-content: center; } }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, var(--cyan), #00A8CC);
+    color: #001018; font-family: var(--display); font-weight: 600;
+    text-decoration: none; padding: 15px 30px; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 0 0 1px rgba(0,212,255,0.3), 0 16px 40px -12px rgba(0,212,255,0.5);
+    transition: transform 0.15s ease;
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1.5px solid var(--cyan-dim); color: var(--text);
+    font-family: var(--display); font-weight: 600; font-size: 15px;
+    padding: 13px 28px; border-radius: 10px; text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .trust-row { display: flex; gap: 20px; margin-top: 26px; flex-wrap: wrap; }
+  @media (max-width: 860px) { .trust-row { justify-content: center; } }
+  .trust-row span { font-size: 12.5px; color: var(--text-dim); font-family: var(--mono); }
+
+  /* ---------- Phone mockup ---------- */
+  .hero-visual { position: relative; display: flex; justify-content: center; padding: 30px 0; }
+  .phone-mock {
+    width: 240px; border-radius: 32px; border: 2px solid var(--border);
+    background: linear-gradient(180deg, #0A1420, #050A0F);
+    padding: 16px 12px; box-shadow: 0 30px 80px -20px rgba(0,212,255,0.25);
+    position: relative; z-index: 2;
+  }
+  .phone-notch { width: 60px; height: 5px; background: var(--border); border-radius: 6px; margin: 0 auto 14px; }
+  .phone-screen { text-align: center; }
+  .phone-header { font-family: var(--display); color: var(--cyan); font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+  .reactor-mini { width: 96px; height: 96px; margin: 0 auto 12px; }
+  .reactor-mini svg { width: 100%; height: 100%; }
+  .phone-status { color: var(--cyan-dim); font-family: var(--mono); font-size: 11px; margin-bottom: 10px; }
+  .mini-wave { display: flex; justify-content: center; gap: 2px; margin-bottom: 14px; height: 16px; align-items: flex-end; }
+  .mini-wave span { width: 2px; background: var(--cyan-dim); border-radius: 1px; animation: wave 1.1s ease-in-out infinite; }
+  @keyframes wave { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+  .phone-input { border: 1px solid var(--border); border-radius: 20px; padding: 9px 14px; font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); text-align: left; }
+
+  .chat-bubble {
+    position: absolute; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 9px 15px; font-size: 12.5px; color: var(--text);
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6); z-index: 3; max-width: 160px;
+  }
+  .bubble-user { top: 8%; right: -4%; }
+  .bubble-reply { top: 24%; right: -8%; color: var(--cyan); }
+  @media (max-width: 960px) { .chat-bubble { display: none; } }
+
+  .status-card {
+    position: absolute; bottom: 8%; left: -6%; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; font-family: var(--mono); font-size: 10px; z-index: 3;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
+  }
+  .status-card .status-title { color: var(--text-faint); letter-spacing: 0.08em; margin-bottom: 8px; }
+  .status-row { display: flex; justify-content: space-between; gap: 16px; color: var(--text-dim); padding: 2px 0; }
+  .status-row::before { content: '●'; color: var(--success); margin-right: 5px; }
+  @media (max-width: 960px) { .status-card { display: none; } }
+
+  /* ---------- Sections ---------- */
+  .section { padding: 56px 0; }
+  .section-title { text-align: center; font-family: var(--display); font-size: clamp(20px, 4vw, 28px); font-weight: 600; margin: 0 0 36px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .card {
+    background: var(--panel); padding: 22px;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 0.5s ease, transform 0.5s ease, background 0.2s ease;
+  }
+  .card.in-view { opacity: 1; transform: translateY(0); }
+  .card:hover { background: #0E1B28; }
+  .card[data-feature] { cursor: pointer; }
+  .card .feat-icon { font-size: 22px; margin-bottom: 10px; }
+  .card h3 { margin: 8px 0 6px; font-size: 15.5px; font-family: var(--display); font-weight: 600; color: var(--text); }
+  .card p { margin: 0; font-size: 13px; color: var(--text-dim); }
+  .card .learn-more { display: block; margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--cyan-dim); }
+  .card:hover .learn-more { color: var(--cyan); }
+
+  /* ---------- Feature detail modal ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(2,4,10,0.75);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+    max-width: 440px; width: 100%; padding: 30px;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.2s ease;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6);
+  }
+  .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+  .modal-icon { font-size: 30px; margin-bottom: 14px; }
+  .modal-box h3 { font-family: var(--display); font-size: 19px; margin: 0 0 12px; color: var(--text); }
+  .modal-box p { color: var(--text-dim); font-size: 14px; margin: 0 0 16px; }
+  .modal-example {
+    font-family: var(--mono); font-size: 12.5px; color: var(--cyan);
+    background: #081019; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 18px;
+  }
+  .modal-example::before { content: '> '; color: var(--violet); }
+  .modal-close {
+    display: inline-block; background: none; border: 1px solid var(--border); color: var(--text-dim);
+    font-family: var(--display); font-size: 13px; padding: 9px 20px; border-radius: 8px;
+    cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .modal-close:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ---------- Screenshots ---------- */
+  .screens-scroll { display: flex; gap: 16px; overflow-x: auto; padding: 8px 4px 16px; scroll-snap-type: x mandatory; }
+  .screens-scroll::-webkit-scrollbar { height: 6px; }
+  .screens-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .mini-phone {
+    flex: 0 0 160px; scroll-snap-align: start; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 20px; padding: 16px 12px; text-align: center;
+    opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .mini-phone.in-view { opacity: 1; transform: translateY(0); }
+  .mini-phone .mp-title { font-family: var(--display); color: var(--cyan); font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+  .mini-phone .mp-icon { font-size: 28px; margin: 12px 0; }
+  .mini-phone .mp-caption { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .mini-phone .mp-result { font-family: var(--mono); font-size: 10px; color: var(--success); margin-top: 4px; }
+
+  /* ---------- Installation steps ---------- */
+  .steps-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-bottom: 26px; }
+  .step { flex: 1; min-width: 130px; text-align: center; }
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--cyan-dim); color: var(--cyan);
+    font-family: var(--mono); font-size: 12px; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+  }
+  .step-icon { font-size: 22px; margin-bottom: 8px; }
+  .step h4 { font-family: var(--display); font-size: 14px; margin: 0 0 6px; color: var(--text); }
+  .step p { font-size: 12px; color: var(--text-dim); margin: 0; }
+
+  .warning-box {
+    border: 1px solid var(--warning); background: rgba(255,179,0,0.06); border-radius: 10px;
+    padding: 14px 20px; text-align: center; font-size: 13px; color: var(--text-dim);
+  }
+  .warning-box strong { color: var(--warning); }
+
+  .perm-note { text-align: center; color: var(--text-faint); font-size: 12.5px; margin-top: 22px; font-family: var(--mono); }
+
+  /* ---------- FAQ ---------- */
+  .faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 720px; margin: 0 auto; }
+  .faq-item { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 4px 20px; }
+  .faq-item summary { cursor: pointer; padding: 15px 0; font-family: var(--display); font-weight: 600; font-size: 15px; color: var(--text); list-style: none; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after { content: '+'; float: right; color: var(--cyan); font-size: 18px; }
+  .faq-item[open] summary::after { content: '−'; }
+  .faq-item p { color: var(--text-dim); font-size: 13.5px; padding-bottom: 18px; margin: 0; }
+
+  /* ---------- Final CTA ---------- */
+  .cta-box {
+    display: flex; align-items: center; gap: 36px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 18px; padding: 40px; flex-wrap: wrap; justify-content: center;
+  }
+  .cta-box .reactor-mini { flex: 0 0 auto; width: 90px; height: 90px; }
+  .cta-copy { flex: 1; min-width: 240px; }
+  .cta-copy h2 { font-family: var(--display); font-size: 24px; margin: 0 0 8px; }
+  .cta-copy p { color: var(--text-dim); margin: 0 0 18px; font-size: 14px; }
+  .cta-stats { display: flex; flex-direction: column; gap: 12px; font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  .cta-stats strong { color: var(--text); display: block; font-family: var(--display); font-size: 13px; margin-bottom: 1px; }
+
+  footer { text-align: center; padding: 30px 0 56px; border-top: 1px solid var(--border); margin-top: 20px; }
+  footer .flogo { font-family: var(--display); font-weight: 700; color: var(--cyan); font-size: 15px; margin-bottom: 8px; }
+  footer .fcopy { color: var(--text-faint); font-size: 12.5px; font-family: var(--mono); }
+  footer .flinks { margin-top: 10px; font-size: 13px; }
+  footer .flinks a { color: var(--cyan-dim); text-decoration: none; margin: 0 8px; }
+  footer .flinks a:hover { color: var(--cyan); }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- Reactor defined once, reused everywhere via <use> -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <radialGradient id="bloomGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="particleGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <symbol id="reactorSymbol" viewBox="0 0 160 160">
+      <circle class="bloom" cx="80" cy="80" r="78" fill="url(#bloomGrad)"/>
+      <g class="spokes" stroke="#00D4FF" stroke-width="1" opacity="0.28">
+        <line x1="118" y1="80" x2="140" y2="80"/>
+        <line x1="106.9" y1="106.9" x2="122.4" y2="122.4"/>
+        <line x1="80" y1="118" x2="80" y2="140"/>
+        <line x1="53.1" y1="106.9" x2="37.6" y2="122.4"/>
+        <line x1="42" y1="80" x2="20" y2="80"/>
+        <line x1="53.1" y1="53.1" x2="37.6" y2="37.6"/>
+        <line x1="80" y1="42" x2="80" y2="20"/>
+        <line x1="106.9" y1="53.1" x2="122.4" y2="37.6"/>
+      </g>
+      <circle class="ring-outer" cx="80" cy="80" r="70" fill="none" stroke="#00D4FF" stroke-width="2" stroke-dasharray="7 12" opacity="0.55"/>
+      <g class="teeth" fill="#00D4FF" opacity="0.65">
+        <polygon points="141.85,75.68 141.85,84.32 133,80"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(18 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(36 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(54 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(72 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(90 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(108 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(126 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(144 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(162 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(180 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(198 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(216 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(234 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(252 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(270 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(288 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(306 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(324 80 80)"/>
+        <polygon points="141.85,75.68 141.85,84.32 133,80" transform="rotate(342 80 80)"/>
+      </g>
+      <g class="particles">
+        <circle cx="150" cy="80" r="6" fill="url(#particleGrad)"/>
+        <circle cx="150" cy="80" r="1.5" fill="#ffffff"/>
+        <circle cx="45" cy="140.6" r="6" fill="url(#particleGrad)"/>
+        <circle cx="45" cy="140.6" r="1.5" fill="#ffffff"/>
+        <circle cx="45" cy="19.4" r="6" fill="url(#particleGrad)"/>
+        <circle cx="45" cy="19.4" r="1.5" fill="#ffffff"/>
+      </g>
+      <circle class="ring-mid" cx="80" cy="80" r="53" fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-dasharray="3 8" opacity="0.7"/>
+      <polygon class="hex-core" points="106,80 93,102.52 67,102.52 54,80 67,57.48 93,57.48" fill="none" stroke="#00D4FF" stroke-width="1.2" opacity="0.55"/>
+      <g class="blades" fill="#00D4FF" opacity="0.5">
+        <path d="M80,80 Q92,72 104,80 Q92,88 80,80 Z"/>
+        <path d="M80,80 Q92,72 104,80 Q92,88 80,80 Z" transform="rotate(120 80 80)"/>
+        <path d="M80,80 Q92,72 104,80 Q92,88 80,80 Z" transform="rotate(240 80 80)"/>
+      </g>
+      <circle class="core" cx="80" cy="80" r="20" fill="#00D4FF" opacity="0.9"/>
+      <circle cx="80" cy="80" r="7" fill="#ffffff" opacity="0.95"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo">
+      <svg viewBox="0 0 160 160"><use href="#reactorSymbol"/></svg>
+      JARVIS
+    </a>
+    <nav class="nav-links">
+      <a href="#top">Home</a>
+      <a href="#features">Features</a>
+      <a href="#installation">Installation</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/naveen-anon/JarvisAI" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <a class="btn-nav" href="https://github.com/naveen-anon/JarvisAI/releases/latest/download/app-debug.apk">⬇ Download APK</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow-badge">YOUR PERSONAL AI ASSISTANT</div>
+        <h1>JARVIS <span>AI</span></h1>
+        <p class="hero-sub">Your Personal AI Assistant for Android</p>
+        <p class="hero-desc">Voice-controlled. Privacy-focused. Smart. Built to make your Android experience feel futuristic — and it works fully offline, in Hindi and English.</p>
+        <div class="hero-ctas">
+          <a class="btn-primary" href="https://github.com/naveen-anon/JarvisAI/releases/latest/download/app-debug.apk">⬇ Download APK</a>
+          <a class="btn-outline" href="https://github.com/naveen-anon/JarvisAI" target="_blank" rel="noopener">Source on GitHub</a>
+        </div>
+        <div class="trust-row">
+          <span>☁ 100% Offline</span>
+          <span>🛡 Privacy First</span>
+          <span>&lt;/&gt; Open Source</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="phone-mock">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-header">JARVIS</div>
+            <div class="reactor-mini"><svg viewBox="0 0 160 160"><use href="#reactorSymbol"/></svg></div>
+            <div class="phone-status">Listening…</div>
+            <div class="mini-wave">
+              <span style="animation-duration:0.9s"></span><span style="animation-duration:1.1s"></span>
+              <span style="animation-duration:0.8s"></span><span style="animation-duration:1.2s"></span>
+              <span style="animation-duration:1s"></span><span style="animation-duration:0.9s"></span>
+              <span style="animation-duration:1.1s"></span>
+            </div>
+            <div class="phone-input">How can I help you? 🎙</div>
+          </div>
+        </div>
+        <div class="chat-bubble bubble-user">"Hey Jarvis"</div>
+        <div class="chat-bubble bubble-reply">Yes sir, how can I help you?</div>
+        <div class="status-card">
+          <div class="status-title">SYSTEM STATUS</div>
+          <div class="status-row"><span>BATTERY</span><span>82%</span></div>
+          <div class="status-row"><span>MEMORY</span><span>2.1 GB</span></div>
+          <div class="status-row"><span>STORAGE</span><span>64%</span></div>
+          <div class="status-row"><span>SECURITY</span><span>SAFE</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section wrap">
+    <h2 class="section-title">Powerful Features</h2>
+    <div class="grid">
+      <div class="card" data-feature="voice"><div class="feat-icon">🎙️</div><h3>Voice Commands</h3><p>Control your phone with natural voice commands, fully offline.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="hindi"><div class="feat-icon">🌐</div><h3>Hindi + English</h3><p>Supports Hindi, English, and Hinglish word order both ways.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="smart"><div class="feat-icon">🧠</div><h3>Smart Assistant</h3><p>Understands context and learns your habits over time.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="calls"><div class="feat-icon">📞</div><h3>Calls &amp; SMS</h3><p>Make calls and send messages using just your voice.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="flashlight"><div class="feat-icon">🔦</div><h3>Flashlight Control</h3><p>Turn it on/off hands-free, instantly.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="alarms"><div class="feat-icon">⏰</div><h3>Alarms &amp; Reminders</h3><p>Set alarms and timers without touching the screen.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="camera"><div class="feat-icon">📷</div><h3>Camera Assistance</h3><p>Read text, recognize objects — all processed on-device.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="privacy"><div class="feat-icon">🔒</div><h3>Privacy Focused</h3><p>Your data stays on your phone. Nothing is uploaded by default.</p><span class="learn-more">Learn more →</span></div>
+      <div class="card" data-feature="offline"><div class="feat-icon">📴</div><h3>Offline First</h3><p>Core features work with zero internet connection.</p><span class="learn-more">Learn more →</span></div>
+    </div>
+  </section>
+
+  <section id="screenshots" class="section wrap">
+    <h2 class="section-title">See Jarvis in Action</h2>
+    <div class="screens-scroll">
+      <div class="mini-phone"><div class="mp-title">JARVIS</div><div class="mp-icon">🎙️</div><div class="mp-caption">Listening…</div></div>
+      <div class="mini-phone"><div class="mp-title">"open youtube"</div><div class="mp-icon">▶️</div><div class="mp-caption">Opening YouTube…</div></div>
+      <div class="mini-phone"><div class="mp-title">"flashlight jalao"</div><div class="mp-icon">🔦</div><div class="mp-result">Flashlight ON ✓</div></div>
+      <div class="mini-phone"><div class="mp-title">"mom ko message karo"</div><div class="mp-icon">💬</div><div class="mp-result">Message sent to Mom ✓</div></div>
+      <div class="mini-phone"><div class="mp-title">"set alarm for 7 AM"</div><div class="mp-icon">⏰</div><div class="mp-result">Alarm set for 7:00 AM ✓</div></div>
+      <div class="mini-phone"><div class="mp-title">Quick Menu</div><div class="mp-icon">⚙️</div><div class="mp-caption">Calls · Messages · Apps · Alarms</div></div>
+    </div>
+  </section>
+
+  <section id="installation" class="section wrap">
+    <h2 class="section-title">Install Jarvis AI</h2>
+    <div class="steps-row">
+      <div class="step"><div class="step-num">1</div><div class="step-icon">⬇️</div><h4>Download</h4><p>Get the latest APK from the official GitHub releases.</p></div>
+      <div class="step"><div class="step-num">2</div><div class="step-icon">📲</div><h4>Install</h4><p>Open the APK and allow installation when Android asks.</p></div>
+      <div class="step"><div class="step-num">3</div><div class="step-icon">🛡️</div><h4>Permissions</h4><p>Grant only the permissions required for the features you use.</p></div>
+      <div class="step"><div class="step-num">4</div><div class="step-icon">🚀</div><h4>Launch</h4><p>Open Jarvis AI and complete the quick initial setup.</p></div>
+      <div class="step"><div class="step-num">5</div><div class="step-icon">🎙️</div><h4>Wake Jarvis</h4><p>Say "Hey Jarvis" and start talking.</p></div>
+    </div>
+    <div class="warning-box"><strong>⚠ Heads up —</strong> Jarvis AI is Android-only. For security, download APKs only from the official GitHub release page, never a third-party mirror.</div>
+  </section>
+
+  <section class="section wrap">
+    <h2 class="section-title">Permissions Explained</h2>
+    <div class="grid">
+      <div class="card"><div class="feat-icon">🎙️</div><h3>Microphone</h3><p>For listening to your voice commands.</p></div>
+      <div class="card"><div class="feat-icon">📞</div><h3>Phone</h3><p>For calling features and call handling.</p></div>
+      <div class="card"><div class="feat-icon">💬</div><h3>SMS</h3><p>For sending and reading messages you ask it to send.</p></div>
+      <div class="card"><div class="feat-icon">📷</div><h3>Camera</h3><p>For on-device text reading and object detection.</p></div>
+      <div class="card"><div class="feat-icon">🔦</div><h3>Hardware</h3><p>For controlling the flashlight.</p></div>
+      <div class="card"><div class="feat-icon">💾</div><h3>Storage</h3><p>For saving your notes and settings locally.</p></div>
+    </div>
+    <p class="perm-note">We only ask for a permission when the corresponding feature actually needs it.</p>
+  </section>
+
+  <section id="faq" class="section wrap">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Is Jarvis AI free?</summary>
+        <p>Yes — completely free and open source. You can read every line of code on GitHub.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Does it really work without internet?</summary>
+        <p>Yes for most commands — calls, SMS, apps, flashlight, volume, alarms, and more all run
+        entirely on-device. Internet is only used as a fallback for open-ended conversation.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is my data sent anywhere?</summary>
+        <p>Your contacts, notes, and habits stay stored locally on your phone. Nothing is uploaded
+        unless a command specifically needs the cloud fallback (general conversation only).</p>
+      </details>
+      <details class="faq-item">
+        <summary>What Android version do I need?</summary>
+        <p>Android 8.0 (Oreo) or newer.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Can I contribute?</summary>
+        <p>Absolutely — it's open source. Pull requests, issues, and feature ideas are all welcome
+        on GitHub.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="cta-box">
+      <div class="reactor-mini"><svg viewBox="0 0 160 160"><use href="#reactorSymbol"/></svg></div>
+      <div class="cta-copy">
+        <h2>Ready to Activate Jarvis?</h2>
+        <p>Download now and experience the future of voice assistance on your Android.</p>
+        <div class="hero-ctas">
+          <a class="btn-primary" href="https://github.com/naveen-anon/JarvisAI/releases/latest/download/app-debug.apk">⬇ Download APK</a>
+          <a class="btn-outline" href="https://github.com/naveen-anon/JarvisAI" target="_blank" rel="noopener">View on GitHub</a>
+        </div>
+      </div>
+      <div class="cta-stats">
+        <div>&lt;/&gt; <strong>Open Source</strong> 100% Free</div>
+        <div>⟳ <strong>Active Development</strong> Regular Updates</div>
+        <div>◎ <strong>Community Driven</strong> Join &amp; Contribute</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-overlay" id="featureModal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon"></div>
+    <h3 id="modalTitle"></h3>
+    <p id="modalDesc"></p>
+    <div class="modal-example" id="modalExample"></div>
+    <button class="modal-close" id="modalClose">Close</button>
+  </div>
+</div>
+
+<footer class="wrap">
+  <div class="flogo">JARVIS AI</div>
+  <div class="fcopy">© 2026 Jarvis AI. All rights reserved.</div>
+  <div class="flinks">
+    <a href="https://github.com/naveen-anon/JarvisAI">Source</a>·
+    <a href="https://github.com/naveen-anon/JarvisAI/issues">Issues</a>·
+    <a href="https://github.com/naveen-anon/JarvisAI/releases">Releases</a>
+  </div>
+</footer>
+
+<script>
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    var revealTargets = document.querySelectorAll('.card, .mini-phone');
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry, i) {
+        if (entry.isIntersecting) {
+          setTimeout(function() { entry.target.classList.add('in-view'); }, i * 50);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealTargets.forEach(function(el) { observer.observe(el); });
+  } else {
+    document.querySelectorAll('.card, .mini-phone').forEach(function(c) { c.classList.add('in-view'); });
+  }
+
+  // Feature detail modal — click a feature card to see a fuller explanation.
+  var featureDetails = {
+    voice: {
+      icon: '🎙️', title: 'Voice Commands',
+      desc: 'Just speak naturally — no rigid syntax to memorize. Jarvis parses what you mean and runs it entirely on-device, without sending your voice anywhere.',
+      example: 'flashlight jalao'
+    },
+    hindi: {
+      icon: '🌐', title: 'Hindi + English',
+      desc: 'Speak pure Hindi, pure English, or mix them the way you actually talk. Jarvis recognizes both word orders for the same command.',
+      example: 'priya ko call karo  —or—  call priya'
+    },
+    smart: {
+      icon: '🧠', title: 'Smart Assistant (Auto Learn Mode)',
+      desc: 'Jarvis quietly learns which apps you open, who you call most, and your daily patterns — then proactively suggests helpful actions without you asking.',
+      example: '"my routine" → recaps your habits'
+    },
+    calls: {
+      icon: '📞', title: 'Calls & SMS',
+      desc: 'Place calls and send texts hands-free, in either language and word order. WhatsApp messages get composed with the text ready — just tap send.',
+      example: 'meri sister ko whatsapp pe sms karo ki khana kya banaya hai'
+    },
+    flashlight: {
+      icon: '🔦', title: 'Flashlight Control',
+      desc: 'One phrase, instant toggle — no fumbling for the quick-settings panel in the dark.',
+      example: 'torch on karo'
+    },
+    alarms: {
+      icon: '⏰', title: 'Alarms & Reminders',
+      desc: 'Set alarms and timers straight from natural phrases, parsed on-device.',
+      example: 'set alarm for 7:30  /  5 minute timer laga do'
+    },
+    camera: {
+      icon: '📷', title: 'Camera Assistance',
+      desc: 'On-device OCR reads text aloud, and object detection identifies what\'s in frame — via ML Kit, with no photo ever leaving your phone.',
+      example: 'read this text  /  what do you see'
+    },
+    privacy: {
+      icon: '🔒', title: 'Privacy Focused',
+      desc: 'Contacts, notes, habits, and your remembered notes are stored locally. The cloud is only used as a fallback for open-ended conversation Jarvis can\'t handle offline.',
+      example: 'no cloud call unless it\'s truly needed'
+    },
+    offline: {
+      icon: '📴', title: 'Offline First',
+      desc: 'Turn on airplane mode — most of Jarvis still works. Calls, SMS, apps, flashlight, alarms, and volume don\'t need a network connection at all.',
+      example: 'works even with zero bars'
+    }
+  };
+
+  var modal = document.getElementById('featureModal');
+  var modalIcon = document.getElementById('modalIcon');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalDesc = document.getElementById('modalDesc');
+  var modalExample = document.getElementById('modalExample');
+
+  function openModal(key) {
+    var d = featureDetails[key];
+    if (!d) return;
+    modalIcon.textContent = d.icon;
+    modalTitle.textContent = d.title;
+    modalDesc.textContent = d.desc;
+    modalExample.textContent = d.example;
+    modal.classList.add('open');
+  }
+  function closeModal() { modal.classList.remove('open'); }
+
+  document.querySelectorAll('.card[data-feature]').forEach(function(card) {
+    card.addEventListener('click', function() { openModal(card.getAttribute('data-feature')); });
+  });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>

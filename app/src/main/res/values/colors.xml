@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matched to Arc Reactor PNG -->
+    <color name="hud_bg">#020810</color>
+    <color name="hud_cyan">#00E5FF</color>
+    <color name="hud_cyan_bright">#9FD8F4</color>
+    <color name="hud_cyan_core">#E0F8FF</color>
+    <color name="hud_cyan_dim">#0A6E85</color>
+    <color name="hud_cyan_mid">#003060</color>
+    <color name="hud_amber">#FFB020</color>
+    <color name="hud_white">#E8F9FF</color>
+    <color name="hud_text_dim">#5C8A94</color>
+    <color name="hud_cyan_faint">#12222E</color>
+    <color name="ic_launcher_background">#020810</color>
+</resources>

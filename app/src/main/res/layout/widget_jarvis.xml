@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/widget_jarvis_bg"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/widgetTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="J.A.R.V.I.S"
+        android:textColor="#00E5FF"
+        android:textSize="11sp"
+        android:letterSpacing="0.15"
+        android:fontFamily="monospace"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widgetStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="SYSTEMS NOMINAL"
+        android:textColor="#5C8A94"
+        android:textSize="8sp"
+        android:fontFamily="monospace" />
+
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="4dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/widget_reactor_ring"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/widgetMicButton"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_mark42"
+            android:contentDescription="@string/app_name" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/widgetHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TAP TO LISTEN"
+        android:textColor="#00E5FF"
+        android:textSize="9sp"
+        android:letterSpacing="0.12"
+        android:fontFamily="monospace" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:text="NAVEEN KHATRI"
+        android:textColor="#1A3A4A"
+        android:textSize="7sp"
+        android:fontFamily="monospace" />
+</LinearLayout>

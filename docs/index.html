@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis AI — Hindi/English Voice Assistant for Android</title>
+<meta name="description" content="An open-source, offline-first Hindi/English voice assistant for Android. Control your phone by voice, no internet required.">
+<style>
+  :root {
+    --bg: #050A0F;
+    --panel: #0A1520;
+    --border: #12222E;
+    --cyan: #00D4FF;
+    --cyan-dim: #5C8A94;
+    --text: #E8F9FF;
+    --text-dim: #8FC7D6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrap { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 64px 24px 96px; }
+
+  header { text-align: center; margin-bottom: 56px; }
+  .reactor {
+    width: 88px; height: 88px; margin: 0 auto 24px;
+    border-radius: 50%;
+    border: 3px solid var(--cyan);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(0,212,255,0.35), inset 0 0 20px rgba(0,212,255,0.2);
+    font-size: 36px;
+  }
+  h1 {
+    font-size: clamp(28px, 6vw, 42px);
+    letter-spacing: 2px;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #fff, var(--cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .tagline { color: var(--text-dim); font-size: 17px; max-width: 480px; margin: 0 auto; }
+  .badges { display: flex; gap: 8px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); color: var(--cyan-dim);
+    font-family: monospace;
+  }
+
+  .cta { text-align: center; margin: 40px 0 64px; }
+  .btn-primary {
+    display: inline-block;
+    background: var(--cyan);
+    color: #001018;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 16px 36px;
+    border-radius: 10px;
+    font-size: 17px;
+    box-shadow: 0 0 30px rgba(0,212,255,0.4);
+    transition: transform 0.15s ease;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+  .cta-note { color: var(--cyan-dim); font-size: 13px; margin-top: 12px; font-family: monospace; }
+  .btn-secondary {
+    display: inline-block;
+    margin-top: 16px;
+    color: var(--text-dim);
+    text-decoration: underline;
+    font-size: 14px;
+  }
+
+  h2 {
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+    margin: 0 0 20px;
+    font-family: monospace;
+  }
+  .section { margin-bottom: 56px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card .icon { font-size: 22px; margin-bottom: 10px; }
+  .card h3 { margin: 0 0 6px; font-size: 15px; color: var(--text); }
+  .card p { margin: 0; font-size: 13px; color: var(--text-dim); }
+
+  .quote {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-family: monospace;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .quote strong { color: var(--cyan); }
+
+  footer {
+    text-align: center;
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--cyan-dim);
+    font-size: 13px;
+    font-family: monospace;
+  }
+  footer a { color: var(--cyan); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="wrap">
+
+  <header>
+    <div class="reactor">🤖</div>
+    <h1>JARVIS AI</h1>
+    <p class="tagline">An open-source Hindi/English voice assistant for Android — works fully offline, no cloud dependency required.</p>
+    <div class="badges">
+      <span class="badge">100% Open Source</span>
+      <span class="badge">Offline-First</span>
+      <span class="badge">Hindi + English</span>
+      <span class="badge">Kotlin</span>
+    </div>
+  </header>
+
+  <div class="cta">
+    <a class="btn-primary" href="https://github.com/naveen-anon/JarvisAI/releases/latest/download/app-debug.apk">
+      ⬇ Download APK
+    </a>
+    <div class="cta-note">Android 8.0+ · You'll need to allow "install from unknown sources"</div>
+    <br>
+    <a class="btn-secondary" href="https://github.com/naveen-anon/JarvisAI">View source on GitHub →</a>
+  </div>
+
+  <div class="section">
+    <h2>Try Saying</h2>
+    <div class="quote"><strong>"Hey Jarvis, Priya ko call karo"</strong> — calls a contact, Hindi word order</div>
+    <br>
+    <div class="quote"><strong>"Jarvis, what's the weather?"</strong> — live weather for your location</div>
+    <br>
+    <div class="quote"><strong>"Jarvis, meri sister ko whatsapp pe sms karo ki khana kya banaya hai"</strong> — opens WhatsApp with the message ready to send</div>
+  </div>
+
+  <div class="section">
+    <h2>Features</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="icon">🎙️</div>
+        <h3>Offline voice commands</h3>
+        <p>Calls, SMS, apps, flashlight, volume, alarms — all work in airplane mode.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🧠</div>
+        <h3>Auto Learn Mode</h3>
+        <p>Learns your habits over time and proactively suggests helpful actions.</p>
+      </div>
+      <div class="card">
+        <div class="icon">👁️</div>
+        <h3>On-device vision</h3>
+        <p>Reads text (OCR), recognizes objects and faces — no photo ever leaves your phone.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🔒</div>
+        <h3>Voice authentication</h3>
+        <p>Optional voice-lock so only your voice can run commands.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📱</div>
+        <h3>Home screen widget</h3>
+        <p>One tap to start listening — no need to open the app.</p>
+      </div>
+      <div class="card">
+        <div class="icon">💬</div>
+        <h3>WhatsApp integration</h3>
+        <p>Compose WhatsApp messages by voice, in Hindi or English.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Why Offline-First?</h2>
+    <p style="color: var(--text-dim); font-size: 14px;">
+      Most voice assistants send everything to the cloud. Jarvis handles the vast majority of
+      commands entirely on-device — your calls, contacts, and habits stay on your phone.
+      Cloud (Gemini) is only used as a fallback for open-ended conversation.
+    </p>
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/naveen-anon">naveen-anon</a> ·
+    <a href="https://github.com/naveen-anon/JarvisAI">Source</a> ·
+    <a href="https://github.com/naveen-anon/JarvisAI/issues">Report an issue</a>
+  </footer>
+
+</div>
+</body>
+</html>

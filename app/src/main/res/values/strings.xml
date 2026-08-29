@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">J.A.R.V.I.S</string>
+    <string name="accessibility_service_description">
+        Allows Jarvis to read on-screen content and perform taps you request by voice.
+    </string>
+</resources>

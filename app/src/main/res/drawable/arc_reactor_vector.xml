@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- High-detail Arc Reactor VectorDrawable (Iron Man style). No rotation. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Deep dark base -->
+    <path
+        android:pathData="M256,16 A240,240 0 1,1 255.9,16 Z"
+        android:fillColor="#020810" />
+
+    <!-- Outer soft ring -->
+    <path
+        android:pathData="M256,28 A228,228 0 1,1 255.9,28 Z"
+        android:fillColor="#00000000"
+        android:strokeWidth="14"
+        android:strokeColor="#003040" />
+
+    <!-- Bright outer rim -->
+    <path
+        android:pathData="M256,36 A220,220 0 1,1 255.9,36 Z"
+        android:fillColor="#00000000"
+        android:strokeWidth="5"
+        android:strokeColor="#00E5FF" />
+
+    <!-- Segmented outer teeth -->
+    <path
+        android:pathData="M256,48 L256,72
+                          M292,52 L286,74
+                          M326,66 L314,86
+                          M354,90 L338,106
+                          M374,122 L354,132
+                          M386,160 L364,164
+                          M390,200 L366,200
+                          M386,240 L364,236
+                          M374,278 L354,268
+                          M354,310 L338,294
+                          M326,334 L314,314
+                          M292,348 L286,326
+                          M256,352 L256,328
+                          M220,348 L226,326
+                          M186,334 L198,314
+                          M158,310 L174,294
+                          M138,278 L158,268
+                          M126,240 L148,236
+                          M122,200 L146,200
+                          M126,160 L148,164
+                          M138,122 L158,132
+                          M158,90 L174,106
+                          M186,66 L198,86
+                          M220,52 L226,74"
+        android:strokeWidth="5"
+        android:strokeColor="#00D4F0"
+        android:strokeLineCap="round" />
+
+    <!-- Second structural ring -->
+    <path
+        android:pathData="M256,88 A168,168 0 1,1 255.9,88 Z"
+        android:fillColor="#00000000"
+        android:strokeWidth="8"
+        android:strokeColor="#0A2838" />
+    <path
+        android:pathData="M256,92 A164,164 0 1,1 255.9,92 Z"
+        android:fillColor="#00000000"
+        android:strokeWidth="3"
+        android:strokeColor="#00C8E8" />
+
+    <!-- Inner ring -->
+    <path
+        android:pathData="M256,128 A128,128 0 1,1 255.9,128 Z"
+        android:fillColor="#00000000"
+        android:strokeWidth="7"
+        android:strokeColor="#082030" />
+    <path
+        android:pathData="M256,132 A124,124 0 1,1 255.9,132 Z"
+        android:fillColor="#00000000"
+        android:strokeWidth="2.5"
+        android:strokeColor="#00E5FF" />
+
+    <!-- Radial energy spokes -->
+    <path
+        android:pathData="M256,132 L256,92
+                          M340,176 L372,144
+                          M372,256 L340,256
+                          M340,336 L372,368
+                          M256,380 L256,420
+                          M172,336 L140,368
+                          M140,256 L172,256
+                          M172,176 L140,144"
+        android:strokeWidth="6"
+        android:strokeColor="#00B0D0"
+        android:strokeLineCap="round" />
+
+    <!-- Core triangle dark -->
+    <path
+        android:pathData="M256,148 L380,348 L132,348 Z"
+        android:fillColor="#001820" />
+
+    <!-- Core triangle main -->
+    <path
+        android:pathData="M256,160 L364,336 L148,336 Z"
+        android:fillColor="#003848"
+        android:strokeWidth="6"
+        android:strokeColor="#00E5FF" />
+
+    <!-- Bright inner triangle -->
+    <path
+        android:pathData="M256,200 L320,308 L192,308 Z"
+        android:fillColor="#00E5FF" />
+
+    <!-- Hottest center -->
+    <path
+        android:pathData="M256,230 L288,286 L224,286 Z"
+        android:fillColor="#E8FFFF" />
+
+    <!-- Thin energy ring -->
+    <path
+        android:pathData="M256,170 A90,90 0 1,1 255.9,170 Z"
+        android:fillColor="#00000000"
+        android:strokeWidth="2"
+        android:strokeColor="#60F0FF" />
+
+    <!-- LED dots -->
+    <path android:pathData="M256,96 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#A0FFFF" />
+    <path android:pathData="M360,156 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#A0FFFF" />
+    <path android:pathData="M360,356 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#A0FFFF" />
+    <path android:pathData="M256,416 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#A0FFFF" />
+    <path android:pathData="M152,356 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#A0FFFF" />
+    <path android:pathData="M152,156 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#A0FFFF" />
+
+</vector>

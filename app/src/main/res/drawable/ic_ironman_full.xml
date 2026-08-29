@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Detailed Iron Man suit – classic Mark III / VII silhouette -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="280dp"
+    android:viewportWidth="200"
+    android:viewportHeight="280">
+
+    <!-- HELMET -->
+    <path android:pathData="M100,6 C70,6 52,20 48,42 L46,58 C46,68 52,74 62,78 L138,78 C148,74 154,68 154,58 L152,42 C148,20 130,6 100,6 Z"
+        android:fillColor="#C41E3A"/>
+    <path android:pathData="M100,14 C78,14 64,26 62,42 L60,56 C60,64 66,70 76,72 L124,72 C134,70 140,64 140,56 L138,42 C136,26 122,14 100,14 Z"
+        android:fillColor="#F5C518"/>
+    <path android:pathData="M70,40 L92,40 L92,50 L70,50 Z" android:fillColor="#0A1520"/>
+    <path android:pathData="M108,40 L130,40 L130,50 L108,50 Z" android:fillColor="#0A1520"/>
+    <path android:pathData="M73,43 L89,43 L89,47 L73,47 Z" android:fillColor="#00E5FF"/>
+    <path android:pathData="M111,43 L127,43 L127,47 L111,47 Z" android:fillColor="#00E5FF"/>
+    <path android:pathData="M85,58 L115,58 L113,64 L87,64 Z" android:fillColor="#B8860B"/>
+    <path android:pathData="M52,30 L58,28 L56,55 L50,52 Z" android:fillColor="#9B1830"/>
+    <path android:pathData="M148,30 L142,28 L144,55 L150,52 Z" android:fillColor="#9B1830"/>
+
+    <!-- TORSO -->
+    <path android:pathData="M58,78 L142,78 L158,150 L42,150 Z" android:fillColor="#B71C1C"/>
+    <path android:pathData="M78,86 L122,86 L130,142 L70,142 Z" android:fillColor="#E8B923"/>
+    <path android:pathData="M100,112 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0" android:fillColor="#0A1A24"/>
+    <path android:pathData="M100,112 m-16,0 a16,16 0 1,1 32,0 a16,16 0 1,1 -32,0" android:fillColor="#0D3A4A"/>
+    <path android:pathData="M100,112 m-11,0 a11,11 0 1,1 22,0 a11,11 0 1,1 -22,0" android:fillColor="#00E5FF"/>
+    <path android:pathData="M100,112 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#E8FFFF"/>
+
+    <!-- SHOULDERS -->
+    <path android:pathData="M18,72 L58,78 L56,105 L14,112 Z" android:fillColor="#C41E3A"/>
+    <path android:pathData="M24,78 L52,82 L50,100 L22,105 Z" android:fillColor="#F5C518"/>
+    <path android:pathData="M142,78 L182,72 L186,112 L144,105 Z" android:fillColor="#C41E3A"/>
+    <path android:pathData="M148,82 L176,78 L178,105 L150,100 Z" android:fillColor="#F5C518"/>
+
+    <!-- ARMS -->
+    <path android:pathData="M14,112 L52,105 L46,175 L10,180 Z" android:fillColor="#B71C1C"/>
+    <path android:pathData="M20,118 L46,112 L42,168 L18,172 Z" android:fillColor="#E8B923"/>
+    <path android:pathData="M148,105 L186,112 L190,180 L154,175 Z" android:fillColor="#B71C1C"/>
+    <path android:pathData="M154,112 L180,118 L182,172 L158,168 Z" android:fillColor="#E8B923"/>
+
+    <!-- HANDS / REPULSORS -->
+    <path android:pathData="M6,180 L30,180 L30,208 L6,208 Z" android:fillColor="#C41E3A"/>
+    <path android:pathData="M11,186 L25,186 L25,200 L11,200 Z" android:fillColor="#00E5FF"/>
+    <path android:pathData="M170,180 L194,180 L194,208 L170,208 Z" android:fillColor="#C41E3A"/>
+    <path android:pathData="M175,186 L189,186 L189,200 L175,200 Z" android:fillColor="#00E5FF"/>
+
+    <!-- BELT -->
+    <path android:pathData="M48,150 L152,150 L148,164 L52,164 Z" android:fillColor="#7A1522"/>
+    <path android:pathData="M68,153 L132,153 L130,161 L70,161 Z" android:fillColor="#F5C518"/>
+    <path android:pathData="M92,154 L108,154 L108,160 L92,160 Z" android:fillColor="#0A1A24"/>
+
+    <!-- LEGS -->
+    <path android:pathData="M52,164 L96,164 L93,230 L50,230 Z" android:fillColor="#B71C1C"/>
+    <path android:pathData="M60,172 L90,172 L88,224 L58,224 Z" android:fillColor="#E8B923"/>
+    <path android:pathData="M104,164 L148,164 L150,230 L107,230 Z" android:fillColor="#B71C1C"/>
+    <path android:pathData="M110,172 L140,172 L142,224 L112,224 Z" android:fillColor="#E8B923"/>
+    <path android:pathData="M58,200 L90,200 L90,214 L58,214 Z" android:fillColor="#C41E3A"/>
+    <path android:pathData="M110,200 L142,200 L142,214 L110,214 Z" android:fillColor="#C41E3A"/>
+
+    <!-- BOOTS -->
+    <path android:pathData="M46,230 L96,230 L102,272 L40,272 Z" android:fillColor="#C41E3A"/>
+    <path android:pathData="M54,238 L92,238 L96,265 L48,265 Z" android:fillColor="#F5C518"/>
+    <path android:pathData="M104,230 L154,230 L160,272 L98,272 Z" android:fillColor="#C41E3A"/>
+    <path android:pathData="M108,238 L150,238 L152,265 L104,265 Z" android:fillColor="#F5C518"/>
+    <path android:pathData="M55,268 L90,268 L88,274 L57,274 Z" android:fillColor="#00E5FF"/>
+    <path android:pathData="M110,268 L145,268 L143,274 L112,274 Z" android:fillColor="#00E5FF"/>
+</vector>
