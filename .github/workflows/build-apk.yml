@@ -43,7 +43,14 @@ jobs:
       - name: Rename APK to Jarvis.apk
         run: |
           mkdir -p app/build/outputs/apk/debug/renamed
-          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/renamed/Jarvis.apk
+          APK_PATH=$(find app/build/outputs/apk/debug -maxdepth 1 -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found in app/build/outputs/apk/debug"
+            ls -la app/build/outputs/apk/debug || true
+            exit 1
+          fi
+          echo "Found APK: $APK_PATH"
+          cp "$APK_PATH" app/build/outputs/apk/debug/renamed/Jarvis.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
