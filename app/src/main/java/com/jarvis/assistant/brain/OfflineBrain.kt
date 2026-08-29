@@ -357,7 +357,6 @@ class OfflineBrain(
             val voiceType = when {
                 "male" in cmd -> { settings.setVoiceType("male"); "male" }
                 "female" in cmd -> { settings.setVoiceType("female"); "female" }
-                "robot" in cmd -> { settings.setVoiceType("robot"); "robot" }
                 else -> settings.getVoiceType()
             }
             "Voice changed to $voiceType."

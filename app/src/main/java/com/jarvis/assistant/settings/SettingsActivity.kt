@@ -264,10 +264,10 @@ class SettingsActivity : AppCompatActivity() {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER
             }
-            val icons = mapOf("male" to R.drawable.ic_person, "female" to R.drawable.ic_person, "robot" to R.drawable.ic_robot)
+            val icons = mapOf("male" to R.drawable.ic_person, "female" to R.drawable.ic_person)
             fun refreshChips(current: String) {
                 voiceRow.removeAllViews()
-                listOf("male", "female", "robot").forEach { type ->
+                listOf("male", "female").forEach { type ->
                     voiceRow.addView(voiceTypeChip(type, icons[type] ?: R.drawable.ic_person, type == current) {
                         settings.setVoiceType(type)
                         voiceTypeLabel.text = "Current: $type"

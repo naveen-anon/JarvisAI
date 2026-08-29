@@ -15,7 +15,8 @@ import java.util.Locale
 /**
  * Speaks replies with upgraded voice pipeline:
  * 1. **ElevenLabs** (human / cinematic) when API key is set + online + cloud voice enabled
- * 2. **Android system TTS** offline fallback — prefers British English male (MCU JARVIS tone)
+ * 2. **Android system TTS** offline fallback — actually searches for a matching-gender
+ *    system voice by name (male vs female), not just pitch-shifting one fixed voice.
  */
 class TextToSpeechHelper(context: Context) {
 
@@ -29,6 +30,7 @@ class TextToSpeechHelper(context: Context) {
     private var cloudJob: Job? = null
     private var voicePicked = false
     private var currentLangTag = "en-GB"
+    private var currentVoiceType = "male"
 
     private lateinit var tts: TextToSpeech
 
@@ -79,6 +81,8 @@ class TextToSpeechHelper(context: Context) {
 
     private fun pickBestVoice(langTag: String) {
         currentLangTag = langTag
+        currentVoiceType = settings.getVoiceType()
+        val genderPref = currentVoiceType
         try {
             val target = Locale.forLanguageTag(langTag.replace('_', '-'))
             val voices = tts.voices ?: emptySet()
@@ -109,19 +113,34 @@ class TextToSpeechHelper(context: Context) {
                 }
                 if (want.startsWith("en")) {
                     if (name.contains("british") || name.contains("gb") || name.contains("uk")) s += 20
-                    if (name.contains("male") || name.contains("daniel") || name.contains("george")
-                        || name.contains("arthur") || name.contains("ryan")
-                    ) s += 18
+
+                    if (genderPref == "female") {
+                        if (name.contains("female") || name.contains("woman") || name.contains("salli")
+                            || name.contains("amy") || name.contains("emma") || name.contains("kate")
+                            || name.contains("susan") || name.contains("victoria") || name.contains("samantha")
+                            || name.contains("karen") || name.contains("joanna") || name.contains("kimberly")
+                            || name.contains("ivy") || name.contains("olivia") || name.contains("serena")
+                            || name.contains("moira") || name.contains("tessa") || name.contains("fiona")
+                        ) s += 25
+                        if (name.contains("male") && !name.contains("female")) s -= 25
+                    } else {
+                        if (name.contains("male") && !name.contains("female")) s += 18
+                        if (name.contains("daniel") || name.contains("george") || name.contains("arthur")
+                            || name.contains("ryan") || name.contains("oliver") || name.contains("james")
+                        ) s += 18
+                        if (name.contains("female") || name.contains("woman")) s -= 25
+                    }
+
                     if (name.contains("network") || name.contains("enhanced") || name.contains("premium")) s += 10
                 }
-                if (name.contains("robot") || name.contains("funny") || name.contains("whisper")) s -= 40
+                if (name.contains("funny") || name.contains("whisper")) s -= 40
                 return s
             }
 
             val best = voices.maxByOrNull { score(it) }
             if (best != null && score(best) > 0) {
                 tts.voice = best
-                Log.d(TAG, "Offline voice: ${best.name} (${best.locale})")
+                Log.d(TAG, "Offline voice: ${best.name} (${best.locale}) [$genderPref]")
             } else {
                 if (tts.isLanguageAvailable(target) >= TextToSpeech.LANG_AVAILABLE) {
                     tts.language = target
@@ -166,7 +185,9 @@ class TextToSpeechHelper(context: Context) {
     private fun speakOffline(text: String) {
         eleven.stop()
         val lang = detectLangFor(text)
-        if (lang != currentLangTag || !voicePicked) pickBestVoice(lang)
+        if (lang != currentLangTag || !voicePicked || settings.getVoiceType() != currentVoiceType) {
+            pickBestVoice(lang)
+        }
         applyVoiceSettings()
         val spoken = text.replace("...", ", ").replace(" — ", ", ").replace(" – ", ", ")
         tts.speak(spoken, TextToSpeech.QUEUE_FLUSH, null, "jarvis_utterance")
@@ -178,7 +199,6 @@ class TextToSpeechHelper(context: Context) {
         val (basePitch, baseRate) = when (settings.getVoiceType()) {
             "male" -> 0.82f to 0.88f
             "female" -> 1.08f to 0.94f
-            "robot" -> 0.50f to 0.82f
             else -> 0.84f to 0.88f
         }
         tts.setPitch((basePitch * userPitch).coerceIn(0.5f, 1.5f))

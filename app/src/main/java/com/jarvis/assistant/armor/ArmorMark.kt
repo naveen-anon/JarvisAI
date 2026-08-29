@@ -144,6 +144,11 @@ object ArmorCatalog {
         ArmorMark(42, "XLII", "Mark XLII", "Iron Man 3", "#C41E3A", "#F5C518",
             "Prehensile autonomous armor. Assembles piece-by-piece onto Tony. Final House Party node.",
             listOf("Prehensile autonomous plates", "Piece-by-piece assemble", "Remote call", "Red-gold classic", "Damaged in final battle", "Emotional core suit"))
+    )),
+
+        ArmorMark(85, "LXXXV", "Mark 85 (Nanotech)", "Avengers: Endgame", "#C41E3A", "#F5C518",
+            "Final nanotech suit built for the battle against Thanos. Assembles from a wrist-mounted nanoparticle core, forming wings, energy whips, a sword, and a full arsenal on demand.",
+            listOf("Nanotech self-assembly", "Wrist-core storage", "Wing energy blades", "Repulsor + unibeam", "Sword mode", "Full HUD suite", "Adaptive weapon forming"))
     )
 
     fun byNumber(n: Int): ArmorMark? = all.find { it.number == n }
