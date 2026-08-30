@@ -85,24 +85,43 @@ class ArmorDetailActivity : AppCompatActivity() {
                     setStroke(dp(1), Color.parseColor("#3300E5FF"))
                 }
             }
-            val suitImg = ImageView(this@ArmorDetailActivity).apply {
-                // Prefer armor_mark_N PNG if present, else detailed full vector
-                val pngId = resources.getIdentifier(
-                    "armor_mark_${mark.number}", "drawable", packageName
-                )
-                if (pngId != 0) {
+            // Prefer a real armor_mark_N image if one was dropped into res/drawable
+            // (with a slow Ken Burns zoom for motion); otherwise fall back to an
+            // original animated silhouette tinted with this mark's own colors —
+            // pulsing chest reactor + idle sway, distinct per mark via color/glow.
+            val pngId = resources.getIdentifier(
+                "armor_mark_${mark.number}", "drawable", packageName
+            )
+            if (pngId != 0) {
+                val suitImg = ImageView(this@ArmorDetailActivity).apply {
                     setImageResource(pngId)
                     clearColorFilter()
-                } else {
-                    setImageResource(R.drawable.ic_ironman_full)
-                    // SRC_ATOP shifts body color while keeping gold + cyan reactor readable
-                    clearColorFilter()
+                    adjustViewBounds = true
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                    layoutParams = LinearLayout.LayoutParams(dp(200), dp(280))
                 }
-                adjustViewBounds = true
-                scaleType = ImageView.ScaleType.FIT_CENTER
-                layoutParams = LinearLayout.LayoutParams(dp(200), dp(280))
+                suitBox.addView(suitImg)
+                suitImg.post {
+                    val zoom = android.animation.ValueAnimator.ofFloat(1f, 1.08f).apply {
+                        duration = 4000
+                        repeatMode = android.animation.ValueAnimator.REVERSE
+                        repeatCount = android.animation.ValueAnimator.INFINITE
+                        addUpdateListener {
+                            val s = it.animatedValue as Float
+                            suitImg.scaleX = s
+                            suitImg.scaleY = s
+                        }
+                    }
+                    zoom.start()
+                }
+            } else {
+                val silhouette = ArmorSilhouetteView(this@ArmorDetailActivity).apply {
+                    primaryColor = primary
+                    secondaryColor = secondary
+                    layoutParams = LinearLayout.LayoutParams(dp(200), dp(280))
+                }
+                suitBox.addView(silhouette)
             }
-            suitBox.addView(suitImg)
             addView(suitBox)
 
             // Color legend
