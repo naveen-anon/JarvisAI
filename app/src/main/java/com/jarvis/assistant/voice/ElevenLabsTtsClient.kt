@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.util.Log
 import com.jarvis.assistant.BuildConfig
+import com.jarvis.assistant.util.SettingsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -38,9 +39,17 @@ class ElevenLabsTtsClient(private val context: Context) {
     private val apiKey: String
         get() = BuildConfig.ELEVENLABS_API_KEY.trim()
 
+    private val settings = SettingsManager(context)
+
+    /** Female preference always uses a distinct known-good voice; male keeps
+     *  any custom BuildConfig override (from local.properties / CI secret),
+     *  falling back to the stock male voice if none was set. */
     private val voiceId: String
-        get() = BuildConfig.ELEVENLABS_VOICE_ID.trim()
-            .ifEmpty { DEFAULT_VOICE_ID }
+        get() {
+            if (settings.getVoiceType() == "female") return FEMALE_VOICE_ID
+            val override = BuildConfig.ELEVENLABS_VOICE_ID.trim()
+            return if (override.isNotEmpty()) override else DEFAULT_VOICE_ID
+        }
 
     /**
      * Synthesize [text] and play. Returns true if audio started successfully.
@@ -153,5 +162,7 @@ class ElevenLabsTtsClient(private val context: Context) {
 
         /** Deep male stock voice (Adam) — override with ELEVENLABS_VOICE_ID */
         const val DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"
+        /** Well-known ElevenLabs premade female voice (Rachel) */
+        const val FEMALE_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
     }
 }
