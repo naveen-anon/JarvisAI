@@ -58,7 +58,7 @@ class ArmorSilhouetteView @JvmOverloads constructor(
         val cx = w / 2f
         val bob = sin(animTime * 2f * Math.PI).toFloat() * (h * 0.012f)
         val sway = sin(animTime * 2f * Math.PI + 1f).toFloat() * (w * 0.01f)
-        val reactorPulse = 0.6f + 0.4f * ((sin(animTime * 2f * Math.PI * 2f) + 1f) / 2f)
+        val reactorPulse = 0.6f + 0.4f * ((sin(animTime * 4f * Math.PI.toFloat()) + 1f) / 2f)
 
         canvas.save()
         canvas.translate(sway, bob)
@@ -131,12 +131,17 @@ class ArmorSilhouetteView @JvmOverloads constructor(
         val reactorCx = cx
         val reactorCy = shoulderY + (torsoBottomY - shoulderY) * 0.32f
         val reactorR = w * 0.045f
+        val glowR = reactorR * (2.2f + reactorPulse)
         reactorGlowPaint.shader = RadialGradient(
-            reactorCx, reactorCy, reactorR * (2.2f + reactorPulse),
-            intArrayOf(colorWithAlpha(Color.parseColor("#00E5FF"), (180 * reactorPulse).toInt()), Color.TRANSPARENT),
-            null, Shader.TileMode.CLAMP
+            reactorCx, reactorCy, glowR,
+            intArrayOf(
+                colorWithAlpha(Color.parseColor("#00E5FF"), (180f * reactorPulse).toInt()),
+                Color.TRANSPARENT
+            ),
+            null,
+            Shader.TileMode.CLAMP
         )
-        canvas.drawCircle(reactorCx, reactorCy, reactorR * (2.2f + reactorPulse), reactorGlowPaint)
+        canvas.drawCircle(reactorCx, reactorCy, glowR, reactorGlowPaint)
         canvas.drawCircle(reactorCx, reactorCy, reactorR * 0.5f, reactorCorePaint)
 
         canvas.restore()
