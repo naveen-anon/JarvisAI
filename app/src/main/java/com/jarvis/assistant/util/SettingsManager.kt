@@ -86,4 +86,14 @@ class SettingsManager(context: Context) {
         prefs.edit().putFloat("clap_sensitivity", value.coerceIn(0.5f, 2.5f)).apply()
     fun setBackgroundListen(enabled: Boolean) =
         prefs.edit().putBoolean("bg_listen", enabled).apply()
+
+    fun getActiveSuitId(): String = prefs.getString("active_suit_id", "mark_1") ?: "mark_1"
+    fun setActiveSuitId(id: String) = prefs.edit().putString("active_suit_id", id).apply()
+    fun getSystemMode(): String = prefs.getString("system_mode", "BALANCED") ?: "BALANCED"
+    fun setSystemMode(mode: String) = prefs.edit().putString("system_mode", mode).apply()
+    fun getSuitPrimaryColor(): String = prefs.getString("suit_primary", "#C41E3A") ?: "#C41E3A"
+    fun setSuitPrimaryColor(color: String) = prefs.edit().putString("suit_primary", color).apply()
+    fun getSuitSecondaryColor(): String = prefs.getString("suit_secondary", "#F5C518") ?: "#F5C518"
+    fun setSuitSecondaryColor(color: String) = prefs.edit().putString("suit_secondary", color).apply()
+
 }
