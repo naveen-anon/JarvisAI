@@ -96,9 +96,9 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(16.dp).background(Color(currentSuit.primaryColor), CircleShape))
-                Box(Modifier.size(16.dp).background(Color(currentSuit.secondaryColor), CircleShape))
-                Box(Modifier.size(16.dp).background(glow, CircleShape))
+                Box(Modifier = Modifier.size(16.dp).background(Color(currentSuit.primaryColor), CircleShape))
+                Box(Modifier = Modifier.size(16.dp).background(Color(currentSuit.secondaryColor), CircleShape))
+                Box(Modifier = Modifier.size(16.dp).background(glow, CircleShape))
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
