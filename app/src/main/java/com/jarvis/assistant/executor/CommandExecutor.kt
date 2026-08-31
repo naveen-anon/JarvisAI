@@ -25,6 +25,7 @@ class CommandExecutor(private val context: Context) {
 
     fun execute(cmd: AssistantCommand): String {
         return when (ActionType.fromKey(cmd.action)) {
+            ActionType.MULTI_STEP -> executeChain(cmd.steps.orEmpty())
             ActionType.OPEN_APP -> openApp(cmd.target)
             ActionType.CALL -> callContact(cmd.target)
             ActionType.SEND_SMS -> sendSms(cmd.target, cmd.message)
@@ -424,6 +425,25 @@ class CommandExecutor(private val context: Context) {
         } catch (e: Exception) {
             "Couldn't open the armor archive: ${e.message}"
         }
+    }
+
+
+    private fun executeChain(steps: List<AssistantCommand>): String {
+        if (steps.isEmpty()) return "No steps to run, sir."
+        val parts = mutableListOf<String>()
+        for ((i, step) in steps.withIndex()) {
+            if (step.action == "multi_step") {
+                parts.add(executeChain(step.steps.orEmpty()))
+            } else {
+                val r = execute(step)
+                parts.add(r)
+            }
+            // Brief pause between UI actions so the system can settle
+            if (i < steps.lastIndex) {
+                try { Thread.sleep(450) } catch (_: InterruptedException) {}
+            }
+        }
+        return parts.joinToString(" ")
     }
 
 }

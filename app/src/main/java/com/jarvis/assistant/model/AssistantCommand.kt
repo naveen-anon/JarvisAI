@@ -2,14 +2,15 @@ package com.jarvis.assistant.model
 
 /**
  * Structured command returned by the LLM after parsing user speech.
- * The LLM is prompted to ALWAYS respond in this JSON shape (see ClaudeClient's system prompt),
- * so parsing is deterministic instead of regex-matching free text.
+ * Single action OR multi_step with nested [steps].
  */
 data class AssistantCommand(
-    val action: String,          // e.g. "open_app", "send_sms", "call", "toggle_setting", "reply", "read_screen"
-    val target: String? = null,  // app name / contact name / setting name
-    val message: String? = null, // sms body / spoken reply text
-    val extra: Map<String, String> = emptyMap()
+    val action: String,
+    val target: String? = null,
+    val message: String? = null,
+    val extra: Map<String, String> = emptyMap(),
+    /** Populated when action == "multi_step" */
+    val steps: List<AssistantCommand>? = null
 )
 
 enum class ActionType(val key: String) {
@@ -19,26 +20,27 @@ enum class ActionType(val key: String) {
     TOGGLE_SETTING("toggle_setting"),
     READ_SCREEN("read_screen"),
     ANALYZE_SCREEN("analyze_screen"),
-    SET_VOLUME("set_volume"),      // target = "up" | "down" | "mute" | "max" | a number string
-    MEDIA_CONTROL("media_control"),// target = "play" | "pause" | "next" | "previous"
-    SET_ALARM("set_alarm"),        // target = "HH:mm"
-    SET_TIMER("set_timer"),        // target = total seconds as string
-    OPEN_VISION("open_vision"),    // target = "ocr" | "objects" | "faces"
-    WEB_SEARCH("web_search"),      // target = search query
-    LOCK_APP("lock_app"),          // target = app name
-    UNLOCK_APP("unlock_app"),      // target = app name
-    SET_PIN("set_pin"),            // target = new PIN
-    PC_CONNECT("pc_connect"),      // toggles the PC bridge server on/off; target = "on" | "off"
-    WHATSAPP_MESSAGE("whatsapp_message"), // target = contact name, message = text to pre-fill
-    TELEGRAM_MESSAGE("telegram_message"),  // target = username/contact name, message = text to pre-fill
+    SET_VOLUME("set_volume"),
+    MEDIA_CONTROL("media_control"),
+    SET_ALARM("set_alarm"),
+    SET_TIMER("set_timer"),
+    OPEN_VISION("open_vision"),
+    WEB_SEARCH("web_search"),
+    LOCK_APP("lock_app"),
+    UNLOCK_APP("unlock_app"),
+    SET_PIN("set_pin"),
+    PC_CONNECT("pc_connect"),
+    WHATSAPP_MESSAGE("whatsapp_message"),
+    TELEGRAM_MESSAGE("telegram_message"),
     SET_REMINDER("set_reminder"),
     READ_CLIPBOARD("read_clipboard"),
     OPEN_CLIPBOARD_LINK("open_clipboard_link"),
     NOTIF_SUMMARY("notif_summary"),
     CALENDAR_NEXT("calendar_next"),
     FOCUS_MODE("focus_mode"),
-    SHOW_ARMOR("show_armor"), // target = mark number or codename (e.g. "33", "silver centurion")
-    REPLY("reply"),          // pure conversational reply, no system action
+    SHOW_ARMOR("show_armor"),
+    MULTI_STEP("multi_step"),
+    REPLY("reply"),
     UNKNOWN("unknown");
 
     companion object {

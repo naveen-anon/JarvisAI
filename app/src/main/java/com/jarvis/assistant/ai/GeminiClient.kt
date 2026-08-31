@@ -24,7 +24,7 @@ class GeminiClient(private val apiKey: String) {
         no prose, no markdown fences, matching this exact schema:
 
         {
-          "action": "open_app | call | send_sms | toggle_setting | set_volume | media_control | set_alarm | set_timer | open_vision | web_search | lock_app | unlock_app | set_pin | read_screen | reply",
+          "action": "open_app | call | send_sms | toggle_setting | set_volume | media_control | set_alarm | set_timer | open_vision | web_search | lock_app | unlock_app | set_pin | read_screen | whatsapp_message | multi_step | reply",
           "target": "string or null - app name / contact name / setting name / volume level / media action / time / duration",
           "message": "string or null - sms body, or the spoken reply text for the user",
           "extra": {"key": "value"}
@@ -47,6 +47,10 @@ class GeminiClient(private val apiKey: String) {
         - For "open_vision", target = one of "ocr","objects","faces".
         - For "web_search", target = the search query text.
         - For "lock_app" / "unlock_app", target = app name. For "set_pin", target = a 4+ digit PIN.
+        - If the user asks for MULTIPLE actions in one sentence (words like "then", "and then", "phir", "after that"),
+          use action "multi_step" and put an ordered array in "steps", each item the same schema
+          (action/target/message/extra) without nesting further multi_step. Example:
+          {"action":"multi_step","steps":[{"action":"open_app","target":"WhatsApp"},{"action":"set_alarm","target":"07:00"}],"target":null,"message":null}
         - Never include commentary outside the JSON object.
     """.trimIndent()
 
@@ -111,20 +115,46 @@ class GeminiClient(private val apiKey: String) {
 
     private fun parseCommandJson(text: String): AssistantCommand {
         return try {
-            val json = JSONObject(text)
-            val extraObj = json.optJSONObject("extra")
-            val extraMap = mutableMapOf<String, String>()
-            extraObj?.keys()?.forEach { k -> extraMap[k] = extraObj.getString(k) }
-
-            AssistantCommand(
-                action = json.getString("action"),
-                target = json.optString("target", null),
-                message = json.optString("message", null),
-                extra = extraMap
-            )
+            parseOne(JSONObject(text))
         } catch (e: Exception) {
-            AssistantCommand(action = "reply", message = "Sorry, I couldn't parse that.")
+            // Array-only response: [ {...}, {...} ]
+            try {
+                val arr = JSONArray(text)
+                if (arr.length() >= 2) {
+                    val steps = (0 until arr.length()).map { parseOne(arr.getJSONObject(it)) }
+                    AssistantCommand(action = "multi_step", steps = steps)
+                } else if (arr.length() == 1) {
+                    parseOne(arr.getJSONObject(0))
+                } else {
+                    AssistantCommand(action = "reply", message = "Sorry, I couldn't parse that.")
+                }
+            } catch (e2: Exception) {
+                AssistantCommand(action = "reply", message = "Sorry, I couldn't parse that.")
+            }
         }
+    }
+
+    private fun parseOne(json: JSONObject): AssistantCommand {
+        val extraObj = json.optJSONObject("extra")
+        val extraMap = mutableMapOf<String, String>()
+        extraObj?.keys()?.forEach { k -> extraMap[k] = extraObj.optString(k, "") }
+
+        val stepsArr = json.optJSONArray("steps")
+        val steps = if (stepsArr != null && stepsArr.length() > 0) {
+            (0 until stepsArr.length()).map { parseOne(stepsArr.getJSONObject(it)) }
+        } else null
+
+        val action = json.optString("action", "reply")
+        val target = json.optString("target", null).let { if (it == "null" || it.isNullOrBlank()) null else it }
+        val message = json.optString("message", null).let { if (it == "null" || it.isNullOrBlank()) null else it }
+
+        return AssistantCommand(
+            action = action,
+            target = target,
+            message = message,
+            extra = extraMap,
+            steps = steps
+        )
     }
 
     private fun fallback() = AssistantCommand(action = "reply", message = "No response from server.")
