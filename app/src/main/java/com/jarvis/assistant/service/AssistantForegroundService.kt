@@ -56,6 +56,7 @@ class AssistantForegroundService : Service() {
     private lateinit var pcBridge: PcBridgeServer
     private lateinit var voiceAuth: com.jarvis.assistant.voice.VoiceAuthManager
     private lateinit var porcupine: com.jarvis.assistant.voice.PorcupineWakeWord
+    private lateinit var clapDetector: com.jarvis.assistant.voice.ClapDetector
     private var voiceSessionVerified = false
     private val scope = CoroutineScope(Dispatchers.Main)
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -85,6 +86,7 @@ class AssistantForegroundService : Service() {
         pcBridge = PcBridgeServer(this) { speech -> processSpeech(speech) }
         voiceAuth = com.jarvis.assistant.voice.VoiceAuthManager(this)
         porcupine = com.jarvis.assistant.voice.PorcupineWakeWord(this)
+        clapDetector = com.jarvis.assistant.voice.ClapDetector()
         offlineBrain = OfflineBrain(this, executor) { turnOn ->
             if (turnOn) pcBridge.start() else pcBridge.stop()
         }
@@ -107,16 +109,22 @@ class AssistantForegroundService : Service() {
     }
 
     private fun startWakeWordListening() {
-        // Prefer Picovoice Porcupine (on-device, low power). Falls back to
-        // SpeechRecognizer continuous mode when PICOVOICE_ACCESS_KEY is missing.
-        if (porcupine.isAvailable) {
+        val settings = com.jarvis.assistant.util.SettingsManager(this)
+        // Mic is exclusive: stop both before restarting
+        if (::porcupine.isInitialized) porcupine.stop()
+        if (::clapDetector.isInitialized) clapDetector.stop()
+
+        // Double-clap wake (no API key). Skipped if Porcupine owns the mic.
+        val wantClap = settings.getClapWakeEnabled()
+        val wantVoice = porcupine.isAvailable
+
+        if (wantVoice) {
             val ok = porcupine.start(
                 onWake = {
                     mainHandler.post {
-                        // Pause wake engine while command STT owns the mic
                         porcupine.stop()
+                        if (::clapDetector.isInitialized) clapDetector.stop()
                         startListeningCycle()
-                        // Resume wake listening after a short delay (command cycle ends → IDLE)
                         mainHandler.postDelayed({
                             if (com.jarvis.assistant.util.SettingsManager(this).getBackgroundListen()) {
                                 startWakeWordListening()
@@ -125,14 +133,44 @@ class AssistantForegroundService : Service() {
                     }
                 },
                 onError = { msg ->
-                    android.util.Log.w("JarvisService", "Porcupine: $msg — falling back to STT wake")
-                    mainHandler.post { startSttWakeFallback() }
+                    android.util.Log.w("JarvisService", "Porcupine: $msg — clap/STT fallback")
+                    mainHandler.post {
+                        if (wantClap) startClapWake(settings.getClapSensitivity())
+                        else startSttWakeFallback()
+                    }
                 }
             )
-            if (!ok) startSttWakeFallback()
+            if (!ok) {
+                if (wantClap) startClapWake(settings.getClapSensitivity())
+                else startSttWakeFallback()
+            }
+            // When Porcupine is active it owns the mic — clap cannot run in parallel.
+            // If user wants clap primarily, disable Picovoice key or we start clap when Porcupine fails.
+        } else if (wantClap) {
+            startClapWake(settings.getClapSensitivity())
         } else {
             startSttWakeFallback()
         }
+    }
+
+    private fun startClapWake(sensitivity: Float) {
+        if (!::clapDetector.isInitialized) {
+            clapDetector = com.jarvis.assistant.voice.ClapDetector()
+        }
+        clapDetector.start(sensitivity = sensitivity) {
+            mainHandler.post {
+                if (::clapDetector.isInitialized) clapDetector.stop()
+                if (::porcupine.isInitialized) porcupine.stop()
+                startListeningCycle()
+                mainHandler.postDelayed({
+                    if (com.jarvis.assistant.util.SettingsManager(this).getBackgroundListen()) {
+                        startWakeWordListening()
+                    }
+                }, 4_000L)
+            }
+        }
+        startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — double clap to activate"))
+        android.util.Log.i("JarvisService", "Clap wake armed (sensitivity=$sensitivity)")
     }
 
     /** Google SpeechRecognizer continuous keyword match (higher battery, no Picovoice key). */
@@ -501,6 +539,7 @@ class AssistantForegroundService : Service() {
     override fun onDestroy() {
         mainHandler.removeCallbacksAndMessages(null)
         if (::porcupine.isInitialized) porcupine.stop()
+        if (::clapDetector.isInitialized) clapDetector.stop()
         stt.stopContinuous()
         stt.destroy()
         tts.shutdown()

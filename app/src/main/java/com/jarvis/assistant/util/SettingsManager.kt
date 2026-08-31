@@ -74,6 +74,16 @@ class SettingsManager(context: Context) {
 
     // Background wake-word listening (must stay INSIDE the class)
     fun getBackgroundListen(): Boolean = prefs.getBoolean("bg_listen", true)
+
+    /** Double-clap to wake Jarvis (mic energy peaks — no API key). */
+    fun getClapWakeEnabled(): Boolean = prefs.getBoolean("clap_wake", true)
+    fun setClapWakeEnabled(enabled: Boolean) =
+        prefs.edit().putBoolean("clap_wake", enabled).apply()
+
+    /** 1.0 default; higher = louder claps needed (0.5–2.5). */
+    fun getClapSensitivity(): Float = prefs.getFloat("clap_sensitivity", 1.0f)
+    fun setClapSensitivity(value: Float) =
+        prefs.edit().putFloat("clap_sensitivity", value.coerceIn(0.5f, 2.5f)).apply()
     fun setBackgroundListen(enabled: Boolean) =
         prefs.edit().putBoolean("bg_listen", enabled).apply()
 }
