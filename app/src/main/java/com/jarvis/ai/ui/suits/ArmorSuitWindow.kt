@@ -175,3 +175,5 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
         }
     }
 }
+
+// build: modifier fix verified
