@@ -494,14 +494,7 @@ class AssistantForegroundService : Service() {
     }
 
     /** Phase 5 — "Daily activity summary", scheduled once for ~8 PM every day. */
-    private fun scheduleDailySummary()
-        proactive = com.jarvis.assistant.util.ProactiveAlertManager(this) { msg ->
-            mainHandler.post {
-                try { tts.speak(msg) } catch (_: Exception) {}
-            }
-        }
-        proactive?.start()
-        mainHandler.postDelayed(proactiveTick, 60_000L) {
+    private fun scheduleDailySummary() {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val receiverIntent = Intent(this, DailySummaryReceiver::class.java).apply {
             action = DailySummaryReceiver.ACTION_DAILY_SUMMARY
