@@ -96,4 +96,15 @@ class SettingsManager(context: Context) {
     fun getSuitSecondaryColor(): String = prefs.getString("suit_secondary", "#F5C518") ?: "#F5C518"
     fun setSuitSecondaryColor(color: String) = prefs.edit().putString("suit_secondary", color).apply()
 
+
+    fun getProactiveAlertsEnabled(): Boolean = prefs.getBoolean("proactive_alerts", true)
+    fun setProactiveAlertsEnabled(enabled: Boolean) =
+        prefs.edit().putBoolean("proactive_alerts", enabled).apply()
+    fun getBatteryAlertThreshold(): Int = prefs.getInt("battery_alert_threshold", 20)
+    fun setBatteryAlertThreshold(pct: Int) =
+        prefs.edit().putInt("battery_alert_threshold", pct.coerceIn(5, 50)).apply()
+    fun getCalendarAlertMinutes(): Int = prefs.getInt("calendar_alert_minutes", 15)
+    fun setCalendarAlertMinutes(mins: Int) =
+        prefs.edit().putInt("calendar_alert_minutes", mins.coerceIn(5, 60)).apply()
+
 }

@@ -60,6 +60,13 @@ class AssistantForegroundService : Service() {
     private var voiceSessionVerified = false
     private val scope = CoroutineScope(Dispatchers.Main)
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var proactive: com.jarvis.assistant.util.ProactiveAlertManager? = null
+    private val proactiveTick = object : Runnable {
+        override fun run() {
+            proactive?.tick()
+            mainHandler.postDelayed(this, 5 * 60_000L)
+        }
+    }
 
     var listener: AssistantListener? = null
 
@@ -92,6 +99,13 @@ class AssistantForegroundService : Service() {
         }
         createNotificationChannel()
         scheduleDailySummary()
+        proactive = com.jarvis.assistant.util.ProactiveAlertManager(this) { msg ->
+            mainHandler.post {
+                try { tts.speak(msg) } catch (_: Exception) {}
+            }
+        }
+        proactive?.start()
+        mainHandler.postDelayed(proactiveTick, 60_000L)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -480,7 +494,14 @@ class AssistantForegroundService : Service() {
     }
 
     /** Phase 5 — "Daily activity summary", scheduled once for ~8 PM every day. */
-    private fun scheduleDailySummary() {
+    private fun scheduleDailySummary()
+        proactive = com.jarvis.assistant.util.ProactiveAlertManager(this) { msg ->
+            mainHandler.post {
+                try { tts.speak(msg) } catch (_: Exception) {}
+            }
+        }
+        proactive?.start()
+        mainHandler.postDelayed(proactiveTick, 60_000L) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val receiverIntent = Intent(this, DailySummaryReceiver::class.java).apply {
             action = DailySummaryReceiver.ACTION_DAILY_SUMMARY
@@ -538,6 +559,8 @@ class AssistantForegroundService : Service() {
 
     override fun onDestroy() {
         mainHandler.removeCallbacksAndMessages(null)
+        proactive?.stop()
+        proactive = null
         if (::porcupine.isInitialized) porcupine.stop()
         if (::clapDetector.isInitialized) clapDetector.stop()
         stt.stopContinuous()
