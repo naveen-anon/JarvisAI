@@ -96,9 +96,9 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier = Modifier.size(16.dp).background(Color(currentSuit.primaryColor), CircleShape))
-                Box(Modifier = Modifier.size(16.dp).background(Color(currentSuit.secondaryColor), CircleShape))
-                Box(Modifier = Modifier.size(16.dp).background(glow, CircleShape))
+                Box(modifier = Modifier.size(16.dp).background(Color(currentSuit.primaryColor), CircleShape))
+                Box(modifier = Modifier.size(16.dp).background(Color(currentSuit.secondaryColor), CircleShape))
+                Box(modifier = Modifier.size(16.dp).background(glow, CircleShape))
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -149,7 +149,7 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                         .padding(vertical = 12.dp, horizontal = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(Modifier = Modifier.size(12.dp).background(r, CircleShape))
+                    Box(modifier = Modifier.size(12.dp).background(r, CircleShape))
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = suit.mark.name.replace('_', ' '),
