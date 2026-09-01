@@ -136,7 +136,7 @@ class OfflineBrain(
                 "what am i looking at", "what am i seeing", "read my screen", "read screen",
                 "what's on my screen", "what is on my screen", "screen pe kya", "screen dikhao",
                 "screen analysis", "screen samjhao", "is screen", "jo dekh raha", "jo dekh rhi",
-                "padho screen", "screen padho"
+                "padho screen", "screen padho", "screen pe kya likha", "kya dikh raha hai", "display pe kya", "ye page padho"
             ) || (
                 // Fuzzy: both a "see/read/analyze-ish" word AND screen
                 (containsAny(cmd, "screen", "display", "monitor") &&

@@ -42,28 +42,8 @@ class CommandExecutor(private val context: Context) {
             ActionType.SET_PIN -> setPin(cmd.target)
             ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
             ActionType.TELEGRAM_MESSAGE -> telegramMessage(cmd.target, cmd.message)
-            ActionType.ANALYZE_SCREEN -> {
-                val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
-                if (svc == null) {
-                    "Enable Accessibility for Jarvis first, sir — I need it to see on-screen content."
-                } else {
-                    val raw = svc.getScreenText()
-                    if (raw.isBlank() || raw.startsWith("No screen") || raw.startsWith("Screen appears")) {
-                        raw
-                    } else {
-                        "SCREEN_CONTENT_FOR_ANALYSIS:\n" + raw.take(2500)
-                    }
-                }
-            }
-            ActionType.READ_SCREEN -> {
-                val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
-                if (svc == null) {
-                    "Accessibility Service is off, sir. Enable Jarvis under Settings → Accessibility to let me see the screen."
-                } else {
-                    val text = svc.getScreenText()
-                    if (text.length > 800) text.take(800) + "… (truncated)" else text
-                }
-            }
+            ActionType.ANALYZE_SCREEN -> summarizeScreen()
+            ActionType.READ_SCREEN -> readScreenRaw()
             
             ActionType.SET_REMINDER -> {
                 val mins = cmd.target?.toIntOrNull() ?: 10
@@ -444,6 +424,29 @@ class CommandExecutor(private val context: Context) {
             }
         }
         return parts.joinToString(" ")
+    }
+
+
+    private fun summarizeScreen(): String {
+        val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
+            ?: return "Enable Accessibility for Jarvis first, sir — Settings → Accessibility → Jarvis."
+        val raw = svc.getScreenText()
+        if (raw.isBlank() || raw.startsWith("No screen") || raw.startsWith("Screen appears")) {
+            return raw
+        }
+        val cleaned = raw.replace(Regex("\\s+"), " ").trim()
+        val short = if (cleaned.length > 600) cleaned.take(600).trimEnd() + "…" else cleaned
+        return "On your screen I can see: $short"
+    }
+
+    private fun readScreenRaw(): String {
+        val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
+            ?: return "Accessibility is off, sir. Enable Jarvis under Settings → Accessibility."
+        val text = svc.getScreenText()
+        if (text.isBlank() || text.startsWith("No screen") || text.startsWith("Screen appears")) {
+            return text
+        }
+        return if (text.length > 900) text.take(900) + "… (truncated)" else text
     }
 
 }

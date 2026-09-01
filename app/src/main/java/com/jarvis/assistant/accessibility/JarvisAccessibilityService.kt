@@ -20,15 +20,27 @@ class JarvisAccessibilityService : AccessibilityService() {
 
     fun getScreenText(): String {
         val root = rootInActiveWindow ?: return "No screen content available."
-        val builder = StringBuilder()
-        collectText(root, builder)
-        return if (builder.isEmpty()) "Screen appears empty." else builder.toString().trim()
+        val seen = LinkedHashSet<String>()
+        collectText(root, seen, 0)
+        if (seen.isEmpty()) return "Screen appears empty."
+        return seen.joinToString(" ").trim().replace(Regex("\\s+"), " ")
     }
 
-    private fun collectText(node: AccessibilityNodeInfo, builder: StringBuilder) {
-        node.text?.let { if (it.isNotBlank()) builder.append(it).append(" ") }
+    private fun collectText(node: AccessibilityNodeInfo, seen: MutableSet<String>, depth: Int) {
+        if (depth > 28) return
+        fun add(s: CharSequence?) {
+            val t = s?.toString()?.trim() ?: return
+            if (t.length < 2) return
+            if (t.length == 1 && !t[0].isLetterOrDigit()) return
+            seen.add(t)
+        }
+        add(node.text)
+        add(node.contentDescription)
+        try { add(node.hintText) } catch (_: Throwable) {}
         for (i in 0 until node.childCount) {
-            node.getChild(i)?.let { collectText(it, builder) }
+            try {
+                node.getChild(i)?.let { collectText(it, seen, depth + 1) }
+            } catch (_: Exception) { }
         }
     }
 
