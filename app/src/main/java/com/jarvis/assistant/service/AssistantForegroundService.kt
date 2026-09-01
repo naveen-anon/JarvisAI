@@ -531,6 +531,7 @@ class AssistantForegroundService : Service() {
         }
     }
 
+    
     private fun buildNotification(text: String): android.app.Notification {
         val listenIntent = Intent(this, com.jarvis.assistant.widget.JarvisWidgetActionReceiver::class.java).apply {
             action = com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING
@@ -543,9 +544,6 @@ class AssistantForegroundService : Service() {
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_mic)
             .setOngoing(true)
-            // Visible and tappable from the lock screen by default (unless the user has
-            // hidden notification content on the lock screen in system settings) — this is
-            // what makes "Jarvis works from the lock screen" possible without a full unlock.
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .addAction(R.drawable.ic_mic, "🎙 Listen", listenPendingIntent)
             .build()
@@ -554,7 +552,9 @@ class AssistantForegroundService : Service() {
     inner class LocalBinder : Binder() {
         fun getService(): AssistantForegroundService = this@AssistantForegroundService
     }
+
     private val binder = LocalBinder()
+
     override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onDestroy() {
