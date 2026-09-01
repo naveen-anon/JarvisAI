@@ -8,6 +8,10 @@ import android.os.BatteryManager
 import android.os.Build
 import android.util.Log
 
+/**
+ * Feature 5 — proactive battery + calendar alerts.
+ * Runs while the foreground service is alive; speaks via [onAlert].
+ */
 class ProactiveAlertManager(
     private val context: Context,
     private val onAlert: (String) -> Unit
@@ -19,17 +23,24 @@ class ProactiveAlertManager(
     private val alertedEventKeys = mutableSetOf<String>()
 
     fun start() {
-        if (!settings.getProactiveAlertsEnabled()) return
+        if (!settings.getProactiveAlertsEnabled()) {
+            Log.i(TAG, "Proactive alerts disabled")
+            return
+        }
         registerBatteryReceiver()
+        // Immediate calendar scan
         checkCalendar()
         Log.i(TAG, "Proactive alerts armed")
     }
 
     fun stop() {
-        try { batteryReceiver?.let { context.unregisterReceiver(it) } } catch (_: Exception) {}
+        try {
+            batteryReceiver?.let { context.unregisterReceiver(it) }
+        } catch (_: Exception) { }
         batteryReceiver = null
     }
 
+    /** Call every ~5 minutes from the service tick. */
     fun tick() {
         if (!settings.getProactiveAlertsEnabled()) return
         checkBatteryLevel()
@@ -41,10 +52,13 @@ class ProactiveAlertManager(
         batteryReceiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 when (intent?.action) {
-                    Intent.ACTION_BATTERY_LOW -> speakBattery(getBatteryPct())
-                    Intent.ACTION_BATTERY_CHANGED,
-                    Intent.ACTION_POWER_CONNECTED,
-                    Intent.ACTION_POWER_DISCONNECTED -> checkBatteryLevel()
+                    Intent.ACTION_BATTERY_LOW -> {
+                        speakBattery(getBatteryPct(), forced = true)
+                    }
+                    Intent.ACTION_BATTERY_CHANGED, Intent.ACTION_POWER_CONNECTED,
+                    Intent.ACTION_POWER_DISCONNECTED -> {
+                        checkBatteryLevel()
+                    }
                 }
             }
         }
@@ -82,27 +96,33 @@ class ProactiveAlertManager(
         val level = getBatteryPct()
         val threshold = settings.getBatteryAlertThreshold()
         if (isCharging()) {
+            // Reset so next discharge can alert again
             if (level > threshold) lastBatteryAlertLevel = -1
             return
         }
         if (level in 1..threshold) {
-            val band = if (level <= threshold / 2) 1 else 2
+            // Alert once per "band" (threshold, and again at half if still dropping)
+            val band = when {
+                level <= threshold / 2 -> 1
+                else -> 2
+            }
             if (lastBatteryAlertLevel != band) {
                 lastBatteryAlertLevel = band
-                speakBattery(level)
+                speakBattery(level, forced = false)
             }
         } else if (level > threshold) {
             lastBatteryAlertLevel = -1
         }
     }
 
-    private fun speakBattery(level: Int) {
+    private fun speakBattery(level: Int, forced: Boolean) {
         if (level <= 0) return
         val msg = when {
             level <= 10 -> "Sir, battery is critical at $level percent. Please connect a charger."
             level <= 20 -> "Sir, battery is low at $level percent."
             else -> "Sir, battery is at $level percent."
         }
+        Log.i(TAG, "Battery alert: $msg forced=$forced")
         onAlert(msg)
     }
 
@@ -110,20 +130,27 @@ class ProactiveAlertManager(
         if (!calendar.hasPermission()) return
         val now = System.currentTimeMillis()
         val windowMs = settings.getCalendarAlertMinutes() * 60_000L
-        for (e in calendar.nextEvents(5)) {
+        val events = calendar.nextEvents(5)
+        for (e in events) {
             val delta = e.startMs - now
             if (delta < 0 || delta > windowMs) continue
-            val key = "\( {e.title}| \){e.startMs}"
+            val key = "${e.title}|${e.startMs}"
             if (key in alertedEventKeys) continue
             alertedEventKeys.add(key)
+            // Cap memory
             if (alertedEventKeys.size > 40) {
-                alertedEventKeys.removeAll(alertedEventKeys.take(15).toSet())
+                val drop = alertedEventKeys.take(15).toSet()
+                alertedEventKeys.removeAll(drop)
             }
             val mins = (delta / 60_000L).toInt().coerceAtLeast(1)
             val loc = e.location?.takeIf { it.isNotBlank() }?.let { " at $it" } ?: ""
-            onAlert("Sir, calendar reminder: ${e.title}$loc starts in about $mins minutes.")
+            val msg = "Sir, calendar reminder: ${e.title}$loc starts in about $mins minutes."
+            Log.i(TAG, msg)
+            onAlert(msg)
         }
     }
 
-    companion object { private const val TAG = "ProactiveAlerts" }
+    companion object {
+        private const val TAG = "ProactiveAlerts"
+    }
 }

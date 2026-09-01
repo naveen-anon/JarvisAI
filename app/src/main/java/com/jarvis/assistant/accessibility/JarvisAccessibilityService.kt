@@ -29,18 +29,16 @@ class JarvisAccessibilityService : AccessibilityService() {
     private fun collectText(node: AccessibilityNodeInfo, seen: MutableSet<String>, depth: Int) {
         if (depth > 28) return
         fun add(s: CharSequence?) {
-            val t = s?.toString()?.trim() ?: return
-            if (t.length < 2) return
-            if (t.length == 1 && !t[0].isLetterOrDigit()) return
-            seen.add(t)
+            val x = s?.toString()?.trim() ?: return
+            if (x.length < 2) return
+            if (x.length == 1 && !x[0].isLetterOrDigit()) return
+            seen.add(x)
         }
         add(node.text)
         add(node.contentDescription)
         try { add(node.hintText) } catch (_: Throwable) {}
         for (i in 0 until node.childCount) {
-            try {
-                node.getChild(i)?.let { collectText(it, seen, depth + 1) }
-            } catch (_: Exception) { }
+            try { node.getChild(i)?.let { collectText(it, seen, depth + 1) } } catch (_: Exception) {}
         }
     }
 

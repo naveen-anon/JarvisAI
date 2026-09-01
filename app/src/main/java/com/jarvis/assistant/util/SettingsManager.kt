@@ -74,16 +74,6 @@ class SettingsManager(context: Context) {
 
     // Background wake-word listening (must stay INSIDE the class)
     fun getBackgroundListen(): Boolean = prefs.getBoolean("bg_listen", true)
-
-    /** Double-clap to wake Jarvis (mic energy peaks — no API key). */
-    fun getClapWakeEnabled(): Boolean = prefs.getBoolean("clap_wake", true)
-    fun setClapWakeEnabled(enabled: Boolean) =
-        prefs.edit().putBoolean("clap_wake", enabled).apply()
-
-    /** 1.0 default; higher = louder claps needed (0.5–2.5). */
-    fun getClapSensitivity(): Float = prefs.getFloat("clap_sensitivity", 1.0f)
-    fun setClapSensitivity(value: Float) =
-        prefs.edit().putFloat("clap_sensitivity", value.coerceIn(0.5f, 2.5f)).apply()
     fun setBackgroundListen(enabled: Boolean) =
         prefs.edit().putBoolean("bg_listen", enabled).apply()
 
@@ -98,13 +88,10 @@ class SettingsManager(context: Context) {
 
 
     fun getProactiveAlertsEnabled(): Boolean = prefs.getBoolean("proactive_alerts", true)
-    fun setProactiveAlertsEnabled(enabled: Boolean) =
-        prefs.edit().putBoolean("proactive_alerts", enabled).apply()
+    fun setProactiveAlertsEnabled(enabled: Boolean) = prefs.edit().putBoolean("proactive_alerts", enabled).apply()
     fun getBatteryAlertThreshold(): Int = prefs.getInt("battery_alert_threshold", 20)
-    fun setBatteryAlertThreshold(pct: Int) =
-        prefs.edit().putInt("battery_alert_threshold", pct.coerceIn(5, 50)).apply()
+    fun setBatteryAlertThreshold(pct: Int) = prefs.edit().putInt("battery_alert_threshold", pct.coerceIn(5, 50)).apply()
     fun getCalendarAlertMinutes(): Int = prefs.getInt("calendar_alert_minutes", 15)
-    fun setCalendarAlertMinutes(mins: Int) =
-        prefs.edit().putInt("calendar_alert_minutes", mins.coerceIn(5, 60)).apply()
+    fun setCalendarAlertMinutes(mins: Int) = prefs.edit().putInt("calendar_alert_minutes", mins.coerceIn(5, 60)).apply()
 
 }
