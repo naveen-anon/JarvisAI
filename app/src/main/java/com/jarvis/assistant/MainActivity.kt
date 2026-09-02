@@ -129,6 +129,45 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
         }
 
+        // --- Phase 2: quick actions + bottom nav ---
+        fun openPkg(pkg: String) {
+            val launch = packageManager.getLaunchIntentForPackage(pkg)
+            if (launch != null) startActivity(launch)
+            else startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=$pkg")))
+        }
+        findViewById<TextView?>(R.id.btnQuickCall)?.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_DIAL))
+        }
+        findViewById<TextView?>(R.id.btnQuickMsg)?.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("sms:")))
+        }
+        findViewById<TextView?>(R.id.btnQuickWa)?.setOnClickListener {
+            openPkg("com.whatsapp")
+        }
+        findViewById<TextView?>(R.id.btnQuickCam)?.setOnClickListener {
+            try {
+                startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
+            } catch (_: Exception) {
+                startActivity(Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))
+            }
+        }
+        findViewById<TextView?>(R.id.navHome)?.setOnClickListener { /* already home */ }
+        findViewById<TextView?>(R.id.navChat)?.setOnClickListener {
+            startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
+        }
+        findViewById<TextView?>(R.id.navMic)?.setOnClickListener {
+            service?.startListeningCycle()
+        }
+        findViewById<TextView?>(R.id.navVision)?.setOnClickListener {
+            try {
+                startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
+            } catch (_: Exception) { }
+        }
+        findViewById<TextView?>(R.id.navSettings)?.setOnClickListener {
+            startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+        }
+
+
         systemStatus = SystemStatusManager(
             context = this,
             onClockUpdate = { time -> txtClock.text = time },
