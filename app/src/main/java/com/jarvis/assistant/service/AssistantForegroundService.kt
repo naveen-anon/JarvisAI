@@ -46,6 +46,7 @@ import com.jarvis.assistant.ai.JarvisLlmClient
 class AssistantForegroundService : Service() {
 
     private lateinit var stt: SpeechToText
+    private lateinit var clapDetector: com.jarvis.assistant.voice.ClapDetector
     private lateinit var tts: TextToSpeechHelper
     private lateinit var executor: CommandExecutor
     private lateinit var gemini: GeminiClient
@@ -83,6 +84,12 @@ class AssistantForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         stt = SpeechToText(this)
+        clapDetector = com.jarvis.assistant.voice.ClapDetector(this) {
+            mainHandler.post { startListeningCycle() }
+        }
+        if (com.jarvis.assistant.util.SettingsManager(this).getClapWakeEnabled()) {
+            try { clapDetector.start() } catch (_: Exception) {}
+        }
         tts = TextToSpeechHelper(this)
         executor = CommandExecutor(this)
         gemini = GeminiClient(BuildConfig.GEMINI_API_KEY)

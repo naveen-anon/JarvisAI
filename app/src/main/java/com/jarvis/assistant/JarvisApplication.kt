@@ -8,6 +8,7 @@ class JarvisApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         CrashHandler.install(this)
+        // Restore last equipped suit → pitch + reactor color
         ArmorController.init(this)
     }
 }

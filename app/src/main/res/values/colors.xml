@@ -2,15 +2,15 @@
 <resources>
     <color name="hud_bg">#020810</color>
     <color name="hud_cyan">#00E5FF</color>
-    <color name="hud_cyan_bright">#9FD8F4</color>
-    <color name="hud_cyan_core">#E0F8FF</color>
-    <color name="hud_cyan_dim">#0A6E85</color>
-    <color name="hud_cyan_mid">#003060</color>
+    <color name="hud_cyan_bright">#B8ECFF</color>
+    <color name="hud_cyan_core">#E8FBFF</color>
+    <color name="hud_cyan_dim">#0A7A96</color>
+    <color name="hud_cyan_mid">#004466</color>
     <color name="hud_amber">#FFB020</color>
-    <color name="hud_white">#E8F9FF</color>
-    <color name="hud_text_dim">#5C8A94</color>
+    <color name="hud_white">#F0FBFF</color>
+    <color name="hud_text_dim">#6A9AAB</color>
     <color name="hud_cyan_faint">#0D1B24</color>
     <color name="ic_launcher_background">#020810</color>
-    <color name="glass_stroke">#3800E5FF</color>
-    <color name="glass_fill">#990A1520</color>
+    <color name="glass_stroke">#4000E5FF</color>
+    <color name="glass_fill">#AA0A1520</color>
 </resources>
