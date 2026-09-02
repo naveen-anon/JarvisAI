@@ -41,7 +41,8 @@ class CommandExecutor(private val context: Context) {
             ActionType.SET_PIN -> setPin(cmd.target)
             ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
             ActionType.TELEGRAM_MESSAGE -> telegramMessage(cmd.target, cmd.message)
-            ActionType.ANALYZE_SCREEN -> summarizeScreen()
+            ActionType.SCREENSHOT -> runScreenshotAnalyze()
+            ActionType.ANALYZE_SCREEN -> runScreenshotAnalyze()
             ActionType.READ_SCREEN -> readScreenRaw()
             
             ActionType.SET_REMINDER -> {
@@ -467,6 +468,18 @@ class CommandExecutor(private val context: Context) {
             text
         } catch (e: Exception) {
             "Briefing unavailable right now, sir."
+        }
+    }
+
+
+    private fun runScreenshotAnalyze(): String {
+        return try {
+            val result = kotlinx.coroutines.runBlocking {
+                com.jarvis.assistant.util.ScreenshotHelper.captureAndAnalyze()
+            }
+            result.summary
+        } catch (e: Exception) {
+            "Could not analyze the screen, sir."
         }
     }
 

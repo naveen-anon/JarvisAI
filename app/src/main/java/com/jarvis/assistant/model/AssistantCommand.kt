@@ -19,6 +19,7 @@ enum class ActionType(val key: String) {
     SEND_SMS("send_sms"),
     TOGGLE_SETTING("toggle_setting"),
     READ_SCREEN("read_screen"),
+    SCREENSHOT("screenshot"),
     ANALYZE_SCREEN("analyze_screen"),
     SET_VOLUME("set_volume"),
     MEDIA_CONTROL("media_control"),
