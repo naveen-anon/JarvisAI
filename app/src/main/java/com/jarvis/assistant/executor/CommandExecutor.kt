@@ -35,7 +35,6 @@ class CommandExecutor(private val context: Context) {
             ActionType.SET_TIMER -> setTimer(cmd.target)
             ActionType.OPEN_VISION -> openVision(cmd.target)
             ActionType.SHOW_ARMOR -> showArmor(cmd.target)
-            ActionType.UNLOCK_PHONE -> triggerUnlock()
             ActionType.WEB_SEARCH -> webSearch(cmd.target)
             ActionType.LOCK_APP -> lockApp(cmd.target)
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
