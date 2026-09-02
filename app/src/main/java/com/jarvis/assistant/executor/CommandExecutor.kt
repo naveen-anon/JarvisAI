@@ -64,6 +64,7 @@ class CommandExecutor(private val context: Context) {
                 }
             }
 
+            ActionType.MULTI_STEP -> executeMultiStep(cmd)
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
             ActionType.UNKNOWN -> "I didn't understand that command."
@@ -435,6 +436,25 @@ class CommandExecutor(private val context: Context) {
         val text = svc.getScreenText()
         if (text.isBlank() || text.startsWith("No screen") || text.startsWith("Screen appears")) return text
         return if (text.length > 900) text.take(900) + "… (truncated)" else text
+    }
+
+
+    private fun executeMultiStep(cmd: AssistantCommand): String {
+        val steps = cmd.steps
+        if (steps.isNullOrEmpty()) {
+            return cmd.message?.takeIf { it.isNotBlank() } ?: "No steps to execute."
+        }
+        val out = mutableListOf<String>()
+        for (step in steps) {
+            try {
+                val r = execute(step)
+                if (r.isNotBlank()) out.add(r)
+            } catch (e: Exception) {
+                out.add("Step failed: ${e.message}")
+                break
+            }
+        }
+        return out.joinToString(" ").ifBlank { "Done." }
     }
 
 }
