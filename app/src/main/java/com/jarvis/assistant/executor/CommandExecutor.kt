@@ -35,6 +35,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.SET_TIMER -> setTimer(cmd.target)
             ActionType.OPEN_VISION -> openVision(cmd.target)
             ActionType.SHOW_ARMOR -> showArmor(cmd.target)
+            ActionType.UNLOCK_PHONE -> triggerUnlock()
             ActionType.WEB_SEARCH -> webSearch(cmd.target)
             ActionType.LOCK_APP -> lockApp(cmd.target)
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
@@ -351,6 +352,18 @@ class CommandExecutor(private val context: Context) {
         }
     }
 
+
+    /** Launches MainActivity with a flag telling it to trigger the real
+     *  unlock flow there (biometric prompt needs a live Activity, which a
+     *  background service/executor doesn't have). */
+    private fun triggerUnlock(): String {
+        val intent = Intent(context, com.jarvis.assistant.MainActivity::class.java).apply {
+            putExtra(com.jarvis.assistant.security.UnlockHelper.EXTRA_TRIGGER_UNLOCK, true)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        }
+        context.startActivity(intent)
+        return "One moment, sir."
+    }
 
     private fun lockApp(appName: String?): String {
         if (appName.isNullOrBlank()) return "Which application should I lock, sir?"

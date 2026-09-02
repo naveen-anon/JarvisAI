@@ -26,6 +26,7 @@ import com.jarvis.assistant.util.NetworkStatusManager
 import com.jarvis.assistant.util.PerformanceMonitor
 import com.jarvis.assistant.util.SystemStatusManager
 import com.jarvis.assistant.util.WeatherClient
+import com.jarvis.assistant.security.UnlockHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -151,6 +152,29 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         scheduleFeedbackPromptCheck()
 
         permissionLauncher.launch(requiredPermissions)
+
+        handleUnlockIntentIfPresent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleUnlockIntentIfPresent(intent)
+    }
+
+    /** Voice-triggered "unlock my phone" lands here -- CommandExecutor can't show a
+     *  biometric prompt itself (needs a live Activity), so it relaunches MainActivity
+     *  with this flag, and this is where the actual prompt gets shown. */
+    private fun handleUnlockIntentIfPresent(intent: Intent) {
+        if (!intent.getBooleanExtra(UnlockHelper.EXTRA_TRIGGER_UNLOCK, false)) return
+        intent.removeExtra(UnlockHelper.EXTRA_TRIGGER_UNLOCK)
+        UnlockHelper(this).requestUnlock { statusMessage ->
+            txtResponse.text = statusMessage
+            service?.let {
+                // Speak the result the same way any other command response would be spoken.
+                Typewriter.animate(txtResponse, statusMessage)
+            }
+        }
     }
 
     /**

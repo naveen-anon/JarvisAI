@@ -669,6 +669,11 @@ class OfflineBrain(
             AssistantCommand("open_vision", "ocr")
 
         // Armor archive — Mark I–XLII
+        containsAny(cmd, "unlock my phone", "unlock phone", "phone unlock karo",
+            "phone unlock kro", "unlock kar do", "phone kholo") -> {
+            AssistantCommand("unlock_phone")
+        }
+
         containsAny(cmd, "show mark", "mark dikhao", "armor mark", "suit mark",
             "show armor", "armor dikhao", "suit dikhao", "iron man mark") -> {
             val num = Regex("""(?:mark\s*)?(\d{1,2})""").find(cmd)?.groupValues?.get(1)
