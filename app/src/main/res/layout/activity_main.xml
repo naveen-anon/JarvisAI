@@ -328,12 +328,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Standing by."
+            android:text="How can I help you?"
             android:textColor="#00E5FF"
             android:textSize="14sp"
             android:fontFamily="monospace"
             android:minLines="2" />
     </LinearLayout>
+
+    <include
+        android:id="@+id/quickActionsInclude"
+        layout="@layout/include_quick_actions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/txtFooter"
+        android:layout_marginBottom="8dp" />
 
     <TextView
         android:id="@+id/txtFooter"
