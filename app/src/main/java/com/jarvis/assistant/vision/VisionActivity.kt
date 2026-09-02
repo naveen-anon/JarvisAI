@@ -2,13 +2,7 @@ package com.jarvis.assistant.vision
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Bundle
-import android.view.Gravity
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -21,80 +15,76 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.common.InputImage
+import com.jarvis.assistant.R
 import com.jarvis.assistant.voice.TextToSpeechHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Phase 4 — "Live camera analysis". One screen, three on-device vision modes selected by
- * the [EXTRA_MODE] intent extra ("ocr" | "objects" | "faces"), or picked manually with the
- * on-screen buttons. Captures a single frame via CameraX, hands it to ML Kit, speaks and
- * displays the result. Everything here runs on-device — no image ever leaves the phone.
+ * Live camera analysis — OCR / objects / faces (on-device ML Kit).
+ * Launch with EXTRA_MODE = "ocr" | "objects" | "faces" (optional auto-run).
  */
 class VisionActivity : AppCompatActivity() {
 
     private lateinit var previewView: PreviewView
     private lateinit var resultText: TextView
+    private lateinit var btnOcr: TextView
+    private lateinit var btnObjects: TextView
+    private lateinit var btnFaces: TextView
     private lateinit var tts: TextToSpeechHelper
     private var imageCapture: ImageCapture? = null
+    private var currentMode: String = "ocr"
     private val scope = CoroutineScope(Dispatchers.Main)
 
     private val cameraPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted -> if (granted) startCamera() else resultText.text = "Camera permission is required." }
+    ) { granted ->
+        if (granted) startCamera()
+        else resultText.text = "Camera permission is required, sir."
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_vision)
         tts = TextToSpeechHelper(this)
-        setContentView(buildUi())
+
+        previewView = findViewById(R.id.previewView)
+        resultText = findViewById(R.id.txtVisionResult)
+        btnOcr = findViewById(R.id.btnModeOcr)
+        btnObjects = findViewById(R.id.btnModeObjects)
+        btnFaces = findViewById(R.id.btnModeFaces)
+
+        findViewById<TextView>(R.id.btnVisionClose).setOnClickListener { finish() }
+
+        btnOcr.setOnClickListener { selectMode("ocr"); runAnalysis("ocr") }
+        btnObjects.setOnClickListener { selectMode("objects"); runAnalysis("objects") }
+        btnFaces.setOnClickListener { selectMode("faces"); runAnalysis("faces") }
+        findViewById<TextView>(R.id.btnCapture).setOnClickListener { runAnalysis(currentMode) }
+
+        currentMode = intent.getStringExtra(EXTRA_MODE)?.lowercase() ?: "ocr"
+        selectMode(currentMode)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             == PackageManager.PERMISSION_GRANTED
         ) {
             startCamera()
+            // Voice-launched: auto capture after preview settles
+            if (intent.hasExtra(EXTRA_MODE)) {
+                previewView.postDelayed({ runAnalysis(currentMode) }, 900)
+            }
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
-
-        // If launched directly from a voice command, auto-run that mode once the camera's ready.
-        intent.getStringExtra(EXTRA_MODE)?.let { mode ->
-            resultText.text = "Point the camera, capturing in a moment…"
-            previewView.postDelayed({ runAnalysis(mode) }, 800)
-        }
     }
 
-    private fun buildUi(): LinearLayout {
-        previewView = PreviewView(this)
-        resultText = TextView(this).apply {
-            setTextColor(Color.parseColor("#00D4FF"))
-            textSize = 15f
-            setPadding(24, 24, 24, 24)
-        }
-
-        val buttonRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-        }
-        listOf("ocr" to "Scan Text", "objects" to "Detect Objects", "faces" to "Faces").forEach { (mode, label) ->
-            buttonRow.addView(Button(this).apply {
-                text = label
-                setOnClickListener { runAnalysis(mode) }
-            })
-        }
-
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#050A0F"))
-        }
-        root.addView(previewView, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
-        root.addView(buttonRow, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-        val scroll = ScrollView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300)
-            addView(resultText)
-        }
-        root.addView(scroll)
-        return root
+    private fun selectMode(mode: String) {
+        currentMode = mode
+        val active = 0xFF00E5FF.toInt()
+        val idle = 0xFF5C8A94.toInt()
+        btnOcr.setTextColor(if (mode == "ocr") active else idle)
+        btnObjects.setTextColor(if (mode == "objects") active else idle)
+        btnFaces.setTextColor(if (mode == "faces") active else idle)
     }
 
     private fun startCamera() {
@@ -107,7 +97,6 @@ class VisionActivity : AppCompatActivity() {
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
-
             try {
                 provider.unbindAll()
                 provider.bindToLifecycle(
@@ -120,33 +109,40 @@ class VisionActivity : AppCompatActivity() {
     }
 
     private fun runAnalysis(mode: String) {
-        val capture = imageCapture ?: run {
-            resultText.text = "Camera isn't ready yet."
+        val capture = imageCapture
+        if (capture == null) {
+            resultText.text = "Camera not ready yet."
             return
         }
         resultText.text = "Analyzing…"
-
         capture.takePicture(
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    val mediaImage = image.image
-                    if (mediaImage == null) {
-                        image.close()
-                        resultText.text = "Couldn't read the captured frame."
-                        return
-                    }
-                    val inputImage = InputImage.fromMediaImage(mediaImage, image.imageInfo.rotationDegrees)
                     scope.launch {
-                        val result = when (mode) {
-                            "ocr" -> TextRecognitionHelper.recognize(inputImage)
-                            "objects" -> ObjectDetectionHelper.detect(inputImage)
-                            "faces" -> FaceDetectionHelper.detect(inputImage)
-                            else -> "Unknown vision mode."
+                        try {
+                            val media = image.image
+                            if (media == null) {
+                                resultText.text = "Empty frame."
+                                image.close()
+                                return@launch
+                            }
+                            val inputImage = InputImage.fromMediaImage(
+                                media, image.imageInfo.rotationDegrees
+                            )
+                            val result = when (mode) {
+                                "ocr" -> TextRecognitionHelper.recognize(inputImage)
+                                "objects" -> ObjectDetectionHelper.detect(inputImage)
+                                "faces" -> FaceDetectionHelper.detect(inputImage)
+                                else -> "Unknown vision mode."
+                            }
+                            resultText.text = result
+                            tts.speak(result)
+                        } catch (e: Exception) {
+                            resultText.text = "Analysis failed: ${e.message}"
+                        } finally {
+                            image.close()
                         }
-                        image.close()
-                        resultText.text = result
-                        tts.speak(result)
                     }
                 }
 
@@ -158,8 +154,8 @@ class VisionActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        tts.shutdown()
         super.onDestroy()
+        try { tts.shutdown() } catch (_: Exception) {}
     }
 
     companion object {
