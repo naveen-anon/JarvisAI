@@ -11,6 +11,4 @@
     <color name="hud_text_dim">#6A9AAB</color>
     <color name="hud_cyan_faint">#0D1B24</color>
     <color name="ic_launcher_background">#020810</color>
-    <color name="glass_stroke">#4000E5FF</color>
-    <color name="glass_fill">#AA0A1520</color>
 </resources>

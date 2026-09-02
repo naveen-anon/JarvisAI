@@ -148,6 +148,28 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             try {
                 startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
             } catch (_: Exception) {
+
+        findViewById<TextView?>(R.id.btnQuickFlash)?.setOnClickListener {
+            try {
+                val cam = getSystemService(CAMERA_SERVICE) as android.hardware.camera2.CameraManager
+                val id = cam.cameraIdList.firstOrNull()
+                if (id != null) {
+                    // toggle best-effort via settings panel if torch API restricted
+                    startActivity(Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS))
+                }
+            } catch (_: Exception) {
+                startActivity(Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS))
+            }
+        }
+        findViewById<TextView?>(R.id.btnQuickWifi)?.setOnClickListener {
+            startActivity(Intent(android.provider.Settings.ACTION_WIFI_SETTINGS))
+        }
+        findViewById<TextView?>(R.id.btnQuickBt)?.setOnClickListener {
+            startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
+        }
+        findViewById<TextView?>(R.id.btnQuickMore)?.setOnClickListener {
+            startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+        }
                 startActivity(Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))
             }
         }
