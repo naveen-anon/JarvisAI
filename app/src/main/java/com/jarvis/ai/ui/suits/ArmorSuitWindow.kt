@@ -156,8 +156,8 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                         .padding(vertical = 12.dp, horizontal = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(Modifier = Modifier.size(12.dp).background(r, CircleShape))
-                    Spacer(Modifier = Modifier.height(8.dp))
+                    Box(modifier = Modifier.size(12.dp).background(r, CircleShape))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = suit.mark.name.replace('_', ' '),
                         color = if (selected) Color.White else Color(0xFF8B9CAB),

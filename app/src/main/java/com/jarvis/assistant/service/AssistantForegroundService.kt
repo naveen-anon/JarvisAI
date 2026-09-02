@@ -84,7 +84,14 @@ class AssistantForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         stt = SpeechToText(this)
-        clapDetector = com.jarvis.assistant.voice.ClapDetector(this) {
+        clapDetector = com.jarvis.assistant.voice.ClapDetector()
+        if (com.jarvis.assistant.util.SettingsManager(this).getClapWakeEnabled()) {
+            try {
+                clapDetector.start(onDoubleClap = {
+                    mainHandler.post { startListeningCycle() }
+                })
+            } catch (_: Exception) {}
+        }
             mainHandler.post { startListeningCycle() }
         }
         if (com.jarvis.assistant.util.SettingsManager(this).getClapWakeEnabled()) {
