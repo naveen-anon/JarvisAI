@@ -36,14 +36,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jarvis.ai.controller.ArmorController
-import com.jarvis.ai.data.model.ArmorSuit
 import com.jarvis.ai.data.repository.SuitRepository
 
 @Composable
 fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
     val currentSuit by ArmorController.currentSuit.collectAsState()
     val suitList = remember { SuitRepository().getAllSuits() }
-
     val glow by animateColorAsState(
         targetValue = Color(currentSuit.arcReactorColor),
         animationSpec = tween(700),
@@ -66,15 +64,12 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
             letterSpacing = 2.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.verticalGradient(
-                        listOf(Color(0xFF0D1117), Color(0xFF161B22))
-                    ),
-                    shape = RoundedCornerShape(16.dp)
+                    Brush.verticalGradient(listOf(Color(0xFF0D1117), Color(0xFF161B22))),
+                    RoundedCornerShape(16.dp)
                 )
                 .border(2.dp, glow, RoundedCornerShape(16.dp))
                 .padding(20.dp),
@@ -97,9 +92,21 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Dot(Color(currentSuit.primaryColor))
-                Dot(Color(currentSuit.secondaryColor))
-                Dot(glow)
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(Color(currentSuit.primaryColor), CircleShape)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(Color(currentSuit.secondaryColor), CircleShape)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(glow, CircleShape)
+                )
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -115,23 +122,17 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace
             )
-            Text(
-                text = "Theme + pitch apply on select",
-                color = Color(0xFF3D5A6A),
-                fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace
-            )
         }
-
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "AVAILABLE MARKS",
             color = Color(0xFF00E5FF),
             fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
-            modifier = Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, bottom = 8.dp)
         )
-
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(horizontal = 2.dp)
@@ -156,7 +157,11 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                         .padding(vertical = 12.dp, horizontal = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(modifier = Modifier.size(12.dp).background(r, CircleShape))
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(r, CircleShape)
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = suit.mark.name.replace('_', ' '),
@@ -169,7 +174,6 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                 }
             }
         }
-
         Spacer(modifier = Modifier.weight(1f))
         if (onClose != null) {
             Text(
@@ -177,18 +181,10 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                 color = Color(0xFF00E5FF),
                 fontSize = 15.sp,
                 fontFamily = FontFamily.Monospace,
-                modifier = Modifier.clickable { onClose() }.padding(12.dp)
+                modifier = Modifier
+                    .clickable { onClose() }
+                    .padding(12.dp)
             )
         }
     }
-}
-
-@Composable
-private fun Dot(color: Color) {
-    Box(
-        modifier = Modifier
-            .size(16.dp)
-            .background(color, CircleShape)
-            .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
-    )
 }

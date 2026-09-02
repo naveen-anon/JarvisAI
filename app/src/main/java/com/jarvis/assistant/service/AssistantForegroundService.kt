@@ -87,15 +87,10 @@ class AssistantForegroundService : Service() {
         clapDetector = com.jarvis.assistant.voice.ClapDetector()
         if (com.jarvis.assistant.util.SettingsManager(this).getClapWakeEnabled()) {
             try {
-                clapDetector.start(onDoubleClap = {
+                clapDetector.start(sensitivity = 1.0f) {
                     mainHandler.post { startListeningCycle() }
-                })
+                }
             } catch (_: Exception) {}
-        }
-            mainHandler.post { startListeningCycle() }
-        }
-        if (com.jarvis.assistant.util.SettingsManager(this).getClapWakeEnabled()) {
-            try { clapDetector.start() } catch (_: Exception) {}
         }
         tts = TextToSpeechHelper(this)
         executor = CommandExecutor(this)
