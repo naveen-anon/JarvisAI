@@ -10,5 +10,7 @@
         <item name="android:colorBackground">#020810</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:textColorPrimary">#E8F9FF</item>
+        <item name="android:textColorSecondary">#5C8A94</item>
     </style>
 </resources>

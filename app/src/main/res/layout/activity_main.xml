@@ -4,30 +4,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#020810"
+    android:background="@drawable/glass_screen_bg"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp">
+    android:paddingTop="12dp"
+    android:paddingBottom="8dp">
 
+    <!-- soft ambient only — no hard corner brackets -->
     <com.jarvis.assistant.ui.HudOverlayView
         android:id="@+id/hudOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:alpha="0.35"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <com.jarvis.assistant.ui.CornerFrameView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- TOP BAR: JARVIS + clock + settings/chat -->
     <LinearLayout
         android:id="@+id/topBrandRow"
         android:layout_width="0dp"
@@ -44,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="JARVIS"
-            android:textColor="#00E5FF"
+            android:textColor="@color/hud_cyan"
             android:textSize="18sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
@@ -55,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
-            android:textColor="#5C8A94"
+            android:textColor="@color/hud_text_dim"
             android:textSize="12sp"
             android:fontFamily="monospace"
             android:layout_marginEnd="10dp" />
@@ -66,7 +57,7 @@
             android:layout_height="36dp"
             android:gravity="center"
             android:text="💬"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:background="@drawable/bg_quick_chip"
             android:layout_marginEnd="8dp" />
 
@@ -76,12 +67,11 @@
             android:layout_height="36dp"
             android:gravity="center"
             android:text="⚙"
-            android:textColor="#00E5FF"
-            android:textSize="16sp"
+            android:textColor="@color/hud_cyan"
+            android:textSize="15sp"
             android:background="@drawable/bg_quick_chip" />
     </LinearLayout>
 
-    <!-- Status strip -->
     <LinearLayout
         android:id="@+id/statusChipStrip"
         android:layout_width="0dp"
@@ -98,263 +88,137 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Hey Jarvis"
-            android:textColor="#00E5FF"
+            android:textColor="@color/hud_cyan"
             android:textSize="13sp"
             android:textStyle="bold"
             android:fontFamily="monospace" />
-
-        <TextView
-            android:id="@+id/txtBattery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BAT --%"
-            android:textColor="#5C8A94"
-            android:textSize="10sp"
-            android:fontFamily="monospace"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/txtNetwork"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="NET"
-            android:textColor="#5C8A94"
-            android:textSize="10sp"
-            android:fontFamily="monospace"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/txtPerf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="OK"
-            android:textColor="#5C8A94"
-            android:textSize="10sp"
-            android:fontFamily="monospace" />
+        <TextView android:id="@+id/txtBattery" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="BAT" android:textColor="@color/hud_text_dim" android:textSize="10sp" android:fontFamily="monospace" android:layout_marginEnd="8dp" />
+        <TextView android:id="@+id/txtNetwork" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="NET" android:textColor="@color/hud_text_dim" android:textSize="10sp" android:fontFamily="monospace" android:layout_marginEnd="8dp" />
+        <TextView android:id="@+id/txtPerf" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="OK" android:textColor="@color/hud_text_dim" android:textSize="10sp" android:fontFamily="monospace" />
     </LinearLayout>
 
-    <!-- Location / weather row -->
     <LinearLayout
         android:id="@+id/locWeatherRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         app:layout_constraintTop_toBottomOf="@id/statusChipStrip"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/txtLocation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=""
-            android:textColor="#3A5A68"
-            android:textSize="10sp"
-            android:fontFamily="monospace" />
-
-        <TextView
-            android:id="@+id/txtWeather"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="#3A5A68"
-            android:textSize="10sp"
-            android:fontFamily="monospace" />
+        <TextView android:id="@+id/txtLocation" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:text="" android:textColor="#3A5A68" android:textSize="10sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/txtWeather" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="" android:textColor="#3A5A68" android:textSize="10sp" android:fontFamily="monospace" />
     </LinearLayout>
 
-    <!-- ARC REACTOR (hero) -->
     <com.jarvis.assistant.ui.ArcReactorView
         android:id="@+id/arcReactor"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
+        android:layout_width="210dp"
+        android:layout_height="210dp"
         app:layout_constraintTop_toBottomOf="@id/locWeatherRow"
-        app:layout_constraintBottom_toTopOf="@id/waveform"
+        app:layout_constraintBottom_toTopOf="@id/txtTapHint"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.35" />
+        app:layout_constraintVertical_bias="0.3" />
 
     <TextView
         android:id="@+id/txtTapHint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Listening…"
-        android:textColor="#0B7A94"
+        android:textColor="@color/hud_cyan_dim"
         android:textSize="12sp"
         android:fontFamily="monospace"
-        android:letterSpacing="0.08"
         app:layout_constraintTop_toBottomOf="@id/arcReactor"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp" />
+        android:layout_marginTop="2dp" />
 
-    <!-- Waveform -->
     <com.jarvis.assistant.ui.WaveformView
         android:id="@+id/waveform"
         android:layout_width="0dp"
-        android:layout_height="36dp"
+        android:layout_height="32dp"
         android:layout_marginTop="6dp"
         app:layout_constraintTop_toBottomOf="@id/txtTapHint"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/quickActionsRow" />
 
-    <!-- Quick actions (mock) -->
     <LinearLayout
         android:id="@+id/quickActionsRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
         android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/waveform"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/panelTranscript">
-
-        <TextView
-            android:id="@+id/btnQuickCall"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/bg_quick_chip"
-            android:gravity="center"
-            android:text="Call"
-            android:textColor="#00E5FF"
-            android:textSize="11sp"
-            android:fontFamily="monospace" />
-        <TextView
-            android:id="@+id/btnQuickMsg"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/bg_quick_chip"
-            android:gravity="center"
-            android:text="Message"
-            android:textColor="#00E5FF"
-            android:textSize="11sp"
-            android:fontFamily="monospace" />
-        <TextView
-            android:id="@+id/btnQuickWa"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/bg_quick_chip"
-            android:gravity="center"
-            android:text="WhatsApp"
-            android:textColor="#00E5FF"
-            android:textSize="11sp"
-            android:fontFamily="monospace" />
-        <TextView
-            android:id="@+id/btnQuickCam"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_quick_chip"
-            android:gravity="center"
-            android:text="Camera"
-            android:textColor="#00E5FF"
-            android:textSize="11sp"
-            android:fontFamily="monospace" />
+        <TextView android:id="@+id/btnQuickCall" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1"
+            android:layout_marginEnd="6dp" android:background="@drawable/bg_quick_chip" android:gravity="center"
+            android:text="Call" android:textColor="@color/hud_cyan" android:textSize="11sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/btnQuickMsg" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1"
+            android:layout_marginEnd="6dp" android:background="@drawable/bg_quick_chip" android:gravity="center"
+            android:text="Message" android:textColor="@color/hud_cyan" android:textSize="11sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/btnQuickWa" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1"
+            android:layout_marginEnd="6dp" android:background="@drawable/bg_quick_chip" android:gravity="center"
+            android:text="WhatsApp" android:textColor="@color/hud_cyan" android:textSize="11sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/btnQuickCam" android:layout_width="0dp" android:layout_height="54dp" android:layout_weight="1"
+            android:background="@drawable/bg_quick_chip" android:gravity="center"
+            android:text="Camera" android:textColor="@color/hud_cyan" android:textSize="11sp" android:fontFamily="monospace" />
     </LinearLayout>
 
-    <!-- Transcript card -->
     <LinearLayout
         android:id="@+id/panelTranscript"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_greeting_card"
-        android:padding="12dp"
+        android:background="@drawable/liquid_glass_card"
+        android:padding="14dp"
         android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/quickActionsRow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/panelResponse">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="YOU"
-            android:textColor="#0B7A94"
-            android:textSize="9sp"
-            android:letterSpacing="0.1"
-            android:fontFamily="monospace" />
-
-        <TextView
-            android:id="@+id/txtTranscript"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Say something…"
-            android:textColor="#9FD8F4"
-            android:textSize="13sp"
-            android:fontFamily="monospace"
-            android:minLines="1" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="YOU" android:textColor="@color/hud_cyan_dim" android:textSize="9sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/txtTranscript" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:text="Say something…"
+            android:textColor="@color/hud_cyan_bright" android:textSize="13sp" android:fontFamily="monospace" />
     </LinearLayout>
 
-    <!-- Response card -->
     <LinearLayout
         android:id="@+id/panelResponse"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_greeting_card"
-        android:padding="12dp"
+        android:background="@drawable/liquid_glass_card"
+        android:padding="14dp"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/panelTranscript"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/txtFooter">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="JARVIS"
-            android:textColor="#0B7A94"
-            android:textSize="9sp"
-            android:letterSpacing="0.1"
-            android:fontFamily="monospace" />
-
-        <TextView
-            android:id="@+id/txtResponse"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="How can I help you?"
-            android:textColor="#00E5FF"
-            android:textSize="14sp"
-            android:fontFamily="monospace"
-            android:minLines="2" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="JARVIS" android:textColor="@color/hud_cyan_dim" android:textSize="9sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/txtResponse" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:text="How can I help you?"
+            android:textColor="@color/hud_cyan" android:textSize="14sp" android:fontFamily="monospace" android:minLines="2" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/txtFooter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="NAVEEN KHATRI  ·  JARVIS"
+        android:text="JARVIS  ·  SOFT GLASS"
         android:fontFamily="@font/share_tech_mono"
-        android:letterSpacing="0.08"
-        android:textAllCaps="true"
         android:textColor="#3A5A68"
         android:textSize="9sp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavInclude"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:gravity="center" />
-
-
-    <include
-        android:id="@+id/bottomNavInclude"
-        layout="@layout/include_bottom_nav"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

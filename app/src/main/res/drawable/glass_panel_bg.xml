@@ -1,29 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Frosted translucent fill, layered over whatever's behind it -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#2A122230" />
-            <stroke android:width="1dp" android:color="#3300E5FF" />
-            <corners android:radius="14dp" />
+            <solid android:color="#99101822" />
+            <stroke android:width="0.8dp" android:color="#2A00E5FF" />
+            <corners android:radius="16dp" />
         </shape>
     </item>
-    <!-- Top-edge specular highlight — the "light catching the glass" cue.
-         Fixed-height item pinned to the top via gravity, so it doesn't stretch
-         to fill the whole panel like a borderless layer-list item normally would. -->
-    <item
-        android:gravity="top"
-        android:height="26dp"
-        android:left="1dp"
-        android:right="1dp"
-        android:top="1dp">
+    <item android:gravity="top" android:height="22dp" android:left="1dp" android:right="1dp" android:top="1dp">
         <shape android:shape="rectangle">
             <gradient
                 android:angle="270"
-                android:startColor="#30FFFFFF"
-                android:endColor="#00FFFFFF"
-                android:type="linear" />
-            <corners android:topLeftRadius="13dp" android:topRightRadius="13dp" android:bottomLeftRadius="0dp" android:bottomRightRadius="0dp" />
+                android:startColor="#18FFFFFF"
+                android:endColor="#00FFFFFF" />
+            <corners android:topLeftRadius="15dp" android:topRightRadius="15dp" />
         </shape>
     </item>
 </layer-list>
