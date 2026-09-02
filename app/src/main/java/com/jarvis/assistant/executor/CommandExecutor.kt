@@ -65,6 +65,7 @@ class CommandExecutor(private val context: Context) {
             }
 
             ActionType.MULTI_STEP -> executeMultiStep(cmd)
+            ActionType.BRIEFING -> runBriefing()
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
             ActionType.UNKNOWN -> "I didn't understand that command."
@@ -455,6 +456,18 @@ class CommandExecutor(private val context: Context) {
             }
         }
         return out.joinToString(" ").ifBlank { "Done." }
+    }
+
+
+    private fun runBriefing(): String {
+        return try {
+            val text = kotlinx.coroutines.runBlocking {
+                com.jarvis.assistant.util.BriefingHelper(context).build(includeWeather = true)
+            }.text
+            text
+        } catch (e: Exception) {
+            "Briefing unavailable right now, sir."
+        }
     }
 
 }

@@ -39,6 +39,7 @@ enum class ActionType(val key: String) {
     CALENDAR_NEXT("calendar_next"),
     FOCUS_MODE("focus_mode"),
     SHOW_ARMOR("show_armor"),
+    BRIEFING("briefing"),
     MULTI_STEP("multi_step"),
     REPLY("reply"),
     UNKNOWN("unknown");
