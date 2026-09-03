@@ -2,13 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bottomNav"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
+    android:layout_height="54dp"
     android:orientation="horizontal"
     android:gravity="center"
-    android:background="@drawable/bg_bottom_nav_glass"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp">
-
+    android:background="#0A1520">
     <TextView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent"
         android:layout_weight="1" android:gravity="center" android:text="Home"
         android:textColor="#00E5FF" android:textSize="11sp" android:fontFamily="monospace" />

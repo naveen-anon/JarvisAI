@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#020810"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:id="@+id/btnBriefingBack"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="←" android:textColor="#00E5FF" android:textSize="22sp" android:padding="8dp" />
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Today's Briefing" android:textColor="#E8F9FF" android:textSize="18sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Your summary for today." android:textColor="#6A9AAB" android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView android:id="@+id/chipCompanion"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_talk_button"
+            android:paddingHorizontal="12dp" android:paddingVertical="6dp"
+            android:text="Companion online" android:textColor="#00E5FF" android:textSize="11sp" android:fontFamily="monospace" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="@drawable/bg_glass_card"
+            android:padding="16dp" android:layout_marginTop="12dp">
+            <TextView android:id="@+id/txtBriefingTitle"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Good evening, boss."
+                android:textColor="#E8F9FF" android:textSize="20sp" android:textStyle="bold" />
+            <TextView android:id="@+id/txtBriefingBody"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Generating briefing…"
+                android:textColor="#9FD8F4" android:textSize="14sp" android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="12dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="72dp" android:layout_weight="1"
+                android:orientation="vertical" android:background="@drawable/bg_glass_card"
+                android:padding="12dp" android:layout_marginEnd="6dp" android:gravity="center">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Pending" android:textColor="#6A9AAB" android:textSize="10sp" />
+                <TextView android:id="@+id/txtPendingTasks" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="0" android:textColor="#E8F9FF" android:textSize="18sp" android:fontFamily="monospace" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="72dp" android:layout_weight="1"
+                android:orientation="vertical" android:background="@drawable/bg_glass_card"
+                android:padding="12dp" android:layout_marginStart="6dp" android:gravity="center">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Score" android:textColor="#6A9AAB" android:textSize="10sp" />
+                <TextView android:id="@+id/txtBriefingScore" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="—" android:textColor="#00E5FF" android:textSize="18sp" android:fontFamily="monospace" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView android:id="@+id/btnGenerateBriefing"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_talk_button"
+            android:gravity="center"
+            android:text="Generate Briefing"
+            android:textColor="#00E5FF" android:textSize="13sp" android:fontFamily="monospace" />
+
+        <TextView android:id="@+id/btnReadAloud"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_talk_button"
+            android:gravity="center"
+            android:text="Read Aloud"
+            android:textColor="#00E5FF" android:textSize="13sp" android:fontFamily="monospace" />
+    </LinearLayout>
+</ScrollView>

@@ -134,5 +134,7 @@
 
         <activity android:name=".armor.ArmorDetailActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
         <activity android:name="com.jarvis.ai.ui.suits.ArmorSuitActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
+            <activity android:name=".ui.SystemCoreActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
+        <activity android:name=".ui.briefing.BriefingActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
     </application>
 </manifest>

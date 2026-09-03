@@ -129,6 +129,16 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
         }
 
+        findViewById<TextView?>(R.id.btnTalkJarvis)?.setOnClickListener {
+            service?.startListeningCycle()
+        }
+        findViewById<TextView?>(R.id.btnQuickBriefing)?.setOnClickListener {
+            startActivity(Intent(this, com.jarvis.assistant.ui.briefing.BriefingActivity::class.java))
+        }
+        findViewById<TextView?>(R.id.btnQuickCore)?.setOnClickListener {
+            startActivity(Intent(this, com.jarvis.assistant.ui.SystemCoreActivity::class.java))
+        }
+
         // --- Phase 2: quick actions + bottom nav ---
         fun openPkg(pkg: String) {
             val launch = packageManager.getLaunchIntentForPackage(pkg)
