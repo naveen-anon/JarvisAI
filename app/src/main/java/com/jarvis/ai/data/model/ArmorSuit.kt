@@ -15,5 +15,7 @@ data class ArmorSuit(
     val arcReactorColor: Int,
     val systemMode: String,
     val voicePitch: Float = 1.0f,
-    val isLocked: Boolean = false
+    val isLocked: Boolean = false,
+    /** Vector drawable resource name without extension, e.g. ic_suit_mark3 */
+    val vectorResName: String = "ic_suit_mark3"
 )

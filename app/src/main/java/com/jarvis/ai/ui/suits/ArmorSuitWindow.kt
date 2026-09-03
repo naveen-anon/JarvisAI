@@ -2,6 +2,7 @@ package com.jarvis.ai.ui.suits
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,16 +31,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jarvis.ai.controller.ArmorController
+import com.jarvis.ai.data.model.ArmorSuit
 import com.jarvis.ai.data.repository.SuitRepository
 
 @Composable
 fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
+    val context = LocalContext.current
     val currentSuit by ArmorController.currentSuit.collectAsState()
     val suitList = remember { SuitRepository().getAllSuits() }
     val glow by animateColorAsState(
@@ -48,6 +53,11 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
         label = "reactorGlow"
     )
     val primary = Color(currentSuit.primaryColor)
+    val vectorId = remember(currentSuit.vectorResName) {
+        context.resources.getIdentifier(
+            currentSuit.vectorResName, "drawable", context.packageName
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -57,13 +67,14 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "J.A.R.V.I.S  ·  SUIT SELECT",
+            text = "J.A.R.V.I.S  ·  ARMOR ARCHIVE",
             color = glow,
             fontSize = 12.sp,
             fontFamily = FontFamily.Monospace,
             letterSpacing = 2.sp
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,60 +83,64 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                     RoundedCornerShape(16.dp)
                 )
                 .border(2.dp, glow, RoundedCornerShape(16.dp))
-                .padding(20.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (vectorId != 0) {
+                Image(
+                    painter = painterResource(id = vectorId),
+                    contentDescription = currentSuit.name,
+                    modifier = Modifier
+                        .height(180.dp)
+                        .fillMaxWidth()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .background(glow.copy(alpha = 0.3f), CircleShape)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = currentSuit.name.uppercase(),
                 color = primary,
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "MODE  ${currentSuit.systemMode}",
                 color = glow,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontFamily = FontFamily.Monospace
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .background(Color(currentSuit.primaryColor), CircleShape)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .background(Color(currentSuit.secondaryColor), CircleShape)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .background(glow, CircleShape)
-                )
+                Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.primaryColor), CircleShape))
+                Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.secondaryColor), CircleShape))
+                Box(modifier = Modifier.size(14.dp).background(glow, CircleShape))
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = currentSuit.description,
                 color = Color(0xFF9FB3C0),
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "VOICE PITCH  ${"%.2f".format(currentSuit.voicePitch)}",
                 color = Color(0xFF5A7A8A),
                 fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(top = 6.dp)
             )
         }
-        Spacer(modifier = Modifier.height(20.dp))
+
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "AVAILABLE MARKS",
+            text = "SELECT MARK",
             color = Color(0xFF00E5FF),
             fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
@@ -138,39 +153,8 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
             contentPadding = PaddingValues(horizontal = 2.dp)
         ) {
             items(suitList, key = { it.id }) { suit ->
-                val selected = suit.id == currentSuit.id
-                val r = Color(suit.arcReactorColor)
-                val p = Color(suit.primaryColor)
-                Column(
-                    modifier = Modifier
-                        .width(110.dp)
-                        .background(
-                            if (selected) p.copy(alpha = 0.35f) else Color(0xFF21262D),
-                            RoundedCornerShape(10.dp)
-                        )
-                        .border(
-                            if (selected) 2.dp else 1.dp,
-                            if (selected) r else Color(0xFF30363D),
-                            RoundedCornerShape(10.dp)
-                        )
-                        .clickable { ArmorController.equipSuit(suit) }
-                        .padding(vertical = 12.dp, horizontal = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(r, CircleShape)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = suit.mark.name.replace('_', ' '),
-                        color = if (selected) Color.White else Color(0xFF8B9CAB),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        textAlign = TextAlign.Center
-                    )
+                SuitChip(suit = suit, selected = suit.id == currentSuit.id) {
+                    ArmorController.equipSuit(suit)
                 }
             }
         }
@@ -186,5 +170,50 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                     .padding(12.dp)
             )
         }
+    }
+}
+
+@Composable
+private fun SuitChip(suit: ArmorSuit, selected: Boolean, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val id = remember(suit.vectorResName) {
+        context.resources.getIdentifier(suit.vectorResName, "drawable", context.packageName)
+    }
+    val r = Color(suit.arcReactorColor)
+    val p = Color(suit.primaryColor)
+    Column(
+        modifier = Modifier
+            .width(100.dp)
+            .background(
+                if (selected) p.copy(alpha = 0.35f) else Color(0xFF21262D),
+                RoundedCornerShape(10.dp)
+            )
+            .border(
+                if (selected) 2.dp else 1.dp,
+                if (selected) r else Color(0xFF30363D),
+                RoundedCornerShape(10.dp)
+            )
+            .clickable { onClick() }
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (id != 0) {
+            Image(
+                painter = painterResource(id = id),
+                contentDescription = suit.name,
+                modifier = Modifier.height(56.dp)
+            )
+        } else {
+            Box(modifier = Modifier.size(12.dp).background(r, CircleShape))
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = suit.mark.name.replace('_', ' '),
+            color = if (selected) Color.White else Color(0xFF8B9CAB),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            textAlign = TextAlign.Center
+        )
     }
 }
