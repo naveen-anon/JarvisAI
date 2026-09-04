@@ -108,7 +108,8 @@ class AssistantForegroundService : Service() {
         scheduleDailySummary()
         proactive = com.jarvis.assistant.util.ProactiveAlertManager(this) { msg ->
             mainHandler.post {
-                try { tts.speak(msg) } catch (_: Exception) {}
+                try { try { com.jarvis.assistant.ui.HudController.speaking() } catch (_: Exception) {}
+                    tts.speak(msg) } catch (_: Exception) {}
             }
         }
         proactive?.start()
@@ -177,6 +178,7 @@ class AssistantForegroundService : Service() {
     }
 
     fun startListeningCycle() {
+        try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
         stt.listenOnce(
             onResult = { speech ->
@@ -377,7 +379,8 @@ class AssistantForegroundService : Service() {
             } else {
                 try {
                     val command = gemini.getCommand(speech)
-                    executor.execute(command) to true
+                    try { com.jarvis.assistant.ui.HudController.executing() } catch (_: Exception) {}
+                executor.execute(command) to true
                 } catch (e: Exception) {
                     val hint = groq?.error.orEmpty()
                     if (hint.contains("API key", ignoreCase = true)) {

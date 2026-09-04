@@ -31,7 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantListener {
+class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantListener , com.jarvis.assistant.ui.HudController.Listener{
 
     private var service: AssistantForegroundService? = null
     private var bound = false
@@ -381,6 +381,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
     }
 
     override fun onResume() {
+        com.jarvis.assistant.ui.HudController.addListener(this)
         super.onResume()
         // Catches the case where the process was killed and relaunched after the Handler
         // callback below would have fired — re-checks elapsed time rather than relying only
@@ -406,4 +407,23 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         }
         super.onDestroy()
     }
+
+    override fun onHudState(state: com.jarvis.assistant.ui.HudState) {
+        runOnUiThread {
+            try {
+                findViewById<android.widget.TextView?>(com.jarvis.assistant.R.id.txtState)?.text = state.label
+                findViewById<android.widget.TextView?>(com.jarvis.assistant.R.id.txtTapHint)?.text = state.label
+            } catch (_: Exception) {}
+            try {
+                val reactor = findViewById<com.jarvis.assistant.ui.ArcReactorView?>(com.jarvis.assistant.R.id.arcReactor)
+                reactor?.setListening(state == com.jarvis.assistant.ui.HudState.LISTENING)
+                // optional intensity if method exists
+                try {
+                    val m = reactor?.javaClass?.methods?.find { it.name == "setIntensity" && it.parameterTypes.size == 1 }
+                    m?.invoke(reactor, state.intensity)
+                } catch (_: Exception) {}
+            } catch (_: Exception) {}
+        }
+    }
+
 }

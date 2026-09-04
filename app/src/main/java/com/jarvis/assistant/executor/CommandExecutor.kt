@@ -444,6 +444,7 @@ class CommandExecutor(private val context: Context) {
 
 
     private fun executeMultiStep(cmd: AssistantCommand): String {
+        try { com.jarvis.assistant.ui.HudController.executing() } catch (_: Exception) {}
         val steps = cmd.steps
         if (steps.isNullOrEmpty()) {
             return cmd.message?.takeIf { it.isNotBlank() } ?: "No steps to execute."
