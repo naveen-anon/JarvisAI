@@ -24,6 +24,18 @@ class CommandExecutor(private val context: Context) {
     private val lockManager = AppLockManager(context)
 
     fun execute(cmd: AssistantCommand): String {
+        // Stark L6 — confirm gate
+        try {
+            val held = com.jarvis.assistant.executor.RiskConfirmGate.takeIfConfirm(
+                listOfNotNull(cmd.message, cmd.target, cmd.action).joinToString(" ")
+            )
+            // actual confirm speech is handled in service; here gate risky new commands
+        } catch (_: Exception) {}
+        if (!riskBypass && com.jarvis.assistant.executor.RiskConfirmGate.isRisky(cmd)) {
+            try { com.jarvis.assistant.ui.HudController.thinking() } catch (_: Exception) {}
+            return com.jarvis.assistant.executor.RiskConfirmGate.hold(cmd)
+        }
+
         return when (ActionType.fromKey(cmd.action)) {
             ActionType.OPEN_APP -> openApp(cmd.target)
             ActionType.CALL -> callContact(cmd.target)
@@ -595,6 +607,18 @@ class CommandExecutor(private val context: Context) {
             msg
         } catch (e: Exception) {
             "Unable to equip suit: ${e.message}"
+        }
+    }
+
+
+    @Volatile private var riskBypass: Boolean = false
+
+    fun executeConfirmed(cmd: AssistantCommand): String {
+        riskBypass = true
+        try {
+            return execute(cmd)
+        } finally {
+            riskBypass = false
         }
     }
 
