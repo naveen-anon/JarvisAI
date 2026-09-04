@@ -66,6 +66,8 @@ class CommandExecutor(private val context: Context) {
             }
 
             ActionType.MULTI_STEP -> executeMultiStep(cmd)
+                        ActionType.REMEMBER -> runRemember(cmd)
+            ActionType.RECALL -> runRecall()
             ActionType.BRIEFING -> runBriefing()
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
@@ -481,6 +483,46 @@ class CommandExecutor(private val context: Context) {
         } catch (e: Exception) {
             "Could not analyze the screen, sir."
         }
+    }
+
+
+    private fun runRemember(cmd: AssistantCommand): String {
+        val mem = com.jarvis.assistant.memory.JarvisMemory(context)
+        val target = cmd.target?.lowercase().orEmpty()
+        val msg = cmd.message?.trim().orEmpty()
+        return when {
+            target == "name" && msg.isNotBlank() -> {
+                mem.setUserName(msg)
+                "Understood. I will address you as $msg."
+            }
+            target == "note" && msg.isNotBlank() -> {
+                mem.addNote(msg)
+                "Noted."
+            }
+            msg.lowercase().startsWith("call me ") -> {
+                val n = msg.substringAfter(" ").substringAfter(" ").trim()
+                mem.setUserName(n)
+                "Understood. I will address you as $n."
+            }
+            msg.isNotBlank() -> {
+                mem.addNote(msg)
+                "I will remember that."
+            }
+            else -> "What should I remember?"
+        }
+    }
+
+    private fun runRecall(): String {
+        val mem = com.jarvis.assistant.memory.JarvisMemory(context)
+        val name = mem.getUserName()
+        val notes = mem.listNotes(5)
+        val parts = mutableListOf<String>()
+        if (name.isNotBlank()) parts += "You asked me to call you $name."
+        else parts += "You have not set a preferred name yet."
+        parts += "Preferred chat app is ${mem.getPreferredChatApp()}."
+        if (notes.isNotEmpty()) parts += "Recent notes: " + notes.joinToString("; ")
+        else parts += "No additional notes stored."
+        return parts.joinToString(" ")
     }
 
 }

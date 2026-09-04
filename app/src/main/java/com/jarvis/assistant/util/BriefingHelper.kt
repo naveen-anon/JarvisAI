@@ -41,12 +41,16 @@ class BriefingHelper(private val context: Context) {
     }
 
     private fun greeting(): String {
+        val who = try {
+            com.jarvis.assistant.memory.JarvisMemory(context).getAddressAs()
+        } catch (_: Exception) { "sir" }
+
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         return when (hour) {
-            in 5..11 -> "Good morning."
-            in 12..16 -> "Good afternoon."
-            in 17..21 -> "Good evening."
-            else -> "Hello."
+            in 5..11 -> "Good morning, $who."
+            in 12..16 -> "Good afternoon, $who."
+            in 17..21 -> "Good evening, $who."
+            else -> "Hello, $who."
         }
     }
 
