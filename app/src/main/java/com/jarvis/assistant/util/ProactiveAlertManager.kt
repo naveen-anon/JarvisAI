@@ -42,6 +42,10 @@ class ProactiveAlertManager(
 
     /** Call every ~5 minutes from the service tick. */
     fun tick() {
+        try {
+            if (com.jarvis.assistant.util.EveningDebrief(context).shouldSuppressProactive()) return
+        } catch (_: Exception) {}
+
         if (!settings.getProactiveAlertsEnabled()) return
         checkBatteryLevel()
         checkCalendar()

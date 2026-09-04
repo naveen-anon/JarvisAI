@@ -42,6 +42,7 @@ enum class ActionType(val key: String) {
     SHOW_ARMOR("show_armor"),
     REMEMBER("remember"),
     RECALL("recall"),
+    DEBRIEF("debrief"),
     BRIEFING("briefing"),
     EQUIP_SUIT("equip_suit"),
     SCREEN_ACT("screen_act"),

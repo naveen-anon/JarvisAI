@@ -107,4 +107,14 @@ class SettingsManager(context: Context) {
     fun setBriefSpeech(brief: Boolean) = prefs.edit().putBoolean("brief_speech", brief).apply()
     fun getBriefSpeech(): Boolean = prefs.getBoolean("brief_speech", false)
 
+
+    fun getQuietHoursEnabled(): Boolean = prefs.getBoolean("quiet_hours_enabled", true)
+    fun setQuietHoursEnabled(v: Boolean) = prefs.edit().putBoolean("quiet_hours_enabled", v).apply()
+    fun getQuietStartHour(): Int = prefs.getInt("quiet_start_hour", 22)
+    fun getQuietEndHour(): Int = prefs.getInt("quiet_end_hour", 7)
+    fun setQuietHours(startHour: Int, endHour: Int) {
+        prefs.edit().putInt("quiet_start_hour", startHour.coerceIn(0, 23))
+            .putInt("quiet_end_hour", endHour.coerceIn(0, 23)).apply()
+    }
+
 }

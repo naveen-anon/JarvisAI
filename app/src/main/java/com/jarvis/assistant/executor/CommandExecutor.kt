@@ -83,6 +83,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.MULTI_STEP -> executeMultiStep(cmd)
                         ActionType.REMEMBER -> runRemember(cmd)
             ActionType.RECALL -> runRecall()
+                        ActionType.DEBRIEF -> runDebrief()
             ActionType.BRIEFING -> runBriefing()
             ActionType.REPLY -> cmd.message ?: ""
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
@@ -619,6 +620,15 @@ class CommandExecutor(private val context: Context) {
             return execute(cmd)
         } finally {
             riskBypass = false
+        }
+    }
+
+
+    private fun runDebrief(): String {
+        return try {
+            com.jarvis.assistant.util.EveningDebrief(context).buildDebrief()
+        } catch (e: Exception) {
+            "Debrief unavailable."
         }
     }
 
