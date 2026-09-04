@@ -65,6 +65,8 @@ class CommandExecutor(private val context: Context) {
                 }
             }
 
+                        ActionType.SCREEN_ACT -> runScreenAct(cmd)
+            ActionType.OPEN_URL -> openUrl(cmd.target)
             ActionType.MULTI_STEP -> executeMultiStep(cmd)
                         ActionType.REMEMBER -> runRemember(cmd)
             ActionType.RECALL -> runRecall()
@@ -524,6 +526,54 @@ class CommandExecutor(private val context: Context) {
         if (notes.isNotEmpty()) parts += "Recent notes: " + notes.joinToString("; ")
         else parts += "No additional notes stored."
         return parts.joinToString(" ")
+    }
+
+
+    private fun runScreenAct(cmd: AssistantCommand): String {
+        try { com.jarvis.assistant.ui.HudController.executing() } catch (_: Exception) {}
+        val text = com.jarvis.assistant.util.ScreenActHelper.captureText()
+        val plan = com.jarvis.assistant.util.ScreenActHelper.plan(context, text, cmd.message)
+        if (plan.action != null) {
+            val follow = plan.action!!
+            val type = try {
+                com.jarvis.assistant.model.ActionType.fromKey(follow.action)
+            } catch (_: Exception) {
+                null
+            }
+            when (type) {
+                com.jarvis.assistant.model.ActionType.OPEN_URL -> openUrl(follow.target)
+                com.jarvis.assistant.model.ActionType.CALL -> dialNumber(follow.target)
+                else -> { /* report only */ }
+            }
+        }
+        try {
+            if (plan.action != null) com.jarvis.assistant.ui.HudController.done()
+            else com.jarvis.assistant.ui.HudController.done()
+        } catch (_: Exception) {}
+        return plan.spoken
+    }
+
+    private fun openUrl(url: String?): String {
+        if (url.isNullOrBlank()) return "Which link should I open?"
+        return if (com.jarvis.assistant.util.ScreenActHelper.openUrl(context, url)) {
+            "Opening link."
+        } else {
+            "I could not open that link."
+        }
+    }
+
+    private fun dialNumber(number: String?): String {
+        if (number.isNullOrBlank()) return "Which number should I call?"
+        return try {
+            val intent = android.content.Intent(android.content.Intent.ACTION_DIAL).apply {
+                data = android.net.Uri.parse("tel:$number")
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            "Dialing $number."
+        } catch (e: Exception) {
+            "I could not start the dialer."
+        }
     }
 
 }

@@ -43,6 +43,8 @@ enum class ActionType(val key: String) {
     REMEMBER("remember"),
     RECALL("recall"),
     BRIEFING("briefing"),
+    SCREEN_ACT("screen_act"),
+    OPEN_URL("open_url"),
     MULTI_STEP("multi_step"),
     REPLY("reply"),
     UNKNOWN("unknown");
