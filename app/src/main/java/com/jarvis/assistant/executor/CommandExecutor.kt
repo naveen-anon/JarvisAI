@@ -65,7 +65,7 @@ class CommandExecutor(private val context: Context) {
                 }
             }
 
-            ActionType.MULTI_STEP -> executeMultiStep(cmd) // executeMultiStep(cmd)
+            ActionType.MULTI_STEP -> executeMultiStep(cmd)
                         ActionType.REMEMBER -> runRemember(cmd)
             ActionType.RECALL -> runRecall()
             ActionType.BRIEFING -> runBriefing()
