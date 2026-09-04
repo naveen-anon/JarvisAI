@@ -160,15 +160,21 @@ class AssistantForegroundService : Service() {
     }
 
     /** Google SpeechRecognizer continuous keyword match (higher battery, no Picovoice key). */
+
+    /**
+     * Continuous Google STT wake is DISABLED — it holds the mic open and drains battery.
+     * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
+     */
     private fun startSttWakeFallback() {
-        stt.listenContinuous { trailingCommand ->
-            if (trailingCommand.isNotBlank()) {
-                handleUserSpeech(trailingCommand)
-            } else {
-                startListeningCycle()
-            }
-        }
+        android.util.Log.i(
+            "JarvisService",
+            "STT continuous wake disabled. Use clap, notification Listen, or Talk button."
+        )
+        // Ensure continuous STT is stopped if it was running
+        try { stt.stopContinuous() } catch (_: Exception) {}
+        try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
     }
+
 
     /** Text chat — same offline-first pipeline as voice. */
     fun submitText(text: String) {
@@ -178,6 +184,8 @@ class AssistantForegroundService : Service() {
     }
 
     fun startListeningCycle() {
+        try { stt.stopContinuous() } catch (_: Exception) {}
+        try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
         stt.listenOnce(

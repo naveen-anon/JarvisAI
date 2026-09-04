@@ -73,7 +73,7 @@ class SettingsManager(context: Context) {
     fun markFeedbackGiven() = prefs.edit().putBoolean("feedback_given", true).apply()
 
     // Background wake-word listening (must stay INSIDE the class)
-    fun getBackgroundListen(): Boolean = prefs.getBoolean("bg_listen", true)
+    fun getBackgroundListen(): Boolean = prefs.getBoolean("background_listen", true)
     fun setBackgroundListen(enabled: Boolean) =
         prefs.edit().putBoolean("bg_listen", enabled).apply()
 
@@ -116,5 +116,10 @@ class SettingsManager(context: Context) {
         prefs.edit().putInt("quiet_start_hour", startHour.coerceIn(0, 23))
             .putInt("quiet_end_hour", endHour.coerceIn(0, 23)).apply()
     }
+
+
+    /** Dangerous: keeps Google STT mic open. Always default false. */
+    fun getContinuousMicWake(): Boolean = prefs.getBoolean("continuous_mic_wake", false)
+    fun setContinuousMicWake(v: Boolean) = prefs.edit().putBoolean("continuous_mic_wake", v).apply()
 
 }
