@@ -408,22 +408,21 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         super.onDestroy()
     }
 
+
     override fun onHudState(state: com.jarvis.assistant.ui.HudState) {
         runOnUiThread {
+            val label = com.jarvis.assistant.ui.HudController.labelOf(state)
             try {
-                findViewById<android.widget.TextView?>(com.jarvis.assistant.R.id.txtState)?.text = state.label
-                findViewById<android.widget.TextView?>(com.jarvis.assistant.R.id.txtTapHint)?.text = state.label
+                findViewById<android.widget.TextView?>(com.jarvis.assistant.R.id.txtState)?.text = label
             } catch (_: Exception) {}
             try {
-                val reactor = findViewById<com.jarvis.assistant.ui.ArcReactorView?>(com.jarvis.assistant.R.id.arcReactor)
-                reactor?.setListening(state == com.jarvis.assistant.ui.HudState.LISTENING)
-                // optional intensity if method exists
-                try {
-                    val m = reactor?.javaClass?.methods?.find { it.name == "setIntensity" && it.parameterTypes.size == 1 }
-                    m?.invoke(reactor, state.intensity)
-                } catch (_: Exception) {}
+                findViewById<android.widget.TextView?>(com.jarvis.assistant.R.id.txtTapHint)?.text = label
+            } catch (_: Exception) {}
+            try {
+                findViewById<com.jarvis.assistant.ui.ArcReactorView?>(com.jarvis.assistant.R.id.arcReactor)?.state = state
             } catch (_: Exception) {}
         }
     }
+
 
 }

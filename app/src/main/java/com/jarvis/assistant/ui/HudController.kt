@@ -4,9 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import java.util.concurrent.CopyOnWriteArrayList
 
-/**
- * Global HUD presence — service + MainActivity both observe.
- */
+/** Stark L3 — presence bus. Uses ArcReactorView.HudState (single enum). */
 object HudController {
     interface Listener {
         fun onHudState(state: HudState)
@@ -34,9 +32,7 @@ object HudController {
         this.state = state
         resetRunnable?.let { main.removeCallbacks(it) }
         resetRunnable = null
-        main.post {
-            listeners.forEach { it.onHudState(state) }
-        }
+        main.post { listeners.forEach { it.onHudState(state) } }
         if (autoIdleMs > 0L && state != HudState.IDLE && state != HudState.LISTENING) {
             val r = Runnable { set(HudState.IDLE) }
             resetRunnable = r
@@ -51,4 +47,14 @@ object HudController {
     fun speaking() = set(HudState.SPEAKING)
     fun done(autoIdleMs: Long = 1800L) = set(HudState.DONE, autoIdleMs)
     fun error(autoIdleMs: Long = 2200L) = set(HudState.ERROR, autoIdleMs)
+
+    fun labelOf(state: HudState): String = when (state) {
+        HudState.IDLE -> "Standing by"
+        HudState.LISTENING -> "Listening…"
+        HudState.THINKING -> "Thinking…"
+        HudState.EXECUTING -> "Executing…"
+        HudState.SPEAKING -> "Speaking…"
+        HudState.DONE -> "Done"
+        HudState.ERROR -> "Unable"
+    }
 }

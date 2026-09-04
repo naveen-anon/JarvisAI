@@ -11,7 +11,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import com.jarvis.assistant.R
 
-enum class HudState { IDLE, LISTENING, THINKING, SPEAKING }
+enum class HudState { IDLE, LISTENING, THINKING, EXECUTING, SPEAKING, DONE, ERROR }
 
 /**
  * Real Arc Reactor PNG + glow colored from PNG / settings accent.
@@ -96,6 +96,21 @@ class ArcReactorView @JvmOverloads constructor(
                 glowBg.setColorFilter(Color.parseColor("#FF8800"), PorterDuff.Mode.SRC_ATOP)
                 startBreathing(0.50f, 1.0f, 420)
                 softScale(1.06f, 1.24f)
+            }
+            HudState.EXECUTING -> {
+                image.alpha = 1f
+                glowBg.setColorFilter(accentColor, PorterDuff.Mode.SRC_ATOP)
+                glowBg.alpha = 0.9f
+            }
+            HudState.DONE -> {
+                image.alpha = 0.9f
+                glowBg.setColorFilter(accentColor, PorterDuff.Mode.SRC_ATOP)
+                glowBg.alpha = 0.5f
+            }
+            HudState.ERROR -> {
+                image.alpha = 0.7f
+                glowBg.setColorFilter(android.graphics.Color.parseColor("#FF5252"), PorterDuff.Mode.SRC_ATOP)
+                glowBg.alpha = 0.55f
             }
             HudState.SPEAKING -> {
                 // Bright white-cyan
