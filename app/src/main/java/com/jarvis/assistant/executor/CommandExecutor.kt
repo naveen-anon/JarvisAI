@@ -65,7 +65,8 @@ class CommandExecutor(private val context: Context) {
                 }
             }
 
-                        ActionType.SCREEN_ACT -> runScreenAct(cmd)
+                                    ActionType.EQUIP_SUIT -> runEquipSuit(cmd)
+            ActionType.SCREEN_ACT -> runScreenAct(cmd)
             ActionType.OPEN_URL -> openUrl(cmd.target)
             ActionType.MULTI_STEP -> executeMultiStep(cmd)
                         ActionType.REMEMBER -> runRemember(cmd)
@@ -573,6 +574,27 @@ class CommandExecutor(private val context: Context) {
             "Dialing $number."
         } catch (e: Exception) {
             "I could not start the dialer."
+        }
+    }
+
+
+    private fun runEquipSuit(cmd: AssistantCommand): String {
+        return try {
+            val repo = com.jarvis.ai.data.repository.SuitRepository()
+            val q = listOfNotNull(cmd.target, cmd.message).joinToString(" ").lowercase()
+            val suit = repo.getAllSuits().firstOrNull { s ->
+                q.contains(s.id.replace("_", " ")) ||
+                    q.contains(s.mark.name.replace("_", " ").lowercase()) ||
+                    q.contains(s.name.substringBefore("—").substringBefore("-").trim().lowercase())
+            } ?: repo.getAllSuits().firstOrNull {
+                it.id == "mark_3" || it.mark.name.contains("3")
+            } ?: return "Suit not found in archive."
+            try { com.jarvis.assistant.ui.HudController.executing() } catch (_: Exception) {}
+            val msg = com.jarvis.ai.controller.ArmorController.equipWithContext(context, suit)
+            try { com.jarvis.assistant.ui.HudController.done() } catch (_: Exception) {}
+            msg
+        } catch (e: Exception) {
+            "Unable to equip suit: ${e.message}"
         }
     }
 

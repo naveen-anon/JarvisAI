@@ -26,6 +26,7 @@ object ArmorController {
     }
 
     fun equipSuit(suit: ArmorSuit) {
+        // behaviour apply is done from UI with Context
         _currentSuit.value = suit
         applySuitConfig(suit, true)
     }
@@ -49,4 +50,11 @@ object ArmorController {
             try { ctx.sendBroadcast(Intent(ACTION_SUIT_CHANGED).setPackage(ctx.packageName)) } catch (_: Exception) {}
         }
     }
+
+    fun equipWithContext(context: android.content.Context, suit: ArmorSuit): String {
+        equipSuit(suit)
+        val applied = SuitModeEngine.apply(context, suit)
+        return "${suit.name}: ${applied.note}"
+    }
+
 }

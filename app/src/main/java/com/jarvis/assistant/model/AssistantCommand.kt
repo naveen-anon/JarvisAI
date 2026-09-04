@@ -43,6 +43,7 @@ enum class ActionType(val key: String) {
     REMEMBER("remember"),
     RECALL("recall"),
     BRIEFING("briefing"),
+    EQUIP_SUIT("equip_suit"),
     SCREEN_ACT("screen_act"),
     OPEN_URL("open_url"),
     MULTI_STEP("multi_step"),

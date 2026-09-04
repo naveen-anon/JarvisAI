@@ -100,4 +100,11 @@ class SettingsManager(context: Context) {
     fun getClapSensitivity(): Float = prefs.getFloat("clap_sensitivity", 0.55f)
     fun setClapSensitivity(v: Float) = prefs.edit().putFloat("clap_sensitivity", v).apply()
 
+
+    fun setProactiveEnabled(enabled: Boolean) = prefs.edit().putBoolean("proactive_enabled", enabled).apply()
+    fun getProactiveEnabled(): Boolean = prefs.getBoolean("proactive_enabled", true)
+
+    fun setBriefSpeech(brief: Boolean) = prefs.edit().putBoolean("brief_speech", brief).apply()
+    fun getBriefSpeech(): Boolean = prefs.getBoolean("brief_speech", false)
+
 }
