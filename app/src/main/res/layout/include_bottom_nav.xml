@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bottomNav"
     android:layout_width="match_parent"
-    android:layout_height="54dp"
+    android:layout_height="52dp"
     android:orientation="horizontal"
     android:gravity="center"
     android:background="#0A1520">
@@ -13,12 +13,12 @@
         android:layout_weight="1" android:gravity="center" android:text="Chat"
         android:textColor="#5C8A94" android:textSize="11sp" android:fontFamily="monospace" />
     <TextView android:id="@+id/navMic" android:layout_width="0dp" android:layout_height="match_parent"
-        android:layout_weight="1" android:gravity="center" android:text="● Mic"
-        android:textColor="#00E5FF" android:textSize="12sp" android:textStyle="bold" android:fontFamily="monospace" />
+        android:layout_weight="1" android:gravity="center" android:text="●"
+        android:textColor="#00E5FF" android:textSize="16sp" android:fontFamily="monospace" />
     <TextView android:id="@+id/navVision" android:layout_width="0dp" android:layout_height="match_parent"
         android:layout_weight="1" android:gravity="center" android:text="Vision"
         android:textColor="#5C8A94" android:textSize="11sp" android:fontFamily="monospace" />
     <TextView android:id="@+id/navSettings" android:layout_width="0dp" android:layout_height="match_parent"
-        android:layout_weight="1" android:gravity="center" android:text="Settings"
+        android:layout_weight="1" android:gravity="center" android:text="More"
         android:textColor="#5C8A94" android:textSize="11sp" android:fontFamily="monospace" />
 </LinearLayout>
