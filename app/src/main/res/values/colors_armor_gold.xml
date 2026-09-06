@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="armor_bg">#000000</color>
+    <color name="armor_gold">#FFB300</color>
+    <color name="armor_gold_bright">#FFD54F</color>
+    <color name="armor_core">#FFF8E1</color>
+    <color name="armor_orange">#FF6D00</color>
+    <color name="armor_amber">#FF8F00</color>
+    <color name="armor_dim">#66FFB300</color>
+    <color name="armor_panel">#E60A0800</color>
+    <color name="armor_stroke">#99FFB300</color>
+    <color name="armor_text">#FFE082</color>
+    <color name="armor_muted">#99FFCC80</color>
+</resources>
