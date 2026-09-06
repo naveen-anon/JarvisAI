@@ -4,8 +4,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#020810"
     android:padding="12dp">
+
+    <com.jarvis.assistant.ui.HudOverlayView
+        android:id="@+id/hudOverlaySpark"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.22"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <!-- Top tabs like reel: Home · Chat · Dashboard -->
     <LinearLayout
@@ -23,18 +31,18 @@
             android:paddingHorizontal="14dp" android:paddingVertical="6dp"
             android:layout_marginEnd="6dp"
             android:background="@drawable/bg_spark_tab_active"
-            android:text="Home" android:textColor="#FFD54F"
+            android:text="Home" android:textColor="#00E5FF"
             android:textSize="11sp" android:fontFamily="monospace" />
         <TextView android:id="@+id/tabChat"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:paddingHorizontal="14dp" android:paddingVertical="6dp"
             android:layout_marginEnd="6dp"
-            android:text="Chat" android:textColor="#99FFCC80"
+            android:text="Chat" android:textColor="#7AB8C8"
             android:textSize="11sp" android:fontFamily="monospace" />
         <TextView android:id="@+id/tabDash"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:paddingHorizontal="14dp" android:paddingVertical="6dp"
-            android:text="Armor" android:textColor="#99FFCC80"
+            android:text="Armor" android:textColor="#7AB8C8"
             android:textSize="11sp" android:fontFamily="monospace" />
     </LinearLayout>
 
@@ -44,7 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="ARMOR ARCHIVE"
-        android:textColor="#FFB300"
+        android:textColor="#00E5FF"
         android:textSize="14sp"
         android:textStyle="bold"
         android:fontFamily="monospace"
@@ -58,7 +66,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Select suit · systems will adapt"
-        android:textColor="#99FFCC80"
+        android:textColor="#7AB8C8"
         android:textSize="11sp"
         android:fontFamily="monospace"
         app:layout_constraintTop_toBottomOf="@id/txtArmorTitle"
@@ -77,13 +85,13 @@
 
         <View android:layout_width="220dp" android:layout_height="220dp"
             android:layout_gravity="center"
-            android:background="@drawable/bg_spark_orb_outer" />
+            android:background="@drawable/bg_reactor_outer" />
         <View android:layout_width="150dp" android:layout_height="150dp"
             android:layout_gravity="center"
-            android:background="@drawable/bg_spark_orb_mid" />
+            android:background="@drawable/bg_reactor_mid" />
         <View android:layout_width="64dp" android:layout_height="64dp"
             android:layout_gravity="center"
-            android:background="@drawable/bg_spark_orb_core" />
+            android:background="@drawable/bg_reactor_core" />
 
         <!-- optional: existing ironman vector on top -->
         <ImageView
@@ -103,7 +111,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="MARK —"
-        android:textColor="#FFD54F"
+        android:textColor="#00E5FF"
         android:textSize="13sp"
         android:fontFamily="monospace"
         app:layout_constraintTop_toBottomOf="@id/goldOrbStack"
@@ -132,31 +140,31 @@
                 android:layout_width="wrap_content" android:layout_height="36dp"
                 android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
                 android:gravity="center" android:background="@drawable/bg_spark_chip"
-                android:text="MK I" android:textColor="#FFE082"
+                android:text="MK I" android:textColor="#B8ECFF"
                 android:textSize="11sp" android:fontFamily="monospace" />
             <TextView android:id="@+id/chipMark3"
                 android:layout_width="wrap_content" android:layout_height="36dp"
                 android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
                 android:gravity="center" android:background="@drawable/bg_spark_chip"
-                android:text="MK III" android:textColor="#FFE082"
+                android:text="MK III" android:textColor="#B8ECFF"
                 android:textSize="11sp" android:fontFamily="monospace" />
             <TextView android:id="@+id/chipMark42"
                 android:layout_width="wrap_content" android:layout_height="36dp"
                 android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
                 android:gravity="center" android:background="@drawable/bg_spark_chip"
-                android:text="MK 42" android:textColor="#FFE082"
+                android:text="MK 42" android:textColor="#B8ECFF"
                 android:textSize="11sp" android:fontFamily="monospace" />
             <TextView android:id="@+id/chipMark50"
                 android:layout_width="wrap_content" android:layout_height="36dp"
                 android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
                 android:gravity="center" android:background="@drawable/bg_spark_chip"
-                android:text="MK 50" android:textColor="#FFE082"
+                android:text="MK 50" android:textColor="#B8ECFF"
                 android:textSize="11sp" android:fontFamily="monospace" />
             <TextView android:id="@+id/chipHulk"
                 android:layout_width="wrap_content" android:layout_height="36dp"
                 android:paddingHorizontal="14dp"
                 android:gravity="center" android:background="@drawable/bg_spark_chip"
-                android:text="HULKBUSTER" android:textColor="#FFE082"
+                android:text="HULKBUSTER" android:textColor="#B8ECFF"
                 android:textSize="11sp" android:fontFamily="monospace" />
         </LinearLayout>
     </HorizontalScrollView>
@@ -176,13 +184,13 @@
         <TextView android:id="@+id/txtSuitDesc"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="Combat systems online."
-            android:textColor="#FFE082" android:textSize="12sp"
+            android:textColor="#B8ECFF" android:textSize="12sp"
             android:fontFamily="monospace" />
         <TextView android:id="@+id/txtSuitMode"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="MODE · STANDARD"
-            android:textColor="#FFB300" android:textSize="11sp"
+            android:textColor="#00E5FF" android:textSize="11sp"
             android:fontFamily="monospace" />
     </LinearLayout>
 
@@ -194,7 +202,7 @@
         android:background="@drawable/bg_spark_panel"
         android:gravity="center"
         android:text="EQUIP SUIT"
-        android:textColor="#FFD54F"
+        android:textColor="#00E5FF"
         android:textSize="13sp"
         android:fontFamily="monospace"
         app:layout_constraintTop_toBottomOf="@id/suitDetailPanel"
@@ -202,4 +210,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0" />
+
+    <com.jarvis.assistant.ui.CornerFrameView
+        android:id="@+id/cornerFrameSpark"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,8 +4,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#020810"
     android:padding="12dp">
+
+    <com.jarvis.assistant.ui.HudOverlayView
+        android:id="@+id/hudOverlayArmor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.22"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <LinearLayout
         android:id="@+id/armorTabs"
@@ -20,18 +28,18 @@
             android:paddingHorizontal="14dp" android:paddingVertical="6dp"
             android:layout_marginEnd="6dp"
             android:background="@drawable/bg_armor_tab"
-            android:text="Home" android:textColor="#FFD54F"
+            android:text="Home" android:textColor="#00E5FF"
             android:textSize="11sp" android:fontFamily="monospace"/>
         <TextView android:id="@+id/tabArmorList"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:paddingHorizontal="14dp" android:paddingVertical="6dp"
             android:layout_marginEnd="6dp"
-            android:text="Suits" android:textColor="#99FFCC80"
+            android:text="Suits" android:textColor="#7AB8C8"
             android:textSize="11sp" android:fontFamily="monospace"/>
         <TextView android:id="@+id/tabArmorStatus"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:paddingHorizontal="14dp" android:paddingVertical="6dp"
-            android:text="Status" android:textColor="#99FFCC80"
+            android:text="Status" android:textColor="#7AB8C8"
             android:textSize="11sp" android:fontFamily="monospace"/>
     </LinearLayout>
 
@@ -41,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="ARMOR SUITS"
-        android:textColor="#FFB300"
+        android:textColor="#00E5FF"
         android:textSize="15sp"
         android:textStyle="bold"
         android:fontFamily="monospace"
@@ -54,8 +62,8 @@
         android:id="@+id/txtArmorSub"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Gold reactor archive · equip to adapt systems"
-        android:textColor="#99FFCC80"
+        android:text="Reactor archive · equip to adapt systems"
+        android:textColor="#7AB8C8"
         android:textSize="11sp"
         android:fontFamily="monospace"
         app:layout_constraintTop_toBottomOf="@id/txtArmorHeader"
@@ -71,11 +79,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
         <View android:layout_width="220dp" android:layout_height="220dp"
-            android:layout_gravity="center" android:background="@drawable/bg_armor_orb_outer"/>
+            android:layout_gravity="center" android:background="@drawable/bg_reactor_outer"/>
         <View android:layout_width="150dp" android:layout_height="150dp"
-            android:layout_gravity="center" android:background="@drawable/bg_armor_orb_mid"/>
+            android:layout_gravity="center" android:background="@drawable/bg_reactor_mid"/>
         <View android:layout_width="64dp" android:layout_height="64dp"
-            android:layout_gravity="center" android:background="@drawable/bg_armor_orb_core"/>
+            android:layout_gravity="center" android:background="@drawable/bg_reactor_core"/>
         <ImageView
             android:id="@+id/imgArmorSuit"
             android:layout_width="110dp"
@@ -91,7 +99,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="MARK I · PROTOTYPE"
-        android:textColor="#FFD54F"
+        android:textColor="#00E5FF"
         android:textSize="13sp"
         android:fontFamily="monospace"
         app:layout_constraintTop_toBottomOf="@id/armorOrb"
@@ -137,17 +145,17 @@
         <TextView android:id="@+id/txtArmorDesc"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="Prototype armor. Heavy plating. Limited flight."
-            android:textColor="#FFE082" android:textSize="12sp" android:fontFamily="monospace"/>
+            android:textColor="#B8ECFF" android:textSize="12sp" android:fontFamily="monospace"/>
         <TextView android:id="@+id/txtArmorStats"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="PWR · 42%   FLIGHT · NO   WEAPONS · BASIC"
-            android:textColor="#FFB300" android:textSize="11sp" android:fontFamily="monospace"/>
+            android:textColor="#00E5FF" android:textSize="11sp" android:fontFamily="monospace"/>
         <TextView android:id="@+id/txtArmorMode"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="VOICE PITCH · 0.95   REACTOR · GOLD"
-            android:textColor="#99FFCC80" android:textSize="11sp" android:fontFamily="monospace"/>
+            android:textColor="#7AB8C8" android:textSize="11sp" android:fontFamily="monospace"/>
     </LinearLayout>
 
     <TextView
@@ -158,11 +166,18 @@
         android:background="@drawable/bg_armor_panel"
         android:gravity="center"
         android:text="EQUIP SUIT"
-        android:textColor="#FFD54F"
+        android:textColor="#00E5FF"
         android:textSize="13sp"
         android:fontFamily="monospace"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/armorInfoPanel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.jarvis.assistant.ui.CornerFrameView
+        android:id="@+id/cornerFrameArmor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

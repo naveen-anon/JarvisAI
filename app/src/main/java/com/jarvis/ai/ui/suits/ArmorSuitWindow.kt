@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -29,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -41,7 +41,21 @@ import androidx.compose.ui.unit.sp
 import com.jarvis.ai.controller.ArmorController
 import com.jarvis.ai.data.model.ArmorSuit
 import com.jarvis.ai.data.repository.SuitRepository
+import com.jarvis.ai.ui.hud.HudBootLog
+import com.jarvis.ai.ui.hud.HudColors
+import com.jarvis.ai.ui.hud.HudCornerFrame
+import com.jarvis.ai.ui.hud.HudGridBackground
+import com.jarvis.ai.ui.hud.HudPanel
+import com.jarvis.ai.ui.hud.HudProgressBar
+import com.jarvis.ai.ui.hud.ReactorRadar
 
+/**
+ * Armor Suit window — same J.A.R.V.I.S HUD chrome as the rest of the app
+ * (grid, corner brackets + edge ticks, reactor radar, boot-log console,
+ * progress bar). Per-suit accent color still comes from ArmorController,
+ * so equipping a suit changes the glow while the window frame itself stays
+ * consistent with MainActivity / SettingsActivity / etc.
+ */
 @Composable
 fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
     val context = LocalContext.current
@@ -58,118 +72,153 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
             currentSuit.vectorResName, "drawable", context.packageName
         )
     }
+    val bootLines = remember(currentSuit.id) {
+        listOf(
+            "VERIFYING SUIT LINK... ${currentSuit.name.uppercase()}",
+            "CALIBRATING ARC REACTOR... ${"%.2f".format(currentSuit.voicePitch)}Hz SYNC",
+            "LOADING PLATE TELEMETRY... MODE ${currentSuit.systemMode}",
+            "REPULSOR DIAGNOSTICS... NOMINAL",
+            "HUD OVERLAY... ENGAGED"
+        )
+    }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF020810))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(HudColors.Background)
     ) {
-        Text(
-            text = "J.A.R.V.I.S  ·  ARMOR ARCHIVE",
-            color = glow,
-            fontSize = 12.sp,
-            fontFamily = FontFamily.Monospace,
-            letterSpacing = 2.sp
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        HudGridBackground(modifier = Modifier.fillMaxSize(), alpha = 0.22f)
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(listOf(Color(0xFF0D1117), Color(0xFF161B22))),
-                    RoundedCornerShape(16.dp)
-                )
-                .border(2.dp, glow, RoundedCornerShape(16.dp))
+                .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (vectorId != 0) {
-                Image(
-                    painter = painterResource(id = vectorId),
-                    contentDescription = currentSuit.name,
-                    modifier = Modifier
-                        .height(180.dp)
-                        .fillMaxWidth()
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .background(glow.copy(alpha = 0.3f), CircleShape)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "J.A.R.V.I.S  ·  ARMOR ARCHIVE",
+                    color = glow,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 2.sp
                 )
             }
-            Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = currentSuit.name.uppercase(),
-                color = primary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                text = "SUIT LINK & DEPLOYMENT SYSTEM",
+                color = HudColors.TextDim,
+                fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace,
-                textAlign = TextAlign.Center
+                letterSpacing = 1.sp
             )
-            Text(
-                text = "MODE  ${currentSuit.systemMode}",
-                color = glow,
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.primaryColor), CircleShape))
-                Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.secondaryColor), CircleShape))
-                Box(modifier = Modifier.size(14.dp).background(glow, CircleShape))
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = currentSuit.description,
-                color = Color(0xFF9FB3C0),
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = "VOICE PITCH  ${"%.2f".format(currentSuit.voicePitch)}",
-                color = Color(0xFF5A7A8A),
-                fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace,
-                modifier = Modifier.padding(top = 6.dp)
-            )
-        }
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "SELECT MARK",
-            color = Color(0xFF00E5FF),
-            fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp, bottom = 8.dp)
-        )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 2.dp)
-        ) {
-            items(suitList, key = { it.id }) { suit ->
-                SuitChip(suit = suit, selected = suit.id == currentSuit.id) {
-                    ArmorController.equipSuit(suit)
+            HudPanel(
+                modifier = Modifier.fillMaxWidth(),
+                accent = glow
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        ReactorRadar(glow = glow, dim = 176.dp)
+                        if (vectorId != 0) {
+                            Image(
+                                painter = painterResource(id = vectorId),
+                                contentDescription = currentSuit.name,
+                                modifier = Modifier
+                                    .height(150.dp)
+                                    .wrapContentSize()
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = currentSuit.name.uppercase(),
+                        color = primary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "MODE  ${currentSuit.systemMode}",
+                        color = glow,
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.primaryColor), CircleShape))
+                        Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.secondaryColor), CircleShape))
+                        Box(modifier = Modifier.size(14.dp).background(glow, CircleShape))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = currentSuit.description,
+                        color = Color(0xFF9FB3C0),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HudBootLog(
+                        lines = bootLines,
+                        modifier = Modifier.fillMaxWidth(),
+                        color = glow
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HudProgressBar(
+                        label = "SUIT LINK: ${currentSuit.name.uppercase()} — SYNCHRONIZING",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = glow
+                    )
                 }
             }
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        if (onClose != null) {
+
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "←  CLOSE",
-                color = Color(0xFF00E5FF),
-                fontSize = 15.sp,
+                text = "SELECT MARK",
+                color = HudColors.Accent,
+                fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
                 modifier = Modifier
-                    .clickable { onClose() }
-                    .padding(12.dp)
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, bottom = 8.dp)
             )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(horizontal = 2.dp)
+            ) {
+                items(suitList, key = { it.id }) { suit ->
+                    SuitChip(suit = suit, selected = suit.id == currentSuit.id) {
+                        ArmorController.equipSuit(suit)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            if (onClose != null) {
+                Text(
+                    text = "←  CLOSE",
+                    color = HudColors.Accent,
+                    fontSize = 15.sp,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier
+                        .clickable { onClose() }
+                        .padding(12.dp)
+                )
+            }
         }
+
+        HudCornerFrame(modifier = Modifier.fillMaxSize(), accent = HudColors.Accent)
     }
 }
 

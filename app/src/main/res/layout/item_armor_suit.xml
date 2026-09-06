@@ -11,14 +11,14 @@
         android:id="@+id/suitColorDot"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:background="@drawable/bg_armor_orb_core"/>
+        android:background="@drawable/bg_reactor_core"/>
     <TextView
         android:id="@+id/suitMarkLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:text="MK I"
-        android:textColor="#FFE082"
+        android:textColor="#B8ECFF"
         android:textSize="11sp"
         android:fontFamily="monospace"/>
 </LinearLayout>

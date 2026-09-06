@@ -6,12 +6,15 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.jarvis.assistant.R
+import com.jarvis.assistant.ui.CornerFrameView
+import com.jarvis.assistant.ui.HudOverlayView
 
 class ArmorDetailActivity : AppCompatActivity() {
 
@@ -170,7 +173,23 @@ class ArmorDetailActivity : AppCompatActivity() {
         })
 
         root.addView(col)
-        setContentView(root)
+
+        // Same J.A.R.V.I.S HUD chrome as MainActivity/SettingsActivity/etc:
+        // faint scanning grid behind the content, corner brackets + edge
+        // ticks on top, so this "armor suit window" matches the rest of Jarvis.
+        val wrapper = FrameLayout(this).apply {
+            setBackgroundColor(Color.parseColor("#020810"))
+            addView(
+                HudOverlayView(this@ArmorDetailActivity).apply { alpha = 0.22f },
+                FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            )
+            addView(root, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+            addView(
+                CornerFrameView(this@ArmorDetailActivity),
+                FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            )
+        }
+        setContentView(wrapper)
     }
 
     private fun label(t: String) = TextView(this).apply {
