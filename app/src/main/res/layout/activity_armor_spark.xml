@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="12dp">
+
+    <!-- Top tabs like reel: Home · Chat · Dashboard -->
+    <LinearLayout
+        android:id="@+id/sparkTabs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView android:id="@+id/tabHome"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingHorizontal="14dp" android:paddingVertical="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_spark_tab_active"
+            android:text="Home" android:textColor="#FFD54F"
+            android:textSize="11sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/tabChat"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingHorizontal="14dp" android:paddingVertical="6dp"
+            android:layout_marginEnd="6dp"
+            android:text="Chat" android:textColor="#99FFCC80"
+            android:textSize="11sp" android:fontFamily="monospace" />
+        <TextView android:id="@+id/tabDash"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingHorizontal="14dp" android:paddingVertical="6dp"
+            android:text="Armor" android:textColor="#99FFCC80"
+            android:textSize="11sp" android:fontFamily="monospace" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtArmorTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="ARMOR ARCHIVE"
+        android:textColor="#FFB300"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:fontFamily="monospace"
+        android:letterSpacing="0.15"
+        app:layout_constraintTop_toBottomOf="@id/sparkTabs"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/txtArmorStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Select suit · systems will adapt"
+        android:textColor="#99FFCC80"
+        android:textSize="11sp"
+        android:fontFamily="monospace"
+        app:layout_constraintTop_toBottomOf="@id/txtArmorTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Gold orb stack (spark-style center) -->
+    <FrameLayout
+        android:id="@+id/goldOrbStack"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/txtArmorStatus"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <View android:layout_width="220dp" android:layout_height="220dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_spark_orb_outer" />
+        <View android:layout_width="150dp" android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_spark_orb_mid" />
+        <View android:layout_width="64dp" android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_spark_orb_core" />
+
+        <!-- optional: existing ironman vector on top -->
+        <ImageView
+            android:id="@+id/imgSuitPreview"
+            android:layout_width="120dp"
+            android:layout_height="160dp"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            android:alpha="0.92"
+            android:src="@drawable/ic_ironman_full"
+            android:contentDescription="suit" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/txtActiveSuit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="MARK —"
+        android:textColor="#FFD54F"
+        android:textSize="13sp"
+        android:fontFamily="monospace"
+        app:layout_constraintTop_toBottomOf="@id/goldOrbStack"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Suit chips row -->
+    <HorizontalScrollView
+        android:id="@+id/suitChipScroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/txtActiveSuit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/suitChipRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="4dp">
+
+            <TextView android:id="@+id/chipMark1"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
+                android:gravity="center" android:background="@drawable/bg_spark_chip"
+                android:text="MK I" android:textColor="#FFE082"
+                android:textSize="11sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/chipMark3"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
+                android:gravity="center" android:background="@drawable/bg_spark_chip"
+                android:text="MK III" android:textColor="#FFE082"
+                android:textSize="11sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/chipMark42"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
+                android:gravity="center" android:background="@drawable/bg_spark_chip"
+                android:text="MK 42" android:textColor="#FFE082"
+                android:textSize="11sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/chipMark50"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:layout_marginEnd="8dp" android:paddingHorizontal="14dp"
+                android:gravity="center" android:background="@drawable/bg_spark_chip"
+                android:text="MK 50" android:textColor="#FFE082"
+                android:textSize="11sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/chipHulk"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:paddingHorizontal="14dp"
+                android:gravity="center" android:background="@drawable/bg_spark_chip"
+                android:text="HULKBUSTER" android:textColor="#FFE082"
+                android:textSize="11sp" android:fontFamily="monospace" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/suitDetailPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_spark_panel"
+        android:padding="14dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/suitChipScroll"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView android:id="@+id/txtSuitDesc"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Combat systems online."
+            android:textColor="#FFE082" android:textSize="12sp"
+            android:fontFamily="monospace" />
+        <TextView android:id="@+id/txtSuitMode"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="MODE · STANDARD"
+            android:textColor="#FFB300" android:textSize="11sp"
+            android:fontFamily="monospace" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/btnEquipSuit"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_spark_panel"
+        android:gravity="center"
+        android:text="EQUIP SUIT"
+        android:textColor="#FFD54F"
+        android:textSize="13sp"
+        android:fontFamily="monospace"
+        app:layout_constraintTop_toBottomOf="@id/suitDetailPanel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0" />
+</androidx.constraintlayout.widget.ConstraintLayout>
