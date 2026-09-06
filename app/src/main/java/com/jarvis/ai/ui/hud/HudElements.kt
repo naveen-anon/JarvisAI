@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -279,8 +278,8 @@ fun HudPanel(
             )
             .border(1.dp, accent.copy(alpha = 0.55f), RoundedCornerShape(cornerRadius))
     ) {
-        HudGridBackground(modifier = Modifier.matchParentSize(), alpha = 0.35f)
-        HudCornerFrame(modifier = Modifier.matchParentSize(), accent = accent)
+        HudGridBackground(modifier = Modifier.fillMaxSize(), alpha = 0.35f)
+        HudCornerFrame(modifier = Modifier.fillMaxSize(), accent = accent)
         content()
     }
 }
