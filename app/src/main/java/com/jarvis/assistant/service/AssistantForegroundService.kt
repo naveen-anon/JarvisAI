@@ -85,9 +85,13 @@ class AssistantForegroundService : Service() {
         super.onCreate()
         stt = SpeechToText(this)
         clapDetector = com.jarvis.assistant.voice.ClapDetector()
-        if (com.jarvis.assistant.util.SettingsManager(this).getClapWakeEnabled()) {
+        val smBoot = com.jarvis.assistant.util.SettingsManager(this)
+        // Mic must NOT open until clap / Porcupine wake / explicit Listen button.
+        if (smBoot.getClapWakeEnabled()) {
             try {
-                clapDetector.start(sensitivity = 1.0f) {
+                // Higher sensitivity value = less false triggers (see ClapDetector docs)
+                val sens = smBoot.getClapSensitivity().coerceIn(0.8f, 2.5f)
+                clapDetector.start(sensitivity = sens) {
                     mainHandler.post { startListeningCycle() }
                 }
             } catch (_: Exception) {}
@@ -117,14 +121,14 @@ class AssistantForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — say \"Jarvis\" to activate"))
-        val bg = com.jarvis.assistant.util.SettingsManager(this).getBackgroundListen()
-        if (bg) {
+        startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — clap or say Jarvis to activate"))
+        val sm = com.jarvis.assistant.util.SettingsManager(this)
+        // NEVER open Google STT here. Only low-power Porcupine (if key) or clap.
+        if (sm.getBackgroundListen()) {
             startWakeWordListening()
-        } else {
-            // Background listen off — still alive for notifications / manual listen / widget
         }
-        if (intent?.action == com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING) {
+        val action = intent?.action
+        if (action == com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING) {
             startListeningCycle()
         }
         return START_STICKY
@@ -184,19 +188,23 @@ class AssistantForegroundService : Service() {
     }
 
     fun startListeningCycle() {
+        // One-shot command mic only — never leave continuous STT running.
         try { stt.stopContinuous() } catch (_: Exception) {}
-        try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
         stt.listenOnce(
             onResult = { speech ->
+                try { stt.stopContinuous() } catch (_: Exception) {}
                 if (speech.isNotBlank()) {
                     handleUserSpeech(speech)
                 } else {
+                    try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                     listener?.onStateChanged(BrainState.IDLE)
                 }
             },
             onError = {
+                try { stt.stopContinuous() } catch (_: Exception) {}
+                try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                 listener?.onStateChanged(BrainState.ERROR)
                 listener?.onStateChanged(BrainState.IDLE)
             }

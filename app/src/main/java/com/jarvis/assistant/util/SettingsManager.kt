@@ -73,7 +73,7 @@ class SettingsManager(context: Context) {
     fun markFeedbackGiven() = prefs.edit().putBoolean("feedback_given", true).apply()
 
     // Background wake-word listening (must stay INSIDE the class)
-    fun getBackgroundListen(): Boolean = prefs.getBoolean("background_listen", true)
+    fun getBackgroundListen(): Boolean = prefs.getBoolean("background_listen", false)
     fun setBackgroundListen(enabled: Boolean) =
         prefs.edit().putBoolean("bg_listen", enabled).apply()
 
@@ -97,7 +97,7 @@ class SettingsManager(context: Context) {
 
     fun getClapWakeEnabled(): Boolean = prefs.getBoolean("clap_wake", true)
     fun setClapWakeEnabled(v: Boolean) = prefs.edit().putBoolean("clap_wake", v).apply()
-    fun getClapSensitivity(): Float = prefs.getFloat("clap_sensitivity", 0.55f)
+    fun getClapSensitivity(): Float = prefs.getFloat("clap_sensitivity", 1.2f)
     fun setClapSensitivity(v: Float) = prefs.edit().putFloat("clap_sensitivity", v).apply()
 
 

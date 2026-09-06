@@ -3,7 +3,6 @@ package com.jarvis.ai.ui.hud
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -279,8 +277,8 @@ fun HudPanel(
             )
             .border(1.dp, accent.copy(alpha = 0.55f), RoundedCornerShape(cornerRadius))
     ) {
-        HudGridBackground(modifier = Modifier.fillMaxSize(), alpha = 0.35f)
-        HudCornerFrame(modifier = Modifier.fillMaxSize(), accent = accent)
+        HudGridBackground(modifier = Modifier.matchParentSize(), alpha = 0.35f)
+        HudCornerFrame(modifier = Modifier.matchParentSize(), accent = accent)
         content()
     }
 }
