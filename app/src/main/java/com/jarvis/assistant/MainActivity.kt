@@ -173,7 +173,16 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
             startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
         }
         findViewById<TextView?>(R.id.btnQuickMore)?.setOnClickListener {
-            startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+            // Label is "Armor" — open holographic Hall of Armor (fallback to suits list)
+            try {
+                startActivity(Intent(this, com.jarvis.assistant.armor.ArmorHoloArchiveActivity::class.java))
+            } catch (_: Exception) {
+                try {
+                    startActivity(Intent(this, com.jarvis.assistant.armor.ArmorSuitsActivity::class.java))
+                } catch (_: Exception) {
+                    startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+                }
+            }
         }
         findViewById<TextView?>(R.id.navHome)?.setOnClickListener { /* already home */ }
         findViewById<TextView?>(R.id.navChat)?.setOnClickListener {

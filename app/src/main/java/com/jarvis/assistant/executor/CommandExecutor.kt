@@ -421,10 +421,23 @@ class CommandExecutor(private val context: Context) {
         return match?.packageName
     }
 
-    /** Opens liquid-glass armor detail for Mark I–XLII. */
+    /** Opens Hall of Armor (holo grid) or a specific mark detail. */
     private fun showArmor(target: String?): String {
         val q = target?.trim().orEmpty()
-        if (q.isEmpty()) return "Which armor mark should I display? Say mark 1 through 42."
+        // No mark specified → full interactive holographic archive
+        if (q.isEmpty() || q.equals("archive", true) || q.equals("suits", true) ||
+            q.equals("hall", true) || q.equals("list", true)
+        ) {
+            return try {
+                val intent = Intent(context, com.jarvis.assistant.armor.ArmorHoloArchiveActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                "Opening the Hall of Armor."
+            } catch (e: Exception) {
+                "Couldn't open the Hall of Armor: ${e.message}"
+            }
+        }
         val mark = ArmorCatalog.search(q)
             ?: return "I couldn't find armor matching \"$q\". Try mark 33 or silver centurion."
         return try {
