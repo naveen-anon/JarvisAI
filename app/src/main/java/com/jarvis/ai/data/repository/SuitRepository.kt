@@ -4,44 +4,57 @@ import android.graphics.Color
 import com.jarvis.ai.data.model.ArmorSuit
 import com.jarvis.ai.data.model.SuitMark
 
-/** MCU-inspired Mark list with vector drawable names (no bitmap assets). */
+/**
+ * MCU-inspired Mark list with vector drawable names (no bitmap assets).
+ * Expanded with additional public / MCU-popular suits (Silver Centurion, War Machine,
+ * Mark IV, etc.) for richer armor archive matching popular Jarvis / Iron Man apps.
+ */
 class SuitRepository {
     fun getAllSuits(): List<ArmorSuit> = listOf(
         ArmorSuit("mark_1", SuitMark.MARK_1, "Mark I — Cave Prototype",
-            "Gray iron prototype. First flight profile.", Color.parseColor("#6B6B6B"), Color.parseColor("#3A3A3A"),
+            "Gray iron prototype. First flight profile. Crude plates, flamethrowers.", Color.parseColor("#6B6B6B"), Color.parseColor("#3A3A3A"),
             Color.parseColor("#FFB300"), "BALANCED", 0.88f, vectorResName = "ic_suit_mark1"),
         ArmorSuit("mark_2", SuitMark.MARK_2, "Mark II — Silver Prototype",
-            "Silver test frame. Clean HUD.", Color.parseColor("#C0C0C0"), Color.parseColor("#8A8A8A"),
+            "Silver test frame. Clean HUD. Flight refinement suit.", Color.parseColor("#C0C0C0"), Color.parseColor("#8A8A8A"),
             Color.parseColor("#00E5FF"), "TEST", 0.95f, vectorResName = "ic_suit_mark2"),
         ArmorSuit("mark_3", SuitMark.MARK_3, "Mark III — Classic Gold-Red",
-            "Signature red and gold. Standard ops.", Color.parseColor("#C41E3A"), Color.parseColor("#F5C518"),
+            "Signature red and gold. Standard ops. First fully combat-ready.", Color.parseColor("#C41E3A"), Color.parseColor("#F5C518"),
+            Color.parseColor("#00E5FF"), "STANDARD", 1.0f, vectorResName = "ic_suit_mark3"),
+        ArmorSuit("mark_4", SuitMark.MARK_4, "Mark IV — Upgraded Classic",
+            "Refined Mark III geometry. Improved power routing and life support.", Color.parseColor("#C41E3A"), Color.parseColor("#F5C518"),
             Color.parseColor("#00E5FF"), "STANDARD", 1.0f, vectorResName = "ic_suit_mark3"),
         ArmorSuit("mark_5", SuitMark.MARK_5, "Mark V — Briefcase",
-            "Portable rapid deploy.", Color.parseColor("#B0B0B0"), Color.parseColor("#C41E3A"),
+            "Portable rapid deploy. Suitcase form factor.", Color.parseColor("#B0B0B0"), Color.parseColor("#C41E3A"),
             Color.parseColor("#00E5FF"), "RAPID", 1.05f, vectorResName = "ic_suit_mark5"),
         ArmorSuit("mark_6", SuitMark.MARK_6, "Mark VI — Triangle Reactor",
-            "New-element core look.", Color.parseColor("#B71C1C"), Color.parseColor("#FFD740"),
+            "New-element core look. Triangle RT. Enhanced endurance.", Color.parseColor("#B71C1C"), Color.parseColor("#FFD740"),
             Color.parseColor("#40C4FF"), "ENHANCED", 1.0f, vectorResName = "ic_suit_mark6"),
         ArmorSuit("mark_7", SuitMark.MARK_7, "Mark VII — Orbital",
-            "Fast assemble profile.", Color.parseColor("#C62828"), Color.parseColor("#FFC107"),
+            "Fast assemble profile. Deployable from container.", Color.parseColor("#C62828"), Color.parseColor("#FFC107"),
             Color.parseColor("#00E5FF"), "COMBAT", 0.98f, vectorResName = "ic_suit_mark7"),
+        ArmorSuit("mark_33", SuitMark.MARK_33, "Mark XXXIII — Silver Centurion",
+            "Silver Centurion. Modular heavy armor with adaptive plating.", Color.parseColor("#C0C0C0"), Color.parseColor("#C41E3A"),
+            Color.parseColor("#00E5FF"), "COMBAT", 0.97f, vectorResName = "ic_suit_mark2"),
         ArmorSuit("mark_42", SuitMark.MARK_42, "Mark XLII — Prehensile",
-            "Autonomous-ready plates.", Color.parseColor("#C41E3A"), Color.parseColor("#F5C518"),
+            "Autonomous-ready plates. Piece-by-piece remote assembly.", Color.parseColor("#C41E3A"), Color.parseColor("#F5C518"),
             Color.parseColor("#00E5FF"), "AUTONOMOUS", 1.0f, vectorResName = "ic_suit_mark42"),
         ArmorSuit("mark_46", SuitMark.MARK_46, "Mark XLVI — Civil War",
-            "Lean combat profile.", Color.parseColor("#B71C1C"), Color.parseColor("#FFD54F"),
+            "Lean combat profile. Civil War configuration.", Color.parseColor("#B71C1C"), Color.parseColor("#FFD54F"),
             Color.parseColor("#00BCD4"), "COMBAT", 0.96f, vectorResName = "ic_suit_mark46"),
         ArmorSuit("mark_50", SuitMark.MARK_50, "Mark L — Nano Tech",
-            "High-performance nano.", Color.parseColor("#D32F2F"), Color.parseColor("#FFD54F"),
+            "High-performance nano. Bleeding Edge evolution.", Color.parseColor("#D32F2F"), Color.parseColor("#FFD54F"),
             Color.parseColor("#00E5FF"), "HIGH_PERFORMANCE", 1.0f, vectorResName = "ic_suit_mark50"),
         ArmorSuit("mark_85", SuitMark.MARK_85, "Mark LXXXV — Endgame",
-            "Maximum output profile.", Color.parseColor("#B71C1C"), Color.parseColor("#FFD740"),
+            "Maximum output profile. Final nanotech combat form.", Color.parseColor("#B71C1C"), Color.parseColor("#FFD740"),
             Color.parseColor("#40C4FF"), "ENDGAME", 0.95f, vectorResName = "ic_suit_mark85"),
         ArmorSuit("hulkbuster", SuitMark.HULKBUSTER, "Mark XLIV — Hulkbuster",
-            "Heavy security, lower pitch.", Color.parseColor("#8B0000"), Color.parseColor("#FF8C00"),
+            "Heavy security modular frame. Extreme load capacity.", Color.parseColor("#8B0000"), Color.parseColor("#FF8C00"),
             Color.parseColor("#FF3D00"), "MAX_SECURITY", 0.72f, vectorResName = "ic_suit_hulkbuster"),
+        ArmorSuit("war_machine", SuitMark.WAR_MACHINE, "War Machine — Mark II",
+            "Heavy weapons platform. Military-grade armament focus.", Color.parseColor("#2A2A2A"), Color.parseColor("#4A4A4A"),
+            Color.parseColor("#FF3D00"), "COMBAT", 0.85f, vectorResName = "ic_suit_mark1"),
         ArmorSuit("endgame", SuitMark.MARK_ENDGAME, "Rescue Assist Profile",
-            "Support mode — bright core.", Color.parseColor("#1565C0"), Color.parseColor("#FFD740"),
+            "Support mode — bright core. Pepper Potts inspired assist.", Color.parseColor("#1565C0"), Color.parseColor("#FFD740"),
             Color.parseColor("#80D8FF"), "SUPPORT", 1.08f, vectorResName = "ic_suit_rescue")
     )
 

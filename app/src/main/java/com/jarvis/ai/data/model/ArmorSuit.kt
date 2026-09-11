@@ -1,8 +1,10 @@
 package com.jarvis.ai.data.model
 
 enum class SuitMark {
-    MARK_1, MARK_2, MARK_3, MARK_5, MARK_6, MARK_7,
-    MARK_42, MARK_46, MARK_50, MARK_85, HULKBUSTER, MARK_ENDGAME
+    MARK_1, MARK_2, MARK_3, MARK_4, MARK_5, MARK_6, MARK_7,
+    MARK_33, // Silver Centurion
+    MARK_42, MARK_46, MARK_50, MARK_85,
+    HULKBUSTER, MARK_ENDGAME, WAR_MACHINE
 }
 
 data class ArmorSuit(

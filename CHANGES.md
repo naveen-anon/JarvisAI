@@ -167,3 +167,19 @@ Prefer GitHub Actions (`assembleDebug` on `main`) for a real compile. Locally:
 ```bash
 ./gradlew clean assembleDebug
 ```
+
+---
+
+## 🔄 Pass — Armor Archive Expansion & Design Polish (public Jarvis apps inspired)
+
+### Armor suits expanded (SuitRepository + SuitMark)
+- Added **Mark IV**, **Mark XXXIII Silver Centurion**, and **War Machine** to the equippable list.
+- Descriptions refined to match MCU / public Iron Man armor archive style (similar to the official Iron Man 3 JARVIS second-screen app suit database).
+- Vector resource mapping reused intelligently so every new suit has a visual without requiring new bitmaps.
+
+### Suit vector designs improved
+- `ic_suit_mark3.xml` — significantly more detailed classic red-gold silhouette (helmet trim, chest accents, knee plates, boot detail, layered arc reactor).
+- `ic_suit_mark1.xml` — bulkier cave-prototype look with crude plating and amber reactor.
+- `ic_suit_mark2.xml` — clean silver test-frame silhouette with bright cyan reactor.
+
+These changes bring the on-device Armor Archive closer to the visual quality users expect from popular public Jarvis / Iron Man themed Android experiences while staying fully offline and vector-based.

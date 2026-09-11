@@ -4,45 +4,74 @@
     android:height="280dp"
     android:viewportWidth="200"
     android:viewportHeight="280">
-    <!-- helmet -->
+    <!-- Helmet -->
     <path android:fillColor="#C41E3A"
-        android:pathData="M70,28 C70,12 130,12 130,28 L136,70 C136,88 64,88 64,70 Z"/>
+        android:pathData="M68,22 C68,8 132,8 132,22 L140,72 C140,92 60,92 60,72 Z"/>
+    <!-- Helmet gold trim -->
+    <path android:fillColor="#F5C518"
+        android:pathData="M72,26 C72,14 128,14 128,26 L134,68 C134,84 66,84 66,68 Z"
+        android:fillAlpha="0.35"/>
+    <!-- Visor -->
     <path android:fillColor="#00E5FF"
-        android:pathData="M88,48 L112,48 L108,62 L92,62 Z"/>
-    <!-- eyes -->
+        android:pathData="M82,42 L118,42 L114,60 L86,60 Z"/>
+    <!-- Eyes -->
+    <path android:fillColor="#80F0FF"
+        android:pathData="M86,38 L98,38 L96,48 L88,48 Z"/>
+    <path android:fillColor="#80F0FF"
+        android:pathData="M102,38 L114,38 L112,48 L104,48 Z"/>
+    <!-- Chin -->
+    <path android:fillColor="#A01830"
+        android:pathData="M88,62 L112,62 L108,74 L92,74 Z"/>
+    <!-- Torso -->
+    <path android:fillColor="#C41E3A"
+        android:pathData="M58,78 L142,78 L152,155 L48,155 Z"/>
+    <!-- Chest gold -->
+    <path android:fillColor="#F5C518"
+        android:pathData="M70,90 L130,90 L128,105 L72,105 Z"
+        android:fillAlpha="0.7"/>
+    <!-- Arc reactor outer -->
     <path android:fillColor="#00E5FF"
-        android:pathData="M78,40 L90,40 L88,48 L80,48 Z"/>
-    <path android:fillColor="#00E5FF"
-        android:pathData="M110,40 L122,40 L120,48 L112,48 Z"/>
-    <!-- torso -->
+        android:pathData="M100,118 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0"/>
+    <path android:fillColor="#80F0FF"
+        android:pathData="M100,118 m-14,0 a14,14 0 1,1 28,0 a14,14 0 1,1 -28,0"/>
+    <path android:fillColor="#F5C518"
+        android:pathData="M100,118 m-7,0 a7,7 0 1,1 14,0 a7,7 0 1,1 -14,0"/>
+    <!-- Shoulders -->
+    <path android:fillColor="#F5C518"
+        android:pathData="M38,76 L60,76 L56,115 L32,102 Z"/>
+    <path android:fillColor="#F5C518"
+        android:pathData="M140,76 L162,76 L168,102 L144,115 Z"/>
+    <!-- Arms -->
     <path android:fillColor="#C41E3A"
-        android:pathData="M60,78 L140,78 L148,150 L52,150 Z"/>
-    <!-- arc reactor core -->
-    <path android:fillColor="#00E5FF"
-        android:pathData="M100,105 m-16,0 a16,16 0 1,1 32,0 a16,16 0 1,1 -32,0"/>
-    <path android:fillColor="#F5C518"
-        android:pathData="M100,105 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0"/>
-    <!-- shoulders -->
-    <path android:fillColor="#F5C518"
-        android:pathData="M40,78 L60,78 L58,110 L36,100 Z"/>
-    <path android:fillColor="#F5C518"
-        android:pathData="M140,78 L160,78 L164,100 L142,110 Z"/>
-    <!-- arms -->
+        android:pathData="M32,102 L56,115 L50,175 L26,168 Z"/>
     <path android:fillColor="#C41E3A"
-        android:pathData="M36,100 L58,110 L52,170 L30,165 Z"/>
-    <path android:fillColor="#C41E3A"
-        android:pathData="M142,110 L164,100 L170,165 L148,170 Z"/>
-    <!-- waist -->
+        android:pathData="M144,115 L168,102 L174,168 L150,175 Z"/>
+    <!-- Forearm gold -->
     <path android:fillColor="#F5C518"
-        android:pathData="M70,150 L130,150 L125,170 L75,170 Z"/>
-    <!-- legs -->
-    <path android:fillColor="#C41E3A"
-        android:pathData="M75,170 L98,170 L100,250 L72,250 Z"/>
-    <path android:fillColor="#C41E3A"
-        android:pathData="M102,170 L125,170 L128,250 L100,250 Z"/>
-    <!-- boots -->
+        android:pathData="M30,150 L48,155 L46,172 L28,168 Z"
+        android:fillAlpha="0.85"/>
     <path android:fillColor="#F5C518"
-        android:pathData="M70,248 L102,248 L100,268 L68,268 Z"/>
+        android:pathData="M152,155 L170,150 L172,168 L154,172 Z"
+        android:fillAlpha="0.85"/>
+    <!-- Waist -->
     <path android:fillColor="#F5C518"
-        android:pathData="M98,248 L130,248 L132,268 L100,268 Z"/>
+        android:pathData="M68,155 L132,155 L128,175 L72,175 Z"/>
+    <!-- Hip -->
+    <path android:fillColor="#A01830"
+        android:pathData="M72,170 L128,170 L126,185 L74,185 Z"/>
+    <!-- Legs -->
+    <path android:fillColor="#C41E3A"
+        android:pathData="M74,180 L98,180 L100,255 L70,255 Z"/>
+    <path android:fillColor="#C41E3A"
+        android:pathData="M102,180 L126,180 L130,255 L100,255 Z"/>
+    <!-- Knee gold -->
+    <path android:fillColor="#F5C518"
+        android:pathData="M78,210 L96,210 L95,225 L79,225 Z"/>
+    <path android:fillColor="#F5C518"
+        android:pathData="M104,210 L122,210 L121,225 L105,225 Z"/>
+    <!-- Boots -->
+    <path android:fillColor="#F5C518"
+        android:pathData="M68,252 L102,252 L100,272 L66,272 Z"/>
+    <path android:fillColor="#F5C518"
+        android:pathData="M98,252 L132,252 L134,272 L100,272 Z"/>
 </vector>
