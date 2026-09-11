@@ -121,6 +121,15 @@ class ArmorDetailActivity : AppCompatActivity() {
                 val silhouette = ArmorSilhouetteView(this@ArmorDetailActivity).apply {
                     primaryColor = primary
                     secondaryColor = secondary
+                    reactorColor = cyan
+                    suitStyle = when {
+                        mark.number == 1 -> ArmorSilhouetteView.SuitStyle.PROTOTYPE
+                        mark.number == 2 || mark.number == 33 -> ArmorSilhouetteView.SuitStyle.SILVER
+                        mark.number == 44 || mark.codename.contains("Hulk", true) -> ArmorSilhouetteView.SuitStyle.HEAVY
+                        mark.number >= 50 -> ArmorSilhouetteView.SuitStyle.NANO
+                        mark.codename.contains("Rescue", true) || mark.number == 49 -> ArmorSilhouetteView.SuitStyle.RESCUE
+                        else -> ArmorSilhouetteView.SuitStyle.CLASSIC
+                    }
                     layoutParams = LinearLayout.LayoutParams(dp(200), dp(280))
                 }
                 suitBox.addView(silhouette)
