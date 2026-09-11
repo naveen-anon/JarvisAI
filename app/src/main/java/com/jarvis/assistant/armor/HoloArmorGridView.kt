@@ -12,8 +12,9 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Interactive Iron Man 3–style holographic armor archive.
- * Cyan blueprint silhouettes on a dark grid — pan / pinch-zoom / drag suits.
+ * Interactive Iron Man 3–style Hall of Armor.
+ * Each mark draws a distinct cyan blueprint silhouette (heavy / claws / slim / pack…),
+ * inspired by the official IM3 holographic archive poster.
  */
 class HoloArmorGridView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -29,123 +30,79 @@ class HoloArmorGridView @JvmOverloads constructor(
     private val marks: List<ArmorMark> = ArmorCatalog.all
     private var selectedIndex = 0
 
-    // Camera
     private var scale = 1f
     private var offsetX = 0f
     private var offsetY = 0f
-    private val minScale = 0.55f
-    private val maxScale = 2.8f
+    private val minScale = 0.5f
+    private val maxScale = 3f
 
-    // Drag single suit
     private var draggingIndex = -1
-    private var dragX = 0f
-    private var dragY = 0f
     private val suitOffsets = HashMap<Int, PointF>()
 
     private val cols = 7
-    private val cellW = 120f
-    private val cellH = 160f
+    private val cellW = 118f
+    private val cellH = 158f
     private val pad = 28f
 
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#020B14") }
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#0A3A4A")
-        strokeWidth = 1f
-        style = Paint.Style.STROKE
+        color = Color.parseColor("#0A3A4A"); strokeWidth = 1f; style = Paint.Style.STROKE
     }
     private val framePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#C41E3A")
-        strokeWidth = 4f
-        style = Paint.Style.STROKE
+        color = Color.parseColor("#C41E3A"); strokeWidth = 4f; style = Paint.Style.STROKE
     }
-    private val cyanPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E5FF")
-        strokeWidth = 2.2f
-        style = Paint.Style.STROKE
-        strokeJoin = Paint.Join.ROUND
-        strokeCap = Paint.Cap.ROUND
+    private val cyanStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#00E5FF"); strokeWidth = 2f; style = Paint.Style.STROKE
+        strokeJoin = Paint.Join.ROUND; strokeCap = Paint.Cap.ROUND
     }
     private val cyanFill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#3300E5FF")
-        style = Paint.Style.FILL
+        color = Color.parseColor("#2200E5FF"); style = Paint.Style.FILL
     }
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E5FF")
-        style = Paint.Style.STROKE
-        strokeWidth = 3.5f
-        maskFilter = BlurMaskFilter(12f, BlurMaskFilter.Blur.OUTER)
+        color = Color.parseColor("#00E5FF"); style = Paint.Style.STROKE; strokeWidth = 3f
+        maskFilter = BlurMaskFilter(10f, BlurMaskFilter.Blur.OUTER)
     }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#7AD4E8")
-        textAlign = Paint.Align.CENTER
-        textSize = 18f
-        typeface = Typeface.MONOSPACE
+        color = Color.parseColor("#7AD4E8"); textAlign = Paint.Align.CENTER
+        textSize = 11f; typeface = Typeface.MONOSPACE
     }
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E5FF")
-        textAlign = Paint.Align.CENTER
-        textSize = 28f
-        typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
-        letterSpacing = 0.12f
+        color = Color.parseColor("#00E5FF"); textAlign = Paint.Align.CENTER
+        textSize = 26f; typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+        letterSpacing = 0.1f
     }
     private val selectPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#4000E5FF")
-        style = Paint.Style.FILL
+        color = Color.parseColor("#3500E5FF"); style = Paint.Style.FILL
     }
-    private val reactorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#E0FFFF")
-        style = Paint.Style.FILL
+    private val corePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#E8FFFF"); style = Paint.Style.FILL
     }
 
     private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             val old = scale
             scale = (scale * detector.scaleFactor).coerceIn(minScale, maxScale)
-            // zoom around focus
-            val fx = detector.focusX
-            val fy = detector.focusY
-            offsetX = fx - (fx - offsetX) * (scale / old)
-            offsetY = fy - (fy - offsetY) * (scale / old)
-            invalidate()
-            return true
+            offsetX = detector.focusX - (detector.focusX - offsetX) * (scale / old)
+            offsetY = detector.focusY - (detector.focusY - offsetY) * (scale / old)
+            invalidate(); return true
         }
     })
 
     private val gesture = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent): Boolean = true
+        override fun onDown(e: MotionEvent) = true
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             val idx = hitTest(e.x, e.y)
-            if (idx >= 0) {
-                selectedIndex = idx
-                listener?.onSuitSelected(marks[idx])
-                invalidate()
-                return true
-            }
+            if (idx >= 0) { selectedIndex = idx; listener?.onSuitSelected(marks[idx]); invalidate(); return true }
             return false
         }
         override fun onDoubleTap(e: MotionEvent): Boolean {
             val idx = hitTest(e.x, e.y)
-            if (idx >= 0) {
-                selectedIndex = idx
-                listener?.onSuitActivated(marks[idx])
-                return true
-            }
-            // reset camera
-            scale = 1f
-            offsetX = 0f
-            offsetY = 0f
-            invalidate()
-            return true
+            if (idx >= 0) { selectedIndex = idx; listener?.onSuitActivated(marks[idx]); return true }
+            scale = 1f; offsetX = 0f; offsetY = 0f; invalidate(); return true
         }
         override fun onLongPress(e: MotionEvent) {
             val idx = hitTest(e.x, e.y)
-            if (idx >= 0) {
-                draggingIndex = idx
-                dragX = e.x
-                dragY = e.y
-                parent.requestDisallowInterceptTouchEvent(true)
-                invalidate()
-            }
+            if (idx >= 0) { draggingIndex = idx; lastPanX = e.x; lastPanY = e.y; parent.requestDisallowInterceptTouchEvent(true); invalidate() }
         }
     })
 
@@ -154,123 +111,123 @@ class HoloArmorGridView @JvmOverloads constructor(
     private var panning = false
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
-    init {
-        setLayerType(LAYER_TYPE_SOFTWARE, null) // for BlurMaskFilter
-    }
+    init { setLayerType(LAYER_TYPE_SOFTWARE, null) }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        // Center content initially
-        val contentW = cols * cellW + pad * 2
         val rows = (marks.size + cols - 1) / cols
+        val contentW = cols * cellW + pad * 2
         val contentH = rows * cellH + pad * 2 + 80f
         offsetX = (w - contentW * scale) / 2f
-        offsetY = (h - contentH * scale) / 2f + 20f
+        offsetY = (h - contentH * scale) / 2f + 16f
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val w = width.toFloat()
-        val h = height.toFloat()
+        val w = width.toFloat(); val h = height.toFloat()
         canvas.drawRect(0f, 0f, w, h, bgPaint)
-
-        // Background grid (screen space)
-        gridPaint.strokeWidth = 1f
-        var x = (offsetX % (40f * scale))
-        while (x < w) {
-            canvas.drawLine(x, 0f, x, h, gridPaint)
-            x += 40f * scale
-        }
-        var y = (offsetY % (40f * scale))
-        while (y < h) {
-            canvas.drawLine(0f, y, w, y, gridPaint)
-            y += 40f * scale
-        }
+        var gx = offsetX % (36f * scale)
+        while (gx < w) { canvas.drawLine(gx, 0f, gx, h, gridPaint); gx += 36f * scale }
+        var gy = offsetY % (36f * scale)
+        while (gy < h) { canvas.drawLine(0f, gy, w, gy, gridPaint); gy += 36f * scale }
 
         canvas.save()
         canvas.translate(offsetX, offsetY)
         canvas.scale(scale, scale)
 
-        // Outer holoprojector frame
         val rows = (marks.size + cols - 1) / cols
         val contentW = cols * cellW + pad * 2
-        val contentH = rows * cellH + pad * 2 + 50f
-        framePaint.strokeWidth = 3f
-        canvas.drawRoundRect(8f, 8f, contentW - 8f, contentH - 8f, 18f, 18f, framePaint)
-        // inner cyan frame
-        cyanPaint.strokeWidth = 1.5f
-        canvas.drawRoundRect(16f, 16f, contentW - 16f, contentH - 16f, 14f, 14f, cyanPaint)
-
-        canvas.drawText("IRON MAN 3  ·  HALL OF ARMOR", contentW / 2f, 42f, titlePaint)
+        val contentH = rows * cellH + pad * 2 + 48f
+        canvas.drawRoundRect(8f, 8f, contentW - 8f, contentH - 8f, 16f, 16f, framePaint)
+        cyanStroke.strokeWidth = 1.4f
+        canvas.drawRoundRect(14f, 14f, contentW - 14f, contentH - 14f, 12f, 12f, cyanStroke)
+        canvas.drawText("IRON MAN 3  ·  HALL OF ARMOR", contentW / 2f, 40f, titlePaint)
 
         marks.forEachIndexed { i, mark ->
-            val col = i % cols
-            val row = i / cols
+            val col = i % cols; val row = i / cols
             var cx = pad + col * cellW + cellW / 2f
-            var cy = pad + 55f + row * cellH + cellH / 2f
-
-            suitOffsets[i]?.let {
-                cx += it.x
-                cy += it.y
-            }
-            if (i == draggingIndex) {
-                // convert screen drag delta into content space roughly
-                cx += (dragX - lastPanX) / scale
-                cy += (dragY - lastPanY) / scale
-            }
+            var cy = pad + 52f + row * cellH + cellH / 2f
+            suitOffsets[i]?.let { cx += it.x; cy += it.y }
 
             if (i == selectedIndex) {
-                canvas.drawRoundRect(
-                    cx - cellW * 0.42f, cy - cellH * 0.42f,
-                    cx + cellW * 0.42f, cy + cellH * 0.42f,
-                    12f, 12f, selectPaint
-                )
-                glowPaint.strokeWidth = 2.5f
-                canvas.drawRoundRect(
-                    cx - cellW * 0.42f, cy - cellH * 0.42f,
-                    cx + cellW * 0.42f, cy + cellH * 0.42f,
-                    12f, 12f, glowPaint
-                )
+                canvas.drawRoundRect(cx - cellW * 0.42f, cy - cellH * 0.42f, cx + cellW * 0.42f, cy + cellH * 0.42f, 10f, 10f, selectPaint)
+                canvas.drawRoundRect(cx - cellW * 0.42f, cy - cellH * 0.42f, cx + cellW * 0.42f, cy + cellH * 0.42f, 10f, 10f, glowPaint)
             }
-
-            drawBlueprintSuit(canvas, cx, cy, cellH * 0.38f, i == selectedIndex)
-            textPaint.textSize = 11f
+            drawMarkSilhouette(canvas, cx, cy, cellH * 0.36f, mark, i == selectedIndex)
             textPaint.color = if (i == selectedIndex) Color.parseColor("#E0FFFF") else Color.parseColor("#5AA8B8")
             canvas.drawText(mark.roman, cx, cy + cellH * 0.40f, textPaint)
         }
-
         canvas.restore()
 
-        // HUD footer
-        textPaint.textSize = 13f
-        textPaint.color = Color.parseColor("#7AD4E8")
-        canvas.drawText("PINCH zoom  ·  DRAG pan  ·  LONG-PRESS move suit  ·  TAP select", w / 2f, h - 24f, textPaint)
+        textPaint.textSize = 12f; textPaint.color = Color.parseColor("#7AD4E8")
+        canvas.drawText("PINCH zoom · DRAG pan · LONG-PRESS move · TAP select · DOUBLE-TAP open", w / 2f, h - 22f, textPaint)
         if (selectedIndex in marks.indices) {
-            titlePaint.textSize = 16f
-            canvas.drawText(
-                "MARK ${marks[selectedIndex].roman}  ·  ${marks[selectedIndex].codename}",
-                w / 2f, h - 48f, titlePaint
-            )
+            titlePaint.textSize = 15f
+            val m = marks[selectedIndex]
+            canvas.drawText("MARK ${m.roman}  ·  ${m.codename}", w / 2f, h - 44f, titlePaint)
         }
     }
 
-    /** Wireframe Iron Man blueprint figure */
-    private fun drawBlueprintSuit(canvas: Canvas, cx: Float, cy: Float, h: Float, selected: Boolean) {
-        val p = if (selected) glowPaint else cyanPaint
-        p.strokeWidth = if (selected) 2.8f else 2.0f
-        val fill = cyanFill
+    private enum class Body {
+        STANDARD, CRUDE, SLIM, HEAVY, CLAW, WIDE, PACK, HAMMER, BONES, NANO
+    }
 
-        val headR = h * 0.12f
-        val headCy = cy - h * 0.72f
-        // head
-        canvas.drawCircle(cx, headCy, headR, p)
-        // visor
-        canvas.drawLine(cx - headR * 0.55f, headCy, cx + headR * 0.55f, headCy, p)
-        // torso
-        val shoulderY = cy - h * 0.52f
-        val shoulderW = h * 0.55f
-        val waistY = cy - h * 0.05f
-        val waistW = h * 0.32f
+    private fun bodyFor(mark: ArmorMark): Body {
+        val n = mark.number
+        val c = mark.codename.lowercase()
+        return when {
+            n == 1 -> Body.CRUDE
+            n == 44 || c.contains("hulk") || c.contains("igor") || c.contains("tank") -> Body.HEAVY
+            c.contains("snapper") || c.contains("claw") -> Body.CLAW
+            c.contains("centurion") || n == 33 -> Body.WIDE
+            c.contains("starboost") || c.contains("pack") -> Body.PACK
+            c.contains("hammer") -> Body.HAMMER
+            c.contains("bones") || c.contains("sneaky") || n == 15 || n == 41 -> Body.SLIM
+            n >= 50 || c.contains("nano") || n == 85 -> Body.NANO
+            n in 12..14 -> Body.SLIM
+            n in 24..26 -> Body.HEAVY
+            n in 34..38 -> Body.HEAVY
+            else -> Body.STANDARD
+        }
+    }
+
+    private fun drawMarkSilhouette(canvas: Canvas, cx: Float, cy: Float, h: Float, mark: ArmorMark, selected: Boolean) {
+        val p = if (selected) glowPaint else cyanStroke
+        p.strokeWidth = if (selected) 2.6f else 1.9f
+        val body = bodyFor(mark)
+
+        val bulk = when (body) {
+            Body.HEAVY, Body.HAMMER -> 1.28f
+            Body.CRUDE -> 1.15f
+            Body.WIDE -> 1.12f
+            Body.SLIM, Body.BONES -> 0.82f
+            Body.NANO -> 0.95f
+            else -> 1f
+        }
+        val shoulderW = h * 0.52f * bulk
+        val waistW = h * 0.30f * (if (body == Body.SLIM) 0.85f else 1f)
+        val headR = h * (if (body == Body.HEAVY) 0.14f else 0.115f)
+        val headCy = cy - h * 0.70f
+        val shoulderY = cy - h * 0.50f
+        val chestY = cy - h * 0.30f
+        val waistY = cy - h * 0.02f
+        val footY = cy + h * 0.68f
+
+        // Head / faceplate
+        when (body) {
+            Body.CRUDE -> {
+                canvas.drawRoundRect(cx - headR, headCy - headR, cx + headR, headCy + headR * 1.1f, 4f, 4f, p)
+            }
+            Body.HAMMER -> {
+                canvas.drawCircle(cx, headCy, headR * 1.15f, p)
+                canvas.drawLine(cx - headR * 1.1f, headCy - headR * 0.2f, cx + headR * 1.1f, headCy - headR * 0.2f, p)
+            }
+            else -> canvas.drawCircle(cx, headCy, headR, p)
+        }
+        // Visor slit
+        canvas.drawLine(cx - headR * 0.55f, headCy + headR * 0.05f, cx + headR * 0.55f, headCy + headR * 0.05f, p)
+
+        // Torso path
         val torso = Path().apply {
             moveTo(cx - shoulderW / 2, shoulderY)
             lineTo(cx + shoulderW / 2, shoulderY)
@@ -278,46 +235,95 @@ class HoloArmorGridView @JvmOverloads constructor(
             lineTo(cx - waistW / 2, waistY)
             close()
         }
-        canvas.drawPath(torso, fill)
+        canvas.drawPath(torso, cyanFill)
         canvas.drawPath(torso, p)
-        // arc reactor
-        canvas.drawCircle(cx, cy - h * 0.32f, h * 0.06f, p)
-        reactorPaint.alpha = if (selected) 230 else 160
-        canvas.drawCircle(cx, cy - h * 0.32f, h * 0.03f, reactorPaint)
-        // arms
-        canvas.drawLine(cx - shoulderW / 2, shoulderY + 4f, cx - shoulderW / 2 - h * 0.08f, waistY - h * 0.05f, p)
-        canvas.drawLine(cx + shoulderW / 2, shoulderY + 4f, cx + shoulderW / 2 + h * 0.08f, waistY - h * 0.05f, p)
-        // shoulders pods
-        canvas.drawCircle(cx - shoulderW / 2, shoulderY, h * 0.07f, p)
-        canvas.drawCircle(cx + shoulderW / 2, shoulderY, h * 0.07f, p)
-        // legs
-        val hipY = waistY + 4f
-        val footY = cy + h * 0.70f
-        canvas.drawLine(cx - waistW * 0.28f, hipY, cx - waistW * 0.22f, footY, p)
-        canvas.drawLine(cx + waistW * 0.28f, hipY, cx + waistW * 0.22f, footY, p)
+
+        // Arc reactor (circle or triangle for nano/classic late marks)
+        if (body == Body.NANO || mark.number in listOf(6, 7, 42, 50, 85)) {
+            val t = h * 0.055f
+            val tri = Path().apply {
+                moveTo(cx, chestY - t)
+                lineTo(cx + t * 0.9f, chestY + t * 0.65f)
+                lineTo(cx - t * 0.9f, chestY + t * 0.65f)
+                close()
+            }
+            canvas.drawPath(tri, p)
+            canvas.drawCircle(cx, chestY, h * 0.02f, corePaint)
+        } else {
+            canvas.drawCircle(cx, chestY, h * 0.055f, p)
+            canvas.drawCircle(cx, chestY, h * 0.025f, corePaint)
+        }
+
+        // Shoulder pods
+        val podR = h * 0.065f * bulk
+        canvas.drawCircle(cx - shoulderW / 2, shoulderY, podR, p)
+        canvas.drawCircle(cx + shoulderW / 2, shoulderY, podR, p)
+
+        // Arms
+        when (body) {
+            Body.CLAW -> {
+                // claw / pincer ends
+                val lx = cx - shoulderW / 2 - h * 0.06f
+                val rx = cx + shoulderW / 2 + h * 0.06f
+                val hy = waistY + h * 0.08f
+                canvas.drawLine(cx - shoulderW / 2, shoulderY + 2f, lx, hy, p)
+                canvas.drawLine(cx + shoulderW / 2, shoulderY + 2f, rx, hy, p)
+                // pincers
+                canvas.drawLine(lx, hy, lx - h * 0.06f, hy + h * 0.08f, p)
+                canvas.drawLine(lx, hy, lx + h * 0.04f, hy + h * 0.09f, p)
+                canvas.drawLine(rx, hy, rx + h * 0.06f, hy + h * 0.08f, p)
+                canvas.drawLine(rx, hy, rx - h * 0.04f, hy + h * 0.09f, p)
+            }
+            Body.HEAVY, Body.HAMMER -> {
+                canvas.drawLine(cx - shoulderW / 2, shoulderY + 4f, cx - shoulderW / 2 - h * 0.12f, waistY + h * 0.05f, p)
+                canvas.drawLine(cx + shoulderW / 2, shoulderY + 4f, cx + shoulderW / 2 + h * 0.12f, waistY + h * 0.05f, p)
+                // thick gauntlets
+                canvas.drawCircle(cx - shoulderW / 2 - h * 0.12f, waistY + h * 0.05f, h * 0.05f, p)
+                canvas.drawCircle(cx + shoulderW / 2 + h * 0.12f, waistY + h * 0.05f, h * 0.05f, p)
+            }
+            Body.PACK -> {
+                canvas.drawLine(cx - shoulderW / 2, shoulderY + 4f, cx - shoulderW / 2 - h * 0.05f, waistY, p)
+                canvas.drawLine(cx + shoulderW / 2, shoulderY + 4f, cx + shoulderW / 2 + h * 0.05f, waistY, p)
+                // back boosters
+                canvas.drawRect(cx - h * 0.12f, shoulderY - h * 0.08f, cx - h * 0.04f, shoulderY + h * 0.1f, p)
+                canvas.drawRect(cx + h * 0.04f, shoulderY - h * 0.08f, cx + h * 0.12f, shoulderY + h * 0.1f, p)
+            }
+            else -> {
+                canvas.drawLine(cx - shoulderW / 2, shoulderY + 4f, cx - shoulderW / 2 - h * 0.07f, waistY, p)
+                canvas.drawLine(cx + shoulderW / 2, shoulderY + 4f, cx + shoulderW / 2 + h * 0.07f, waistY, p)
+            }
+        }
+
+        // Legs
+        val legSpread = when (body) {
+            Body.HEAVY, Body.CRUDE -> waistW * 0.38f
+            Body.SLIM -> waistW * 0.22f
+            else -> waistW * 0.28f
+        }
+        canvas.drawLine(cx - legSpread, waistY + 2f, cx - legSpread * 0.85f, footY, p)
+        canvas.drawLine(cx + legSpread, waistY + 2f, cx + legSpread * 0.85f, footY, p)
         // boots
-        canvas.drawLine(cx - waistW * 0.32f, footY, cx - waistW * 0.12f, footY, p)
-        canvas.drawLine(cx + waistW * 0.12f, footY, cx + waistW * 0.32f, footY, p)
+        val bootW = if (body == Body.HEAVY) h * 0.12f else h * 0.09f
+        canvas.drawLine(cx - legSpread * 0.85f - bootW * 0.3f, footY, cx - legSpread * 0.85f + bootW * 0.5f, footY, p)
+        canvas.drawLine(cx + legSpread * 0.85f - bootW * 0.5f, footY, cx + legSpread * 0.85f + bootW * 0.3f, footY, p)
+
+        // Extra: Mark I chest bar / crude plates
+        if (body == Body.CRUDE) {
+            canvas.drawLine(cx - waistW * 0.35f, chestY - h * 0.06f, cx + waistW * 0.35f, chestY - h * 0.06f, p)
+            canvas.drawLine(cx - waistW * 0.35f, chestY + h * 0.06f, cx + waistW * 0.35f, chestY + h * 0.06f, p)
+        }
     }
 
-    private fun contentPoint(screenX: Float, screenY: Float): PointF {
-        return PointF((screenX - offsetX) / scale, (screenY - offsetY) / scale)
-    }
+    private fun contentPoint(sx: Float, sy: Float) = PointF((sx - offsetX) / scale, (sy - offsetY) / scale)
 
-    private fun hitTest(screenX: Float, screenY: Float): Int {
-        val pt = contentPoint(screenX, screenY)
+    private fun hitTest(sx: Float, sy: Float): Int {
+        val pt = contentPoint(sx, sy)
         marks.forEachIndexed { i, _ ->
-            val col = i % cols
-            val row = i / cols
+            val col = i % cols; val row = i / cols
             var cx = pad + col * cellW + cellW / 2f
-            var cy = pad + 55f + row * cellH + cellH / 2f
-            suitOffsets[i]?.let {
-                cx += it.x
-                cy += it.y
-            }
-            if (kotlin.math.abs(pt.x - cx) < cellW * 0.4f && kotlin.math.abs(pt.y - cy) < cellH * 0.4f) {
-                return i
-            }
+            var cy = pad + 52f + row * cellH + cellH / 2f
+            suitOffsets[i]?.let { cx += it.x; cy += it.y }
+            if (kotlin.math.abs(pt.x - cx) < cellW * 0.4f && kotlin.math.abs(pt.y - cy) < cellH * 0.4f) return i
         }
         return -1
     }
@@ -325,57 +331,32 @@ class HoloArmorGridView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         scaleDetector.onTouchEvent(event)
         gesture.onTouchEvent(event)
-
         when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                lastPanX = event.x
-                lastPanY = event.y
-                panning = false
-            }
+            MotionEvent.ACTION_DOWN -> { lastPanX = event.x; lastPanY = event.y; panning = false }
             MotionEvent.ACTION_MOVE -> {
                 if (draggingIndex >= 0) {
                     val dx = (event.x - lastPanX) / scale
                     val dy = (event.y - lastPanY) / scale
                     val prev = suitOffsets[draggingIndex] ?: PointF(0f, 0f)
                     suitOffsets[draggingIndex] = PointF(prev.x + dx, prev.y + dy)
-                    lastPanX = event.x
-                    lastPanY = event.y
-                    dragX = event.x
-                    dragY = event.y
-                    invalidate()
-                    return true
+                    lastPanX = event.x; lastPanY = event.y; invalidate(); return true
                 }
                 if (!scaleDetector.isInProgress) {
-                    val dx = event.x - lastPanX
-                    val dy = event.y - lastPanY
-                    if (!panning && (dx * dx + dy * dy) > touchSlop * touchSlop) {
-                        panning = true
-                        parent.requestDisallowInterceptTouchEvent(true)
+                    val dx = event.x - lastPanX; val dy = event.y - lastPanY
+                    if (!panning && dx * dx + dy * dy > touchSlop * touchSlop) {
+                        panning = true; parent.requestDisallowInterceptTouchEvent(true)
                     }
                     if (panning) {
-                        offsetX += dx
-                        offsetY += dy
-                        lastPanX = event.x
-                        lastPanY = event.y
-                        invalidate()
+                        offsetX += dx; offsetY += dy
+                        lastPanX = event.x; lastPanY = event.y; invalidate()
                     }
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                draggingIndex = -1
-                panning = false
-                parent.requestDisallowInterceptTouchEvent(false)
-                invalidate()
+                draggingIndex = -1; panning = false
+                parent.requestDisallowInterceptTouchEvent(false); invalidate()
             }
         }
         return true
-    }
-
-    fun selectMarkNumber(number: Int) {
-        val idx = marks.indexOfFirst { it.number == number }
-        if (idx >= 0) {
-            selectedIndex = idx
-            invalidate()
-        }
     }
 }
