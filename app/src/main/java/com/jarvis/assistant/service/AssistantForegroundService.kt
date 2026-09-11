@@ -84,17 +84,22 @@ class AssistantForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         stt = SpeechToText(this)
+        // Hard stop any residual continuous STT from previous process death
+        try { stt.stopContinuous() } catch (_: Exception) {}
         clapDetector = com.jarvis.assistant.voice.ClapDetector()
         val smBoot = com.jarvis.assistant.util.SettingsManager(this)
         // Mic must NOT open until clap / Porcupine wake / explicit Listen button.
+        // Clap wake is OFF by default so AudioRecord does not hold the mic at boot.
         if (smBoot.getClapWakeEnabled()) {
             try {
                 // Higher sensitivity value = less false triggers (see ClapDetector docs)
-                val sens = smBoot.getClapSensitivity().coerceIn(0.8f, 2.5f)
+                val sens = smBoot.getClapSensitivity().coerceIn(1.0f, 2.5f)
                 clapDetector.start(sensitivity = sens) {
                     mainHandler.post { startListeningCycle() }
                 }
             } catch (_: Exception) {}
+        } else {
+            android.util.Log.i("JarvisService", "Clap wake disabled — mic not held at boot")
         }
         tts = TextToSpeechHelper(this)
         executor = CommandExecutor(this)
@@ -124,8 +129,11 @@ class AssistantForegroundService : Service() {
         startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — clap or say Jarvis to activate"))
         val sm = com.jarvis.assistant.util.SettingsManager(this)
         // NEVER open Google STT here. Only low-power Porcupine (if key) or clap.
+        // background_listen only starts Porcupine; STT continuous path is a no-op.
         if (sm.getBackgroundListen()) {
             startWakeWordListening()
+        } else {
+            try { stt.stopContinuous() } catch (_: Exception) {}
         }
         val action = intent?.action
         if (action == com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING) {
@@ -170,11 +178,13 @@ class AssistantForegroundService : Service() {
      * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
      */
     private fun startSttWakeFallback() {
+        // IMPORTANT: Continuous Google STT wake is permanently disabled.
+        // It holds the mic open, drains battery, and causes "mic auto on" reports.
+        // Without Porcupine key: use clap (if enabled), notification Listen, or Talk button.
         android.util.Log.i(
             "JarvisService",
             "STT continuous wake disabled. Use clap, notification Listen, or Talk button."
         )
-        // Ensure continuous STT is stopped if it was running
         try { stt.stopContinuous() } catch (_: Exception) {}
         try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
     }

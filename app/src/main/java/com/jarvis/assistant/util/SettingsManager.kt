@@ -95,9 +95,9 @@ class SettingsManager(context: Context) {
     fun setCalendarAlertMinutes(mins: Int) = prefs.edit().putInt("calendar_alert_minutes", mins.coerceIn(5, 60)).apply()
 
 
-    fun getClapWakeEnabled(): Boolean = prefs.getBoolean("clap_wake", true)
+    fun getClapWakeEnabled(): Boolean = prefs.getBoolean("clap_wake", false)
     fun setClapWakeEnabled(v: Boolean) = prefs.edit().putBoolean("clap_wake", v).apply()
-    fun getClapSensitivity(): Float = prefs.getFloat("clap_sensitivity", 1.2f)
+    fun getClapSensitivity(): Float = prefs.getFloat("clap_sensitivity", 1.6f)
     fun setClapSensitivity(v: Float) = prefs.edit().putFloat("clap_sensitivity", v).apply()
 
 
