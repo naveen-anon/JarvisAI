@@ -88,52 +88,23 @@ class ArmorDetailActivity : AppCompatActivity() {
                     setStroke(dp(1), Color.parseColor("#3300E5FF"))
                 }
             }
-            // Prefer a real armor_mark_N image if one was dropped into res/drawable
-            // (with a slow Ken Burns zoom for motion); otherwise fall back to an
-            // original animated silhouette tinted with this mark's own colors —
-            // pulsing chest reactor + idle sway, distinct per mark via color/glow.
-            val pngId = resources.getIdentifier(
-                "armor_mark_${mark.number}", "drawable", packageName
-            )
-            if (pngId != 0) {
-                val suitImg = ImageView(this@ArmorDetailActivity).apply {
-                    setImageResource(pngId)
-                    clearColorFilter()
-                    adjustViewBounds = true
-                    scaleType = ImageView.ScaleType.FIT_CENTER
-                    layoutParams = LinearLayout.LayoutParams(dp(200), dp(280))
+            // Always use MCU-style animated metallic silhouette (Canvas).
+            // Image assets (armor_mark_N) intentionally skipped — they look flat/cartoon.
+            val silhouette = ArmorSilhouetteView(this@ArmorDetailActivity).apply {
+                primaryColor = primary
+                secondaryColor = secondary
+                reactorColor = cyan
+                suitStyle = when {
+                    mark.number == 1 -> ArmorSilhouetteView.SuitStyle.PROTOTYPE
+                    mark.number == 2 || mark.number == 33 -> ArmorSilhouetteView.SuitStyle.SILVER
+                    mark.number == 44 || mark.codename.contains("Hulk", ignoreCase = true) -> ArmorSilhouetteView.SuitStyle.HEAVY
+                    mark.number >= 50 -> ArmorSilhouetteView.SuitStyle.NANO
+                    mark.codename.contains("Rescue", ignoreCase = true) -> ArmorSilhouetteView.SuitStyle.RESCUE
+                    else -> ArmorSilhouetteView.SuitStyle.CLASSIC
                 }
-                suitBox.addView(suitImg)
-                suitImg.post {
-                    val zoom = android.animation.ValueAnimator.ofFloat(1f, 1.08f).apply {
-                        duration = 4000
-                        repeatMode = android.animation.ValueAnimator.REVERSE
-                        repeatCount = android.animation.ValueAnimator.INFINITE
-                        addUpdateListener {
-                            val s = it.animatedValue as Float
-                            suitImg.scaleX = s
-                            suitImg.scaleY = s
-                        }
-                    }
-                    zoom.start()
-                }
-            } else {
-                val silhouette = ArmorSilhouetteView(this@ArmorDetailActivity).apply {
-                    primaryColor = primary
-                    secondaryColor = secondary
-                    reactorColor = cyan
-                    suitStyle = when {
-                        mark.number == 1 -> ArmorSilhouetteView.SuitStyle.PROTOTYPE
-                        mark.number == 2 || mark.number == 33 -> ArmorSilhouetteView.SuitStyle.SILVER
-                        mark.number == 44 || mark.codename.contains("Hulk", true) -> ArmorSilhouetteView.SuitStyle.HEAVY
-                        mark.number >= 50 -> ArmorSilhouetteView.SuitStyle.NANO
-                        mark.codename.contains("Rescue", true) || mark.number == 49 -> ArmorSilhouetteView.SuitStyle.RESCUE
-                        else -> ArmorSilhouetteView.SuitStyle.CLASSIC
-                    }
-                    layoutParams = LinearLayout.LayoutParams(dp(200), dp(280))
-                }
-                suitBox.addView(silhouette)
+                layoutParams = LinearLayout.LayoutParams(dp(220), dp(300))
             }
+            suitBox.addView(silhouette)
             addView(suitBox)
 
             // Color legend
