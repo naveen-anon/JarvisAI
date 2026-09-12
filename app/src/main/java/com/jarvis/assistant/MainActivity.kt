@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         findViewById<View?>(R.id.navMic)?.setOnClickListener {
             service?.startListeningCycle()
         }
-        findViewById<View?>(R.id.navVision)?.setOnClickListener {
+        findViewById<View?>(R.id.navArmor)?.setOnClickListener {
             try {
                 startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
             } catch (_: Exception) { }
