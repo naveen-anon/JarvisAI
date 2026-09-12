@@ -8,10 +8,6 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import kotlin.math.sin
 
-/**
- * Detail preview — uses the same distinct per-mark shapes as Hall of Armor.
- * Style.METAL for colored armor look (not cartoon robot).
- */
 class ArmorSilhouetteView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : View(context, attrs) {
@@ -40,20 +36,24 @@ class ArmorSilhouetteView @JvmOverloads constructor(
         super.onDraw(canvas)
         val w = width.toFloat(); val h = height.toFloat()
         if (w <= 0 || h <= 0) return
-        val cx = w / 2f
-        val bob = sin(animTime * 2f * Math.PI).toFloat() * (h * 0.012f)
         val m = mark ?: ArmorCatalog.byNumber(42) ?: return
+        val cx = w / 2f
+        val bob = sin(animTime * 2f * Math.PI).toFloat() * (h * 0.01f)
         canvas.save()
         canvas.translate(0f, bob)
-        // soft glow
         val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            shader = RadialGradient(cx, h * 0.45f, w * 0.45f,
-                intArrayOf(Color.argb(50, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)), Color.TRANSPARENT),
-                null, Shader.TileMode.CLAMP)
+            shader = RadialGradient(
+                cx, h * 0.42f, w * 0.42f,
+                intArrayOf(
+                    Color.argb(55, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)),
+                    Color.TRANSPARENT
+                ),
+                null, Shader.TileMode.CLAMP
+            )
         }
-        canvas.drawCircle(cx, h * 0.45f, w * 0.45f, glow)
+        canvas.drawCircle(cx, h * 0.42f, w * 0.42f, glow)
         ArmorBlueprintDrawer.draw(
-            canvas, cx, h * 0.48f, h * 0.42f, m,
+            canvas, cx, h * 0.50f, h * 0.46f, m,
             ArmorBlueprintDrawer.Style.METAL,
             selected = true,
             primary = primaryColor,
