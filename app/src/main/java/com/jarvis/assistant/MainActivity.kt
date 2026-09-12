@@ -216,7 +216,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         systemStatus = SystemStatusManager(
             context = this,
             onClockUpdate = { time -> txtClock.text = time },
-            onBatteryUpdate = { pct -> txtBattery.text = "BATT: $pct%" }
+            onBatteryUpdate = { pct -> txtBattery.text = "⚡ BATT: $pct%" }
         )
         systemStatus.start()
 
@@ -324,10 +324,10 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
     private fun startPerfLoop(txtNetwork: TextView, txtPerf: TextView) {
         val runnable = object : Runnable {
             override fun run() {
-                txtNetwork.text = networkStatus.getSignalLabel()
+                txtNetwork.text = "📶 ${networkStatus.getSignalLabel()}"
                 val ram = perfMonitor.getRamUsagePercent()
                 val cpu = perfMonitor.getCpuUsagePercent()
-                txtPerf.text = if (cpu >= 0) "CPU:$cpu% RAM:$ram%" else "RAM:$ram%"
+                txtPerf.text = if (cpu >= 0) "💾 RAM: $ram%" else "💾 RAM: $ram%"
                 perfHandler.postDelayed(this, 3000)
             }
         }
@@ -341,15 +341,15 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         activityScope.launch {
             val loc = locationHelper.getCurrentLocation()
             if (loc != null) {
-                txtLocation.text = loc.cityName.uppercase()
+                txtLocation.text = "📍 ${loc.cityName.uppercase()}"
                 val weather = weatherClient.getWeather(loc.lat, loc.lon)
                 if (weather != null) {
-                    txtWeather.text = "${weather.tempCelsius}\u00b0C  ${weather.condition.uppercase()}"
+                    txtWeather.text = "☁️ ${weather.tempCelsius}\u00b0C ${weather.condition.uppercase()}"
                 } else {
-                    txtWeather.text = "WEATHER UNAVAILABLE OFFLINE"
+                    txtWeather.text = "☁️ —"
                 }
             } else {
-                txtLocation.text = "LOCATION UNAVAILABLE"
+                txtLocation.text = "📍 —"
             }
         }
     }
