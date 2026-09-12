@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -184,19 +185,19 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
                 }
             }
         }
-        findViewById<TextView?>(R.id.navHome)?.setOnClickListener { /* already home */ }
-        findViewById<TextView?>(R.id.navChat)?.setOnClickListener {
+        findViewById<View?>(R.id.navHome)?.setOnClickListener { /* already home */ }
+        findViewById<View?>(R.id.navChat)?.setOnClickListener {
             startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
         }
-        findViewById<TextView?>(R.id.navMic)?.setOnClickListener {
+        findViewById<View?>(R.id.navMic)?.setOnClickListener {
             service?.startListeningCycle()
         }
-        findViewById<TextView?>(R.id.navVision)?.setOnClickListener {
+        findViewById<View?>(R.id.navVision)?.setOnClickListener {
             try {
                 startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
             } catch (_: Exception) { }
         }
-        findViewById<TextView?>(R.id.navSettings)?.setOnClickListener {
+        findViewById<View?>(R.id.navSettings)?.setOnClickListener {
             startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
         }
 

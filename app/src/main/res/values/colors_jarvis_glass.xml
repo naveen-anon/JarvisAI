@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="jg_bg">#030A12</color>
+    <color name="jg_bg_deep">#02060C</color>
+    <color name="jg_panel">#0A1624</color>
+    <color name="jg_cyan">#00E5FF</color>
+    <color name="jg_cyan_bright">#7DF0FF</color>
+    <color name="jg_purple">#A855F7</color>
+    <color name="jg_green">#22D3A8</color>
+    <color name="jg_amber">#FBBF24</color>
+    <color name="jg_text">#E8F7FF</color>
+    <color name="jg_text_dim">#6B9AAB</color>
+    <color name="jg_text_muted">#3D6A7A</color>
+    <color name="jg_danger">#F43F5E</color>
+</resources>

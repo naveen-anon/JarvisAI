@@ -2,23 +2,54 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bottomNav"
     android:layout_width="match_parent"
-    android:layout_height="52dp"
+    android:layout_height="60dp"
     android:orientation="horizontal"
     android:gravity="center"
-    android:background="#0A1520">
-    <TextView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent"
-        android:layout_weight="1" android:gravity="center" android:text="Home"
-        android:textColor="#00E5FF" android:textSize="11sp" android:fontFamily="monospace" />
-    <TextView android:id="@+id/navChat" android:layout_width="0dp" android:layout_height="match_parent"
-        android:layout_weight="1" android:gravity="center" android:text="Chat"
-        android:textColor="#5C8A94" android:textSize="11sp" android:fontFamily="monospace" />
-    <TextView android:id="@+id/navMic" android:layout_width="0dp" android:layout_height="match_parent"
-        android:layout_weight="1" android:gravity="center" android:text="●"
-        android:textColor="#00E5FF" android:textSize="16sp" android:fontFamily="monospace" />
-    <TextView android:id="@+id/navVision" android:layout_width="0dp" android:layout_height="match_parent"
-        android:layout_weight="1" android:gravity="center" android:text="Vision"
-        android:textColor="#5C8A94" android:textSize="11sp" android:fontFamily="monospace" />
-    <TextView android:id="@+id/navSettings" android:layout_width="0dp" android:layout_height="match_parent"
-        android:layout_weight="1" android:gravity="center" android:text="More"
-        android:textColor="#5C8A94" android:textSize="11sp" android:fontFamily="monospace" />
+    android:background="@drawable/bg_jg_bottom_nav"
+    android:paddingTop="6dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="⌂" android:textColor="#00E5FF" android:textSize="18sp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Home" android:textColor="#00E5FF" android:textSize="9sp"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/navChat" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="◇" android:textColor="#5C8A94" android:textSize="16sp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Chat" android:textColor="#5C8A94" android:textSize="9sp"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/navMic" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless">
+        <TextView android:layout_width="42dp" android:layout_height="42dp"
+            android:gravity="center" android:text="◉" android:textColor="#00E5FF"
+            android:textSize="20sp" android:background="@drawable/bg_jg_reactor_ring"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/navArmor" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="▣" android:textColor="#5C8A94" android:textSize="16sp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Armor" android:textColor="#5C8A94" android:textSize="9sp"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/navSettings" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="☰" android:textColor="#5C8A94" android:textSize="16sp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="More" android:textColor="#5C8A94" android:textSize="9sp"/>
+    </LinearLayout>
 </LinearLayout>
