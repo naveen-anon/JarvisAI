@@ -88,29 +88,28 @@ class ArmorDetailActivity : AppCompatActivity() {
                     setStroke(dp(1), Color.parseColor("#3300E5FF"))
                 }
             }
-            // Prefer a real armor_mark_N image if one was dropped into res/drawable
-            // (with a slow Ken Burns zoom for motion); otherwise fall back to an
-            // original animated silhouette tinted with this mark's own colors —
-            // pulsing chest reactor + idle sway, distinct per mark via color/glow.
-            val pngId = 0 // force distinct blueprint/metal silhouette, not flat assets
-            if (pngId != 0) {
+            // Prefer original vector armor_mark_N (distinct per Mark); else Canvas silhouette
+            val artId = resources.getIdentifier(
+                "armor_mark_${mark.number}", "drawable", packageName
+            )
+            if (artId != 0) {
                 val suitImg = ImageView(this@ArmorDetailActivity).apply {
-                    setImageResource(pngId)
+                    setImageResource(artId)
                     clearColorFilter()
                     adjustViewBounds = true
                     scaleType = ImageView.ScaleType.FIT_CENTER
-                    layoutParams = LinearLayout.LayoutParams(dp(200), dp(280))
+                    layoutParams = LinearLayout.LayoutParams(dp(220), dp(320))
                 }
                 suitBox.addView(suitImg)
                 suitImg.post {
-                    val zoom = android.animation.ValueAnimator.ofFloat(1f, 1.08f).apply {
-                        duration = 4000
+                    val zoom = android.animation.ValueAnimator.ofFloat(1f, 1.06f).apply {
+                        duration = 3500
                         repeatMode = android.animation.ValueAnimator.REVERSE
                         repeatCount = android.animation.ValueAnimator.INFINITE
                         addUpdateListener {
-                            val s = it.animatedValue as Float
-                            suitImg.scaleX = s
-                            suitImg.scaleY = s
+                            val sc = it.animatedValue as Float
+                            suitImg.scaleX = sc
+                            suitImg.scaleY = sc
                         }
                     }
                     zoom.start()

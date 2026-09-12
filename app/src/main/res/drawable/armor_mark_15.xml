@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="320dp"
+    android:viewportWidth="200"
+    android:viewportHeight="320">
+  <!-- helmet -->
+  <path android:fillColor="#1A1A1A" android:pathData="M74,22 C74,8 126,8 126,22 L132,70 L124,90 L76,90 L68,70 Z"/>
+  <path android:fillColor="#3A3A3A" android:pathData="M84,48 L116,48 L114,66 L86,66 Z"/>
+  <!-- torso -->
+  <path android:fillColor="#1A1A1A" android:pathData="M55,88 L145,88 L138,172 L62,172 Z"/>
+  <path android:fillColor="#3A3A3A" android:pathData="M78,98 L122,98 L118,142 L82,142 Z"/>
+  <path android:fillColor="#00E5FF" android:pathData="M92,116 A9,9 0 1,1 92,116.1 Z"/>
+  <!-- shoulder pods -->
+  <path android:fillColor="#3A3A3A" android:pathData="M48,85 A12,12 0 1,1 48,85.1 Z"/>
+  <path android:fillColor="#3A3A3A" android:pathData="M152,85 A12,12 0 1,1 152,85.1 Z"/>
+  <!-- arms -->
+  <path android:fillColor="#1A1A1A" android:pathData="M40,95 L58,90 L50,162 L34,165 Z"/>
+  <path android:fillColor="#1A1A1A" android:pathData="M142,90 L160,95 L166,165 L150,162 Z"/>
+  <path android:fillColor="#3A3A3A" android:pathData="M36,160 L52,158 L52,172 L36,172 Z"/>
+  <path android:fillColor="#3A3A3A" android:pathData="M148,158 L164,160 L164,172 L148,172 Z"/>
+  <!-- legs -->
+  <path android:fillColor="#1A1A1A" android:pathData="M70,172 L95,172 L92,278 L68,278 Z"/>
+  <path android:fillColor="#1A1A1A" android:pathData="M105,172 L130,172 L132,278 L108,278 Z"/>
+  <path android:fillColor="#3A3A3A" android:pathData="M66,272 L96,272 L96,288 L66,288 Z"/>
+  <path android:fillColor="#3A3A3A" android:pathData="M104,272 L134,272 L134,288 L104,288 Z"/>
+</vector>
