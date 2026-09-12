@@ -1,29 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="JG.Text">
+    <!-- Root parent required by dotted style names JG.* -->
+    <style name="JG" />
+
+    <style name="JG.Text" parent="JG">
         <item name="android:textColor">#A8D4E0</item>
         <item name="android:textSize">12sp</item>
     </style>
-    <style name="JG.Text.Title">
+
+    <style name="JG.Text.Title" parent="JG.Text">
         <item name="android:textColor">#00E5FF</item>
         <item name="android:textSize">18sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:letterSpacing">0.04</item>
     </style>
-    <style name="JG.Text.Section">
+
+    <style name="JG.Text.Section" parent="JG.Text">
         <item name="android:textColor">#00E5FF</item>
         <item name="android:textSize">13sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
-    <style name="JG.Text.Body">
+
+    <style name="JG.Text.Body" parent="JG.Text">
         <item name="android:textColor">#A8D4E0</item>
         <item name="android:textSize">12sp</item>
     </style>
-    <style name="JG.Text.Muted">
+
+    <style name="JG.Text.Muted" parent="JG.Text">
         <item name="android:textColor">#5C8A94</item>
         <item name="android:textSize">11sp</item>
     </style>
-    <style name="JG.Button.Primary" parent="Widget.AppCompat.Button.Borderless">
+
+    <style name="JG.Button" parent="Widget.AppCompat.Button.Borderless" />
+
+    <style name="JG.Button.Primary" parent="JG.Button">
         <item name="android:background">@drawable/bg_jg_button</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:textAllCaps">true</item>
