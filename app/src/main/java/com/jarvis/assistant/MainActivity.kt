@@ -197,6 +197,17 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
                 startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
             } catch (_: Exception) { }
         }
+        
+        findViewById<View?>(R.id.navArmor)?.setOnClickListener {
+            try {
+                startActivity(Intent(this, com.jarvis.assistant.armor.ArmorHoloArchiveActivity::class.java))
+            } catch (_: Exception) {
+                try {
+                    startActivity(Intent(this, com.jarvis.assistant.armor.ArmorSuitsActivity::class.java))
+                } catch (_: Exception) { }
+            }
+        }
+
         findViewById<View?>(R.id.navSettings)?.setOnClickListener {
             startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
         }
