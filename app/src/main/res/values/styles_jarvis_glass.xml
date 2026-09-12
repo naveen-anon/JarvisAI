@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="JG.Text">
+        <item name="android:textColor">#A8D4E0</item>
+        <item name="android:textSize">12sp</item>
+    </style>
     <style name="JG.Text.Title">
         <item name="android:textColor">#00E5FF</item>
         <item name="android:textSize">18sp</item>
@@ -28,8 +32,3 @@
         <item name="android:paddingBottom">12dp</item>
     </style>
 </resources>
-
-    <style name="JG.Text">
-        <item name="android:textColor">#A8D4E0</item>
-        <item name="android:textSize">12sp</item>
-    </style>
