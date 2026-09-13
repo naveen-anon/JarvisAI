@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,16 +46,20 @@ import com.jarvis.ai.ui.hud.HudBootLog
 import com.jarvis.ai.ui.hud.HudColors
 import com.jarvis.ai.ui.hud.HudCornerFrame
 import com.jarvis.ai.ui.hud.HudGridBackground
-import com.jarvis.ai.ui.hud.HudPanel
 import com.jarvis.ai.ui.hud.HudProgressBar
+import com.jarvis.ai.ui.hud.IconBadge
+import com.jarvis.ai.ui.hud.JgButtonOutline
+import com.jarvis.ai.ui.hud.JgCard
+import com.jarvis.ai.ui.hud.JgCardSelected
+import com.jarvis.ai.ui.hud.JgChip
 import com.jarvis.ai.ui.hud.ReactorRadar
 
 /**
- * Armor Suit window — same J.A.R.V.I.S HUD chrome as the rest of the app
- * (grid, corner brackets + edge ticks, reactor radar, boot-log console,
- * progress bar). Per-suit accent color still comes from ArmorController,
- * so equipping a suit changes the glow while the window frame itself stays
- * consistent with MainActivity / SettingsActivity / etc.
+ * Armor Suit window — built from the SAME card/chip/button language as the
+ * rest of the app (bg_jg_card / bg_jg_chip / bg_jg_button_outline, icon-badge
+ * headers). Screen-level chrome (grid + corner brackets) matches
+ * MainActivity/SettingsActivity; individual cards stay clean/rounded like
+ * Usage Stats, Settings, Voice Auth screens — no ticks/grid inside cards.
  */
 @Composable
 fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
@@ -77,73 +82,96 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
             "VERIFYING SUIT LINK... ${currentSuit.name.uppercase()}",
             "CALIBRATING ARC REACTOR... ${"%.2f".format(currentSuit.voicePitch)}Hz SYNC",
             "LOADING PLATE TELEMETRY... MODE ${currentSuit.systemMode}",
-            "REPULSOR DIAGNOSTICS... NOMINAL",
-            "HUD OVERLAY... ENGAGED"
+            "REPULSOR DIAGNOSTICS... NOMINAL"
         )
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(HudColors.Background)
+            .background(
+                Brush.verticalGradient(listOf(Color(0xFF030A12), Color(0xFF061018), Color(0xFF030A12)))
+            )
     ) {
-        HudGridBackground(modifier = Modifier.fillMaxSize(), alpha = 0.22f)
+        HudGridBackground(modifier = Modifier.fillMaxSize(), alpha = 0.18f)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(14.dp)
         ) {
+            // Header: icon badge + two-tone title + subtitle, chip top-right
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "J.A.R.V.I.S  ·  ARMOR ARCHIVE",
-                    color = glow,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    letterSpacing = 2.sp
-                )
+                IconBadge(accent = glow, size = 52.dp) {
+                    Text(text = "🛡", fontSize = 22.sp)
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Row {
+                        Text(
+                            text = "ARMOR ",
+                            color = glow,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Text(
+                            text = "ARCHIVE",
+                            color = Color.White,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    Text(
+                        text = "Suit link & deployment system",
+                        color = HudColors.TextDim,
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+                JgChip(accent = glow) {
+                    Text(
+                        text = currentSuit.mark.name.replace('_', ' '),
+                        color = glow,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
             }
-            Text(
-                text = "SUIT LINK & DEPLOYMENT SYSTEM",
-                color = HudColors.TextDim,
-                fontSize = 9.sp,
-                fontFamily = FontFamily.Monospace,
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(12.dp))
 
-            HudPanel(
-                modifier = Modifier.fillMaxWidth(),
-                accent = glow
-            ) {
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Main suit card
+            JgCard(modifier = Modifier.fillMaxWidth(), accent = glow) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(18.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        ReactorRadar(glow = glow, dim = 176.dp)
+                        ReactorRadar(glow = glow, dim = 168.dp)
                         if (vectorId != 0) {
                             Image(
                                 painter = painterResource(id = vectorId),
                                 contentDescription = currentSuit.name,
                                 modifier = Modifier
-                                    .height(150.dp)
+                                    .height(144.dp)
                                     .wrapContentSize()
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = currentSuit.name.uppercase(),
                         color = primary,
-                        fontSize = 16.sp,
+                        fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
                         textAlign = TextAlign.Center
@@ -154,28 +182,38 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                         fontSize = 12.sp,
                         fontFamily = FontFamily.Monospace
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.primaryColor), CircleShape))
                         Box(modifier = Modifier.size(14.dp).background(Color(currentSuit.secondaryColor), CircleShape))
                         Box(modifier = Modifier.size(14.dp).background(glow, CircleShape))
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = currentSuit.description,
                         color = Color(0xFF9FB3C0),
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center
                     )
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HudBootLog(
-                        lines = bootLines,
-                        modifier = Modifier.fillMaxWidth(),
-                        color = glow
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Boot-log status card (same pattern as the "Quick Insights" info card)
+            JgCard(modifier = Modifier.fillMaxWidth(), accent = glow) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = "SYSTEM LOG",
+                        color = glow,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 1.sp
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HudBootLog(lines = bootLines, modifier = Modifier.fillMaxWidth(), color = glow)
+                    Spacer(modifier = Modifier.height(10.dp))
                     HudProgressBar(
                         label = "SUIT LINK: ${currentSuit.name.uppercase()} — SYNCHRONIZING",
                         modifier = Modifier.fillMaxWidth(),
@@ -184,15 +222,13 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = "SELECT MARK",
                 color = HudColors.Accent,
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 4.dp, bottom = 8.dp)
+                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
             )
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -204,17 +240,25 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
                     }
                 }
             }
+
             Spacer(modifier = Modifier.weight(1f))
+
             if (onClose != null) {
-                Text(
-                    text = "←  CLOSE",
-                    color = HudColors.Accent,
-                    fontSize = 15.sp,
-                    fontFamily = FontFamily.Monospace,
+                JgButtonOutline(
                     modifier = Modifier
-                        .clickable { onClose() }
-                        .padding(12.dp)
-                )
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clickable { onClose() },
+                    accent = HudColors.Accent
+                ) {
+                    Text(
+                        text = "←  CLOSE",
+                        color = HudColors.Accent,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
             }
         }
 
@@ -229,40 +273,39 @@ private fun SuitChip(suit: ArmorSuit, selected: Boolean, onClick: () -> Unit) {
         context.resources.getIdentifier(suit.vectorResName, "drawable", context.packageName)
     }
     val r = Color(suit.arcReactorColor)
-    val p = Color(suit.primaryColor)
-    Column(
-        modifier = Modifier
-            .width(100.dp)
-            .background(
-                if (selected) p.copy(alpha = 0.35f) else Color(0xFF21262D),
-                RoundedCornerShape(10.dp)
+
+    @Composable
+    fun chipContent() {
+        Column(
+            modifier = Modifier
+                .clickable { onClick() }
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (id != 0) {
+                Image(
+                    painter = painterResource(id = id),
+                    contentDescription = suit.name,
+                    modifier = Modifier.height(56.dp)
+                )
+            } else {
+                Box(modifier = Modifier.size(12.dp).background(r, CircleShape))
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = suit.mark.name.replace('_', ' '),
+                color = if (selected) Color.White else Color(0xFF8B9CAB),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                textAlign = TextAlign.Center
             )
-            .border(
-                if (selected) 2.dp else 1.dp,
-                if (selected) r else Color(0xFF30363D),
-                RoundedCornerShape(10.dp)
-            )
-            .clickable { onClick() }
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (id != 0) {
-            Image(
-                painter = painterResource(id = id),
-                contentDescription = suit.name,
-                modifier = Modifier.height(56.dp)
-            )
-        } else {
-            Box(modifier = Modifier.size(12.dp).background(r, CircleShape))
         }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = suit.mark.name.replace('_', ' '),
-            color = if (selected) Color.White else Color(0xFF8B9CAB),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
-            textAlign = TextAlign.Center
-        )
+    }
+
+    if (selected) {
+        JgCardSelected(modifier = Modifier.width(100.dp), accent = r, cornerRadius = 14.dp) { chipContent() }
+    } else {
+        JgCard(modifier = Modifier.width(100.dp), accent = Color(0xFF30363D), borderAlpha = 0.5f, cornerRadius = 14.dp) { chipContent() }
     }
 }

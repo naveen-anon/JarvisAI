@@ -2,8 +2,8 @@ package com.jarvis.ai.ui.hud
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -13,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -282,4 +283,109 @@ fun HudPanel(
         HudCornerFrame(modifier = Modifier.matchParentSize(), accent = accent)
         content()
     }
+}
+
+/**
+ * Plain rounded "jg" card — matches bg_jg_card.xml exactly (navy #0A1624
+ * body, 1dp cyan glow border, 18dp corners). This is what individual content
+ * cards use throughout the real app (Usage Stats, Settings, Voice Auth
+ * screens) — no grid/ticks inside, those only live at the screen level.
+ */
+@Composable
+fun JgCard(
+    modifier: Modifier = Modifier,
+    accent: Color = HudColors.Accent,
+    borderAlpha: Float = 0.4f,
+    cornerRadius: Dp = 18.dp,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(Color(0xE60A1624), RoundedCornerShape(cornerRadius))
+            .border(1.dp, accent.copy(alpha = borderAlpha), RoundedCornerShape(cornerRadius)),
+        content = content
+    )
+}
+
+/** Selected variant — matches bg_jg_card_selected.xml (brighter fill + 2dp border). */
+@Composable
+fun JgCardSelected(
+    modifier: Modifier = Modifier,
+    accent: Color = HudColors.Accent,
+    cornerRadius: Dp = 18.dp,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(Color(0xF00A2030), RoundedCornerShape(cornerRadius))
+            .border(2.dp, accent.copy(alpha = 0.8f), RoundedCornerShape(cornerRadius)),
+        content = content
+    )
+}
+
+/** Small pill chip — matches bg_jg_chip.xml. */
+@Composable
+fun JgChip(
+    modifier: Modifier = Modifier,
+    accent: Color = HudColors.Accent,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(Color(0xCC062030), RoundedCornerShape(999.dp))
+            .border(1.dp, accent.copy(alpha = 0.6f), RoundedCornerShape(999.dp)),
+        content = content
+    )
+}
+
+/** Round icon badge (icon sitting inside a glowing tinted ring) — the header
+ * icon pattern used on every real screen (Usage Stats, Settings, Voice Auth). */
+@Composable
+fun IconBadge(
+    modifier: Modifier = Modifier,
+    accent: Color = HudColors.Accent,
+    size: Dp = 52.dp,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .background(accent.copy(alpha = 0.08f), androidx.compose.foundation.shape.CircleShape)
+            .border(2.dp, accent.copy(alpha = 0.55f), androidx.compose.foundation.shape.CircleShape),
+        contentAlignment = Alignment.Center,
+        content = content
+    )
+}
+
+/** Outline "jg" button — matches bg_jg_button_outline.xml (transparent + cyan border, 14dp). */
+@Composable
+fun JgButtonOutline(
+    modifier: Modifier = Modifier,
+    accent: Color = HudColors.Accent,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(Color.Transparent, RoundedCornerShape(14.dp))
+            .border(2.dp, accent.copy(alpha = 0.6f), RoundedCornerShape(14.dp)),
+        contentAlignment = Alignment.Center,
+        content = content
+    )
+}
+
+/** Filled gradient "jg" button — matches bg_jg_button.xml (cyan gradient, 14dp). */
+@Composable
+fun JgButtonFilled(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(
+                Brush.horizontalGradient(listOf(Color(0xFF00C6E0), Color(0xFF0077B6))),
+                RoundedCornerShape(14.dp)
+            ),
+        contentAlignment = Alignment.Center,
+        content = content
+    )
 }

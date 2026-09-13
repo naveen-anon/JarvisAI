@@ -57,13 +57,6 @@ class ArmorSuitsActivity : AppCompatActivity() {
         render(selected)
         findViewById<TextView>(R.id.btnEquipArmor).setOnClickListener { equip(selected) }
         findViewById<TextView>(R.id.tabArmorHome).setOnClickListener { finish() }
-        // Hall of Armor — Iron Man 3 holographic interactive grid
-        findViewById<TextView?>(R.id.tabArmorList)?.setOnClickListener {
-            startActivity(android.content.Intent(this, ArmorHoloArchiveActivity::class.java))
-        }
-        findViewById<TextView?>(R.id.tabArmorStatus)?.setOnClickListener {
-            startActivity(android.content.Intent(this, ArmorHoloArchiveActivity::class.java))
-        }
     }
 
     private fun bindChips() {
@@ -82,8 +75,8 @@ class ArmorSuitsActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtArmorMode).text = s.mode
         suits.forEach {
             findViewById<TextView>(it.chipId).setBackgroundResource(
-                if (it.id == s.id) R.drawable.bg_armor_chip_selected
-                else R.drawable.bg_armor_chip
+                if (it.id == s.id) R.drawable.bg_jg_card_selected
+                else R.drawable.bg_jg_chip
             )
         }
     }

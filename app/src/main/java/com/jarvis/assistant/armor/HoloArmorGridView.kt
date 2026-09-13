@@ -115,7 +115,6 @@ class HoloArmorGridView @JvmOverloads constructor(
         val contentH = rows * cellH + pad * 2 + 48f
         canvas.drawRoundRect(8f, 8f, contentW - 8f, contentH - 8f, 16f, 16f, framePaint)
         canvas.drawRoundRect(14f, 14f, contentW - 14f, contentH - 14f, 12f, 12f, cyanStroke)
-        canvas.drawText("IRON MAN 3  ·  HALL OF ARMOR", contentW / 2f, 40f, titlePaint)
 
         marks.forEachIndexed { i, mark ->
             val col = i % cols; val row = i / cols
