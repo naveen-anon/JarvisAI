@@ -145,8 +145,9 @@ class StatsActivity : AppCompatActivity() {
                 text = stats.totalInteractions.toString()
                 setTextColor(C_CYAN); textSize = 34f
                 typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
-                setPadding(0, dp(8), 0, 0)
+                setPadding(0, dp(8), 0, dp(10))
             })
+            addView(waveformRow())
         })
 
         metricsRow.addView(LinearLayout(this).apply {
@@ -176,6 +177,8 @@ class StatsActivity : AppCompatActivity() {
                 text = "  \uD83D\uDD25"; textSize = 22f
             })
             addView(streakRow)
+            addView(spacer(10))
+            addView(dotProgressRow(filled = stats.currentStreak.coerceIn(0, 6)))
         })
         root.addView(metricsRow)
         root.addView(spacer(20))
@@ -256,6 +259,45 @@ class StatsActivity : AppCompatActivity() {
 
     private fun spacer(hDp: Int) = View(this).apply {
         layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(hDp))
+    }
+
+    /** Small equalizer-style bar chart, like the strip under Total Commands. */
+    private fun waveformRow(): LinearLayout {
+        val heights = intArrayOf(6, 12, 8, 16, 10, 18, 9, 14, 7, 20, 11, 15, 8, 17, 10, 13, 6, 19, 9, 12)
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.BOTTOM
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(24))
+            heights.forEach { h ->
+                addView(View(this@StatsActivity).apply {
+                    setBackgroundColor(C_CYAN)
+                    alpha = 0.55f
+                    layoutParams = LinearLayout.LayoutParams(dp(3), dp(h)).apply {
+                        marginEnd = dp(2)
+                    }
+                })
+            }
+        }
+    }
+
+    /** Row of small dots marking streak progress, like the strip under Day Streak. */
+    private fun dotProgressRow(filled: Int, total: Int = 7): LinearLayout {
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            for (i in 0 until total) {
+                addView(View(this@StatsActivity).apply {
+                    val on = i < filled
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        shape = android.graphics.drawable.GradientDrawable.OVAL
+                        setColor(if (on) Color.parseColor("#C084FC") else Color.parseColor("#33FFFFFF"))
+                    }
+                    layoutParams = LinearLayout.LayoutParams(dp(if (on) 10 else 7), dp(if (on) 10 else 7)).apply {
+                        marginEnd = dp(6)
+                    }
+                })
+            }
+        }
     }
 
     private fun sectionHeader(emoji: String, title: String, subtitle: String) =

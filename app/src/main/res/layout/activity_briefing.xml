@@ -63,9 +63,9 @@
             <TextView android:id="@+id/chipCompanion"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                android:background="@drawable/bg_jg_chip"
+                android:background="@drawable/bg_jg_chip_green"
                 android:paddingHorizontal="14dp" android:paddingVertical="10dp"
-                android:text="👥  COMPANION ONLINE  »" android:textColor="#00E5FF" android:textSize="12sp"
+                android:text="👥  COMPANION ONLINE  »" android:textColor="#22C55E" android:textSize="12sp"
                 android:fontFamily="monospace" android:textStyle="bold" />
 
             <!-- Main briefing card -->
