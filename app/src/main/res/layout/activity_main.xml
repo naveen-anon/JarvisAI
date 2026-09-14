@@ -277,34 +277,15 @@
         <!-- Reactor stack -->
         <FrameLayout
             android:id="@+id/reactorStack"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp">
 
-            <View
-                android:layout_width="190dp"
-                android:layout_height="190dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_reactor_outer"
-                android:alpha="0.9" />
-            <View
-                android:layout_width="130dp"
-                android:layout_height="130dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_reactor_mid"
-                android:alpha="0.95" />
-            <View
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_reactor_core"
-                android:alpha="1" />
-
             <com.jarvis.assistant.ui.ArcReactorView
                 android:id="@+id/arcReactor"
-                android:layout_width="170dp"
-                android:layout_height="170dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center" />
         </FrameLayout>
 
