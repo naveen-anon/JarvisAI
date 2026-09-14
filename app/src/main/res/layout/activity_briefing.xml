@@ -25,10 +25,14 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal" android:gravity="center_vertical">
 
-                <TextView android:id="@+id/btnBriefingBack"
+                <FrameLayout android:id="@+id/btnBriefingBack"
                     android:layout_width="52dp" android:layout_height="52dp"
-                    android:text="📅" android:textSize="20sp" android:gravity="center"
-                    android:background="@drawable/bg_icon_ring_cyan" />
+                    android:background="@drawable/bg_icon_ring_cyan">
+                    <ImageView
+                        android:layout_width="24dp" android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_calendar" android:tint="#00E5FF" />
+                </FrameLayout>
 
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1" android:orientation="vertical"
@@ -50,23 +54,29 @@
                 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:orientation="vertical" android:gravity="center"
                     android:background="@drawable/bg_jg_chip" android:padding="8dp">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_brain" android:tint="#00E5FF" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="🧠 AI" android:textColor="#00E5FF" android:textSize="10sp"
-                        android:fontFamily="monospace" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Powered" android:textColor="#7AB8C8" android:textSize="9sp"
-                        android:fontFamily="monospace" />
+                        android:text="AI Powered" android:textColor="#7AB8C8" android:textSize="9sp"
+                        android:fontFamily="monospace" android:layout_marginTop="4dp" />
                 </LinearLayout>
             </LinearLayout>
 
             <!-- Companion online chip -->
-            <TextView android:id="@+id/chipCompanion"
+            <LinearLayout android:id="@+id/chipCompanion"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="14dp" android:gravity="center_vertical"
                 android:background="@drawable/bg_jg_chip_green"
-                android:paddingHorizontal="14dp" android:paddingVertical="10dp"
-                android:text="👥  COMPANION ONLINE  »" android:textColor="#22C55E" android:textSize="12sp"
-                android:fontFamily="monospace" android:textStyle="bold" />
+                android:paddingHorizontal="14dp" android:paddingVertical="10dp">
+                <ImageView android:layout_width="16dp" android:layout_height="16dp"
+                    android:src="@drawable/ic_people" android:tint="#22C55E" android:layout_marginEnd="8dp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="COMPANION ONLINE" android:textColor="#22C55E" android:textSize="12sp"
+                    android:fontFamily="monospace" android:textStyle="bold" />
+                <ImageView android:layout_width="16dp" android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right" android:tint="#22C55E" />
+            </LinearLayout>
 
             <!-- Main briefing card -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -87,15 +97,27 @@
 
                 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:orientation="horizontal" android:layout_marginTop="14dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="📍 New Delhi" android:textColor="#7AB8C8" android:textSize="10sp"
-                        android:fontFamily="monospace" android:background="@drawable/bg_jg_chip"
+
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:gravity="center_vertical" android:background="@drawable/bg_jg_chip"
                         android:paddingHorizontal="10dp" android:paddingVertical="6dp"
-                        android:layout_marginEnd="8dp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="☁️ Clouds" android:textColor="#7AB8C8" android:textSize="10sp"
-                        android:fontFamily="monospace" android:background="@drawable/bg_jg_chip"
-                        android:paddingHorizontal="10dp" android:paddingVertical="6dp" />
+                        android:layout_marginEnd="8dp">
+                        <ImageView android:layout_width="13dp" android:layout_height="13dp"
+                            android:src="@drawable/ic_location_pin" android:tint="#7AB8C8" android:layout_marginEnd="5dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="New Delhi" android:textColor="#7AB8C8" android:textSize="10sp"
+                            android:fontFamily="monospace" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:gravity="center_vertical" android:background="@drawable/bg_jg_chip"
+                        android:paddingHorizontal="10dp" android:paddingVertical="6dp">
+                        <ImageView android:layout_width="13dp" android:layout_height="13dp"
+                            android:src="@drawable/ic_cloud" android:tint="#7AB8C8" android:layout_marginEnd="5dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Clouds" android:textColor="#7AB8C8" android:textSize="10sp"
+                            android:fontFamily="monospace" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
@@ -106,9 +128,12 @@
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
                     android:orientation="vertical" android:background="@drawable/bg_jg_card_purple"
                     android:padding="12dp" android:layout_marginEnd="6dp">
-                    <TextView android:layout_width="36dp" android:layout_height="36dp"
-                        android:text="⏰" android:textSize="16sp" android:background="@drawable/bg_icon_ring_purple"
-                        android:gravity="center" />
+                    <FrameLayout android:layout_width="36dp" android:layout_height="36dp"
+                        android:background="@drawable/bg_icon_ring_purple">
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_clock" android:tint="#C084FC" />
+                    </FrameLayout>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="PENDING" android:textColor="#C084FC" android:textSize="10sp"
                         android:fontFamily="monospace" android:textStyle="bold" android:layout_marginTop="8dp" />
@@ -122,9 +147,12 @@
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
                     android:orientation="vertical" android:background="@drawable/bg_jg_card_green"
                     android:padding="12dp" android:layout_marginStart="6dp">
-                    <TextView android:layout_width="36dp" android:layout_height="36dp"
-                        android:text="🎯" android:textSize="16sp" android:background="@drawable/bg_icon_ring_green"
-                        android:gravity="center" />
+                    <FrameLayout android:layout_width="36dp" android:layout_height="36dp"
+                        android:background="@drawable/bg_icon_ring_green">
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_target" android:tint="#22C55E" />
+                    </FrameLayout>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="SCORE" android:textColor="#22C55E" android:textSize="10sp"
                         android:fontFamily="monospace" android:textStyle="bold" android:layout_marginTop="8dp" />
@@ -136,23 +164,33 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView android:id="@+id/btnGenerateBriefing"
+            <LinearLayout android:id="@+id/btnGenerateBriefing"
                 android:layout_width="match_parent" android:layout_height="50dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_jg_button"
-                android:gravity="center"
-                android:text="⚡  GENERATE BRIEFING  ›"
-                android:textColor="#02141C" android:textSize="13sp" android:fontFamily="monospace"
-                android:textStyle="bold" />
+                android:layout_marginTop="16dp" android:gravity="center"
+                android:background="@drawable/bg_jg_button">
+                <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                    android:src="@drawable/ic_bolt" android:tint="#02141C" android:layout_marginEnd="8dp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="GENERATE BRIEFING"
+                    android:textColor="#02141C" android:textSize="13sp" android:fontFamily="monospace"
+                    android:textStyle="bold" />
+                <ImageView android:layout_width="16dp" android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right" android:tint="#02141C" android:layout_marginStart="6dp" />
+            </LinearLayout>
 
-            <TextView android:id="@+id/btnReadAloud"
+            <LinearLayout android:id="@+id/btnReadAloud"
                 android:layout_width="match_parent" android:layout_height="50dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_jg_button_purple"
-                android:gravity="center"
-                android:text="📖  READ ALOUD  ›"
-                android:textColor="#0A0018" android:textSize="13sp" android:fontFamily="monospace"
-                android:textStyle="bold" />
+                android:layout_marginTop="10dp" android:gravity="center"
+                android:background="@drawable/bg_jg_button_purple">
+                <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                    android:src="@drawable/ic_speaker" android:tint="#0A0018" android:layout_marginEnd="8dp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="READ ALOUD"
+                    android:textColor="#0A0018" android:textSize="13sp" android:fontFamily="monospace"
+                    android:textStyle="bold" />
+                <ImageView android:layout_width="16dp" android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right" android:tint="#0A0018" android:layout_marginStart="6dp" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent" android:layout_height="wrap_content"

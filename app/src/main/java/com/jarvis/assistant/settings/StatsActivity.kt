@@ -1,12 +1,14 @@
 package com.jarvis.assistant.settings
 
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -18,10 +20,9 @@ import com.jarvis.assistant.ui.HudOverlayView
 import com.jarvis.assistant.util.AutoLearnEngine
 
 /**
- * Usage Stats screen — matches the app-wide "jg" card language:
- * icon-badge header, side-by-side metric cards, colored info cards
- * (green = app usage, pink = contacts), quick-insights card, outline
- * close button. Same building blocks as SettingsActivity/LockScreenActivity.
+ * Usage Stats screen — real vector icons (no emoji), matching the
+ * reference design 1:1: icon-badge header, metric cards with waveform /
+ * streak-dots, colored info cards, quick-insights card, outline close.
  */
 class StatsActivity : AppCompatActivity() {
 
@@ -29,13 +30,11 @@ class StatsActivity : AppCompatActivity() {
     private val C_TEXT = Color.parseColor("#B8ECFF")
     private val C_MUTED = Color.parseColor("#7AB8C8")
     private val C_WHITE = Color.parseColor("#F0FBFF")
+    private val C_PURPLE = Color.parseColor("#C084FC")
     private val C_GREEN = Color.parseColor("#22C55E")
     private val C_PINK = Color.parseColor("#EC4899")
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
-    private fun sp(v: Float) = v
-
-    private fun iconRing(colorRes: Int) = ContextCompat.getDrawable(this, colorRes)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,13 +55,24 @@ class StatsActivity : AppCompatActivity() {
         setContentView(root)
     }
 
-    /** Small circular icon badge like the header icons across the app. */
-    private fun iconBadge(emoji: String, ringDrawable: Int, size: Int = 52, textSize: Float = 20f) =
-        TextView(this).apply {
-            text = emoji
-            this.textSize = textSize
-            gravity = Gravity.CENTER
-            background = iconRing(ringDrawable)
+    /** Real vector icon inside a colored ring badge (replaces emoji icons). */
+    private fun iconBadge(iconRes: Int, ringRes: Int, tint: Int, size: Int = 52, iconSize: Int = 24) =
+        FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(size), dp(size))
+            background = ContextCompat.getDrawable(this@StatsActivity, ringRes)
+            addView(ImageView(this@StatsActivity).apply {
+                setImageDrawable(ContextCompat.getDrawable(this@StatsActivity, iconRes))
+                setColorFilter(tint, PorterDuff.Mode.SRC_IN)
+                layoutParams = FrameLayout.LayoutParams(dp(iconSize), dp(iconSize)).apply {
+                    gravity = Gravity.CENTER
+                }
+            })
+        }
+
+    private fun smallIcon(iconRes: Int, tint: Int, size: Int = 16) =
+        ImageView(this).apply {
+            setImageDrawable(ContextCompat.getDrawable(this@StatsActivity, iconRes))
+            setColorFilter(tint, PorterDuff.Mode.SRC_IN)
             layoutParams = LinearLayout.LayoutParams(dp(size), dp(size))
         }
 
@@ -76,12 +86,12 @@ class StatsActivity : AppCompatActivity() {
             setPadding(dp(16), dp(14), dp(16), dp(28))
         }
 
-        // ===== Header: icon badge + two-tone title + subtitle, chip top-right =====
+        // ===== Header =====
         val headerRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        headerRow.addView(iconBadge("\uD83D\uDCCA", R.drawable.bg_icon_ring_cyan))
+        headerRow.addView(iconBadge(R.drawable.ic_bar_chart, R.drawable.bg_icon_ring_cyan, C_CYAN))
 
         val titleCol = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -109,16 +119,19 @@ class StatsActivity : AppCompatActivity() {
 
         headerRow.addView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
             background = jgChip()
             setPadding(dp(10), dp(8), dp(10), dp(8))
+            addView(smallIcon(R.drawable.ic_track, C_GREEN, 16))
             addView(TextView(this@StatsActivity).apply {
-                text = "Track"; setTextColor(C_TEXT); textSize = 10f; typeface = Typeface.MONOSPACE
+                text = "Track"; setTextColor(C_TEXT); textSize = 9f; typeface = Typeface.MONOSPACE
+                setPadding(0, dp(3), 0, 0)
             })
             addView(TextView(this@StatsActivity).apply {
-                text = "Learn"; setTextColor(C_TEXT); textSize = 10f; typeface = Typeface.MONOSPACE
+                text = "Learn"; setTextColor(C_TEXT); textSize = 9f; typeface = Typeface.MONOSPACE
             })
             addView(TextView(this@StatsActivity).apply {
-                text = "Improve"; setTextColor(C_TEXT); textSize = 10f; typeface = Typeface.MONOSPACE
+                text = "Improve"; setTextColor(C_TEXT); textSize = 9f; typeface = Typeface.MONOSPACE
             })
         })
         root.addView(headerRow)
@@ -132,7 +145,7 @@ class StatsActivity : AppCompatActivity() {
             background = jgCard()
             setPadding(dp(14), dp(14), dp(14), dp(14))
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = dp(8) }
-            addView(iconBadge("\uD83D\uDCC8", R.drawable.bg_icon_ring_cyan, size = 40, textSize = 16f))
+            addView(iconBadge(R.drawable.ic_terminal, R.drawable.bg_icon_ring_cyan, C_CYAN, size = 40, iconSize = 18))
             addView(spacer(8))
             addView(TextView(this@StatsActivity).apply {
                 text = "TOTAL COMMANDS"; setTextColor(C_CYAN); textSize = 11f
@@ -155,10 +168,10 @@ class StatsActivity : AppCompatActivity() {
             background = jgCard(R.drawable.bg_jg_card_purple)
             setPadding(dp(14), dp(14), dp(14), dp(14))
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-            addView(iconBadge("\uD83D\uDCC4", R.drawable.bg_icon_ring_purple, size = 40, textSize = 16f))
+            addView(iconBadge(R.drawable.ic_flame, R.drawable.bg_icon_ring_purple, C_PURPLE, size = 40, iconSize = 18))
             addView(spacer(8))
             addView(TextView(this@StatsActivity).apply {
-                text = "DAY STREAK"; setTextColor(Color.parseColor("#C084FC")); textSize = 11f
+                text = "DAY STREAK"; setTextColor(C_PURPLE); textSize = 11f
                 typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
             })
             addView(TextView(this@StatsActivity).apply {
@@ -170,11 +183,11 @@ class StatsActivity : AppCompatActivity() {
                 setPadding(0, dp(8), 0, 0)
             }
             streakRow.addView(TextView(this@StatsActivity).apply {
-                text = "${stats.currentStreak}"; setTextColor(Color.parseColor("#C084FC")); textSize = 34f
+                text = "${stats.currentStreak}"; setTextColor(C_PURPLE); textSize = 34f
                 typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
             })
-            streakRow.addView(TextView(this@StatsActivity).apply {
-                text = "  \uD83D\uDD25"; textSize = 22f
+            streakRow.addView(smallIcon(R.drawable.ic_flame, Color.parseColor("#FB923C"), 20).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(20), dp(20)).apply { marginStart = dp(8) }
             })
             addView(streakRow)
             addView(spacer(10))
@@ -184,13 +197,13 @@ class StatsActivity : AppCompatActivity() {
         root.addView(spacer(20))
 
         // ===== APP USAGE section =====
-        root.addView(sectionHeader("\uD83D\uDD32", "APP USAGE", "Your most used apps (from Jarvis)"))
+        root.addView(sectionHeader(R.drawable.ic_bar_chart, "APP USAGE", "Your most used apps (from Jarvis)"))
         root.addView(spacer(10))
 
         root.addView(infoCard(
             bg = R.drawable.bg_jg_card_green,
             ring = R.drawable.bg_icon_ring_green,
-            emoji = "\u2B50",
+            icon = R.drawable.ic_star_filled,
             title = "MOST USED APPS",
             titleColor = C_GREEN,
             subtitle = if (stats.topApps.isEmpty()) "Not enough data yet – keep using Jarvis!"
@@ -200,7 +213,7 @@ class StatsActivity : AppCompatActivity() {
         root.addView(infoCard(
             bg = R.drawable.bg_jg_card_pink,
             ring = R.drawable.bg_icon_ring_pink,
-            emoji = "\uD83D\uDC65",
+            icon = R.drawable.ic_people,
             title = "MOST CONTACTED",
             titleColor = C_PINK,
             subtitle = if (stats.topContacts.isEmpty()) "Not enough data yet."
@@ -218,7 +231,7 @@ class StatsActivity : AppCompatActivity() {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
             }
-            hRow.addView(iconBadge("\uD83D\uDCA1", R.drawable.bg_icon_ring_cyan, size = 34, textSize = 14f))
+            hRow.addView(iconBadge(R.drawable.ic_lightbulb, R.drawable.bg_icon_ring_cyan, C_CYAN, size = 34, iconSize = 16))
             hRow.addView(TextView(this@StatsActivity).apply {
                 text = "  QUICK INSIGHTS"; setTextColor(C_CYAN); textSize = 13f
                 typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
@@ -230,8 +243,8 @@ class StatsActivity : AppCompatActivity() {
                 orientation = LinearLayout.HORIZONTAL
                 background = jgChip()
                 setPadding(dp(10), dp(10), dp(10), dp(10))
-                addView(TextView(this@StatsActivity).apply {
-                    text = "\u24D8  "; setTextColor(C_CYAN); textSize = 13f
+                addView(smallIcon(R.drawable.ic_info, C_CYAN, 16).apply {
+                    layoutParams = LinearLayout.LayoutParams(dp(16), dp(16)).apply { marginEnd = dp(8) }
                 })
                 addView(TextView(this@StatsActivity).apply {
                     text = "Keep using Jarvis to unlock detailed insights, app stats, and more in the future!"
@@ -243,16 +256,22 @@ class StatsActivity : AppCompatActivity() {
         root.addView(spacer(20))
 
         // ===== Close button =====
-        root.addView(TextView(this).apply {
-            text = "\u2190  CLOSE"
-            setTextColor(C_CYAN)
-            textSize = 14f
+        val closeBtn = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
             background = jgButtonOutline()
             setPadding(0, dp(14), 0, dp(14))
             setOnClickListener { finish() }
+        }
+        closeBtn.addView(smallIcon(R.drawable.ic_chevron_right, C_CYAN, 16).apply {
+            rotation = 180f
+            layoutParams = LinearLayout.LayoutParams(dp(16), dp(16)).apply { marginEnd = dp(8) }
         })
+        closeBtn.addView(TextView(this).apply {
+            text = "CLOSE"; setTextColor(C_CYAN); textSize = 14f
+            typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+        })
+        root.addView(closeBtn)
 
         return ScrollView(this).apply { addView(root) }
     }
@@ -261,7 +280,6 @@ class StatsActivity : AppCompatActivity() {
         layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(hDp))
     }
 
-    /** Small equalizer-style bar chart, like the strip under Total Commands. */
     private fun waveformRow(): LinearLayout {
         val heights = intArrayOf(6, 12, 8, 16, 10, 18, 9, 14, 7, 20, 11, 15, 8, 17, 10, 13, 6, 19, 9, 12)
         return LinearLayout(this).apply {
@@ -272,15 +290,12 @@ class StatsActivity : AppCompatActivity() {
                 addView(View(this@StatsActivity).apply {
                     setBackgroundColor(C_CYAN)
                     alpha = 0.55f
-                    layoutParams = LinearLayout.LayoutParams(dp(3), dp(h)).apply {
-                        marginEnd = dp(2)
-                    }
+                    layoutParams = LinearLayout.LayoutParams(dp(3), dp(h)).apply { marginEnd = dp(2) }
                 })
             }
         }
     }
 
-    /** Row of small dots marking streak progress, like the strip under Day Streak. */
     private fun dotProgressRow(filled: Int, total: Int = 7): LinearLayout {
         return LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -290,7 +305,7 @@ class StatsActivity : AppCompatActivity() {
                     val on = i < filled
                     background = android.graphics.drawable.GradientDrawable().apply {
                         shape = android.graphics.drawable.GradientDrawable.OVAL
-                        setColor(if (on) Color.parseColor("#C084FC") else Color.parseColor("#33FFFFFF"))
+                        setColor(if (on) C_PURPLE else Color.parseColor("#33FFFFFF"))
                     }
                     layoutParams = LinearLayout.LayoutParams(dp(if (on) 10 else 7), dp(if (on) 10 else 7)).apply {
                         marginEnd = dp(6)
@@ -300,13 +315,11 @@ class StatsActivity : AppCompatActivity() {
         }
     }
 
-    private fun sectionHeader(emoji: String, title: String, subtitle: String) =
+    private fun sectionHeader(iconRes: Int, title: String, subtitle: String) =
         LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            addView(TextView(this@StatsActivity).apply {
-                text = emoji; setTextColor(C_CYAN); textSize = 14f
-            })
+            addView(smallIcon(iconRes, C_CYAN, 18))
             addView(LinearLayout(this@StatsActivity).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(8), 0, 0, 0)
@@ -320,14 +333,14 @@ class StatsActivity : AppCompatActivity() {
             })
         }
 
-    private fun infoCard(bg: Int, ring: Int, emoji: String, title: String, titleColor: Int, subtitle: String) =
+    private fun infoCard(bg: Int, ring: Int, icon: Int, title: String, titleColor: Int, subtitle: String) =
         LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             background = jgCard(bg)
             setPadding(dp(12), dp(12), dp(12), dp(12))
 
-            addView(iconBadge(emoji, ring, size = 40, textSize = 16f))
+            addView(iconBadge(icon, ring, titleColor, size = 40, iconSize = 18))
             addView(LinearLayout(this@StatsActivity).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(10), 0, 0, 0)
@@ -341,8 +354,6 @@ class StatsActivity : AppCompatActivity() {
                     maxLines = 1
                 })
             })
-            addView(TextView(this@StatsActivity).apply {
-                text = "\u203A"; setTextColor(titleColor); textSize = 20f
-            })
+            addView(smallIcon(R.drawable.ic_chevron_right, titleColor, 20))
         }
 }

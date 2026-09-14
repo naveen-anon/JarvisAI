@@ -1,6 +1,7 @@
 package com.jarvis.assistant.ui.briefing
 
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.jarvis.assistant.R
@@ -22,9 +23,9 @@ class BriefingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_briefing)
         tts = TextToSpeechHelper(this)
 
-        findViewById<TextView>(R.id.btnBriefingBack).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnGenerateBriefing).setOnClickListener { generate() }
-        findViewById<TextView>(R.id.btnReadAloud).setOnClickListener {
+        findViewById<View>(R.id.btnBriefingBack).setOnClickListener { finish() }
+        findViewById<View>(R.id.btnGenerateBriefing).setOnClickListener { generate() }
+        findViewById<View>(R.id.btnReadAloud).setOnClickListener {
             if (lastText.isNotBlank()) tts.speak(lastText)
             else generate(andSpeak = true)
         }
