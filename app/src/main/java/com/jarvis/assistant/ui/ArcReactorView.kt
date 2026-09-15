@@ -2,6 +2,7 @@ package com.jarvis.assistant.ui
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -18,8 +19,7 @@ import kotlin.math.sin
 enum class HudState { IDLE, LISTENING, THINKING, EXECUTING, SPEAKING, DONE, ERROR }
 
 /**
- * Dense multi-ring Arc Reactor matching reference HUD:
- * solid outer ring, dashed energy rings, glowing triangle core.
+ * Dense navy-cyan liquid-glass Arc Reactor (reference style).
  */
 class ArcReactorView @JvmOverloads constructor(
     context: Context,
@@ -41,6 +41,10 @@ class ArcReactorView @JvmOverloads constructor(
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
+    private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        maskFilter = BlurMaskFilter(14f, BlurMaskFilter.Blur.NORMAL)
+    }
 
     var state: HudState = HudState.IDLE
         set(value) {
@@ -50,6 +54,7 @@ class ArcReactorView @JvmOverloads constructor(
         }
 
     init {
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
         setBackgroundColor(Color.TRANSPARENT)
         startAnimations()
         applyStateSpeeds()
@@ -66,18 +71,18 @@ class ArcReactorView @JvmOverloads constructor(
 
     private fun startAnimations() {
         spinAnim = ValueAnimator.ofFloat(0f, 360f).apply {
-            duration = 16000L
+            duration = 18000L
             repeatCount = ValueAnimator.INFINITE
             interpolator = LinearInterpolator()
             addUpdateListener {
                 rotationDeg = it.animatedValue as Float
-                rotationRev = 360f - (it.animatedValue as Float) * 0.55f
+                rotationRev = 360f - (it.animatedValue as Float) * 0.5f
                 invalidate()
             }
             start()
         }
         pulseAnim = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 2200L
+            duration = 2400L
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.REVERSE
             addUpdateListener {
@@ -90,12 +95,12 @@ class ArcReactorView @JvmOverloads constructor(
 
     private fun applyStateSpeeds() {
         val (spinMs, pulseMs) = when (state) {
-            HudState.IDLE -> 22000L to 2600L
-            HudState.LISTENING -> 5000L to 800L
-            HudState.THINKING, HudState.EXECUTING -> 3500L to 600L
-            HudState.SPEAKING -> 8000L to 1000L
-            HudState.DONE -> 16000L to 1800L
-            HudState.ERROR -> 12000L to 500L
+            HudState.IDLE -> 20000L to 2600L
+            HudState.LISTENING -> 4500L to 700L
+            HudState.THINKING, HudState.EXECUTING -> 3200L to 550L
+            HudState.SPEAKING -> 7000L to 900L
+            HudState.DONE -> 15000L to 1800L
+            HudState.ERROR -> 10000L to 450L
         }
         spinAnim?.duration = spinMs
         pulseAnim?.duration = pulseMs
@@ -105,140 +110,140 @@ class ArcReactorView @JvmOverloads constructor(
         super.onDraw(canvas)
         val cx = width / 2f
         val cy = height / 2f
-        val r = min(cx, cy) * 0.90f
+        val r = min(cx, cy) * 0.88f
 
-        // IDLE + LISTENING always cyan (ignore settings accent so it never goes yellow while listening)
+        val cyan = Color.parseColor("#00E5FF")
+        val cyanDeep = Color.parseColor("#0090B8")
         val base = when (state) {
             HudState.THINKING, HudState.EXECUTING -> Color.parseColor("#FFB020")
-            HudState.SPEAKING -> Color.parseColor("#B0F8FF")
+            HudState.SPEAKING -> Color.parseColor("#B8F4FF")
             HudState.ERROR -> Color.parseColor("#FF5252")
-            HudState.LISTENING -> Color.parseColor("#00E5FF")
-            else -> Color.parseColor("#00E5FF") // IDLE + DONE = cyan, not settings amber
+            else -> cyan
         }
         val bright = when (state) {
             HudState.THINKING -> Color.parseColor("#FFE8A0")
             HudState.SPEAKING -> Color.WHITE
             else -> Color.parseColor("#E8FDFF")
         }
-        val alphaMul = when (state) {
-            HudState.IDLE -> 0.88f
-            HudState.LISTENING, HudState.SPEAKING -> 1f
-            HudState.THINKING, HudState.EXECUTING -> 1f
-            else -> 0.92f
-        }
+        val a = if (state == HudState.IDLE) 0.92f else 1f
 
-        // Soft outer glow
+        // Outer liquid glow
         fillPaint.shader = RadialGradient(
-            cx, cy, r * 1.08f,
+            cx, cy, r * 1.15f,
             intArrayOf(
-                Color.argb((55 * alphaMul).toInt(), Color.red(base), Color.green(base), Color.blue(base)),
+                Color.argb((70 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base)),
+                Color.argb((25 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base)),
                 Color.TRANSPARENT
             ),
-            floatArrayOf(0.5f, 1f),
+            floatArrayOf(0.35f, 0.7f, 1f),
             Shader.TileMode.CLAMP
         )
-        canvas.drawCircle(cx, cy, r * 1.08f, fillPaint)
+        canvas.drawCircle(cx, cy, r * 1.15f, fillPaint)
         fillPaint.shader = null
 
-        // Solid outer ring (thick)
+        glowPaint.color = Color.argb((90 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base))
+        glowPaint.strokeWidth = r * 0.06f
+        canvas.drawCircle(cx, cy, r * 0.98f, glowPaint)
+
+        // Solid thick outer rim
         ringPaint.pathEffect = null
-        ringPaint.strokeWidth = r * 0.035f
-        ringPaint.color = Color.argb((200 * alphaMul).toInt(), Color.red(base), Color.green(base), Color.blue(base))
+        ringPaint.strokeWidth = r * 0.045f
+        ringPaint.color = Color.argb((230 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base))
         canvas.drawCircle(cx, cy, r * 0.96f, ringPaint)
 
-        // Outer dashed ticks
-        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.035f, r * 0.055f), 0f)
-        ringPaint.strokeWidth = r * 0.018f
-        ringPaint.color = Color.argb((160 * alphaMul).toInt(), Color.red(base), Color.green(base), Color.blue(base))
+        ringPaint.strokeWidth = r * 0.012f
+        ringPaint.color = Color.argb((100 * a).toInt(), 255, 255, 255)
+        canvas.drawCircle(cx, cy, r * 0.935f, ringPaint)
+
+        // Long dashes
+        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.12f, r * 0.04f), 0f)
+        ringPaint.strokeWidth = r * 0.028f
+        ringPaint.color = Color.argb((200 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base))
         canvas.save()
-        canvas.rotate(rotationDeg * 0.25f, cx, cy)
-        canvas.drawCircle(cx, cy, r * 0.90f, ringPaint)
+        canvas.rotate(rotationDeg * 0.35f, cx, cy)
+        canvas.drawCircle(cx, cy, r * 0.82f, ringPaint)
         canvas.restore()
 
-        // Main energy ring (segmented)
-        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.11f, r * 0.045f), 0f)
-        ringPaint.strokeWidth = r * 0.032f
-        ringPaint.color = Color.argb((230 * alphaMul).toInt(), Color.red(base), Color.green(base), Color.blue(base))
+        // Medium segments
+        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.08f, r * 0.035f), 0f)
+        ringPaint.strokeWidth = r * 0.022f
+        ringPaint.color = Color.argb((170 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base))
         canvas.save()
         canvas.rotate(rotationDeg, cx, cy)
-        canvas.drawCircle(cx, cy, r * 0.78f, ringPaint)
+        canvas.drawCircle(cx, cy, r * 0.70f, ringPaint)
         canvas.restore()
 
-        // Mid dense ring
-        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.06f, r * 0.04f), 0f)
-        ringPaint.strokeWidth = r * 0.022f
-        ringPaint.color = Color.argb((180 * alphaMul).toInt(), Color.red(base), Color.green(base), Color.blue(base))
+        // Fine ticks counter
+        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.03f, r * 0.045f), 0f)
+        ringPaint.strokeWidth = r * 0.016f
+        ringPaint.color = Color.argb((140 * a).toInt(), Color.red(cyanDeep), Color.green(cyanDeep), Color.blue(cyanDeep))
         canvas.save()
         canvas.rotate(rotationRev, cx, cy)
-        canvas.drawCircle(cx, cy, r * 0.64f, ringPaint)
+        canvas.drawCircle(cx, cy, r * 0.58f, ringPaint)
         canvas.restore()
 
-        // Inner technical ring
-        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.09f, r * 0.05f), 0f)
-        ringPaint.strokeWidth = r * 0.016f
-        ringPaint.color = Color.argb((140 * alphaMul).toInt(), 255, 255, 255)
+        // Dense near core
+        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.05f, r * 0.025f), 0f)
+        ringPaint.strokeWidth = r * 0.024f
+        ringPaint.color = Color.argb((220 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base))
         canvas.save()
-        canvas.rotate(rotationDeg * 0.8f, cx, cy)
-        canvas.drawCircle(cx, cy, r * 0.50f, ringPaint)
+        canvas.rotate(rotationDeg * 1.6f, cx, cy)
+        canvas.drawCircle(cx, cy, r * 0.46f, ringPaint)
         canvas.restore()
 
-        // Tight ring around core
-        ringPaint.pathEffect = android.graphics.DashPathEffect(floatArrayOf(r * 0.04f, r * 0.035f), 0f)
-        ringPaint.strokeWidth = r * 0.028f
-        ringPaint.color = Color.argb((240 * alphaMul).toInt(), Color.red(base), Color.green(base), Color.blue(base))
-        canvas.save()
-        canvas.rotate(rotationDeg * 1.8f, cx, cy)
-        canvas.drawCircle(cx, cy, r * 0.38f, ringPaint)
-        canvas.restore()
+        // Tight solid
+        ringPaint.pathEffect = null
+        ringPaint.strokeWidth = r * 0.014f
+        ringPaint.color = Color.argb((180 * a).toInt(), 255, 255, 255)
+        canvas.drawCircle(cx, cy, r * 0.36f, ringPaint)
 
-        // Core glow
-        val coreR = r * (0.20f + 0.03f * pulse)
+        // Core glow pulse
+        val coreR = r * (0.22f + 0.035f * pulse)
         fillPaint.shader = RadialGradient(
-            cx, cy, coreR * 1.9f,
+            cx, cy, coreR * 2.0f,
             intArrayOf(
                 Color.argb(255, Color.red(bright), Color.green(bright), Color.blue(bright)),
-                Color.argb(210, Color.red(base), Color.green(base), Color.blue(base)),
-                Color.argb(0, Color.red(base), Color.green(base), Color.blue(base))
+                Color.argb(220, Color.red(base), Color.green(base), Color.blue(base)),
+                Color.argb(60, Color.red(base), Color.green(base), Color.blue(base)),
+                Color.TRANSPARENT
             ),
-            floatArrayOf(0f, 0.4f, 1f),
+            floatArrayOf(0f, 0.3f, 0.65f, 1f),
             Shader.TileMode.CLAMP
         )
-        canvas.drawCircle(cx, cy, coreR * 1.7f, fillPaint)
+        canvas.drawCircle(cx, cy, coreR * 1.9f, fillPaint)
         fillPaint.shader = null
 
-        // Core solid
         fillPaint.color = bright
-        canvas.drawCircle(cx, cy, coreR * 0.5f, fillPaint)
+        canvas.drawCircle(cx, cy, coreR * 0.48f, fillPaint)
         fillPaint.color = Color.WHITE
         canvas.drawCircle(cx, cy, coreR * 0.2f, fillPaint)
 
         // Triangle
-        val triR = coreR * 1.05f
+        val triR = coreR * 1.15f
         val path = Path()
         for (i in 0..2) {
-            val a = Math.toRadians((-90 + i * 120).toDouble())
-            val x = cx + (triR * cos(a)).toFloat()
-            val y = cy + (triR * sin(a)).toFloat()
+            val ang = Math.toRadians((-90 + i * 120).toDouble())
+            val x = cx + (triR * cos(ang)).toFloat()
+            val y = cy + (triR * sin(ang)).toFloat()
             if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
         path.close()
         ringPaint.pathEffect = null
-        ringPaint.strokeWidth = r * 0.022f
-        ringPaint.color = Color.argb((250 * alphaMul).toInt(), Color.red(base), Color.green(base), Color.blue(base))
+        ringPaint.strokeWidth = r * 0.028f
+        ringPaint.color = Color.argb((250 * a).toInt(), Color.red(base), Color.green(base), Color.blue(base))
         canvas.drawPath(path, ringPaint)
 
-        // Inner triangle (thinner)
         val path2 = Path()
-        val triR2 = triR * 0.55f
+        val triR2 = triR * 0.5f
         for (i in 0..2) {
-            val a = Math.toRadians((-90 + i * 120).toDouble())
-            val x = cx + (triR2 * cos(a)).toFloat()
-            val y = cy + (triR2 * sin(a)).toFloat()
+            val ang = Math.toRadians((-90 + i * 120).toDouble())
+            val x = cx + (triR2 * cos(ang)).toFloat()
+            val y = cy + (triR2 * sin(ang)).toFloat()
             if (i == 0) path2.moveTo(x, y) else path2.lineTo(x, y)
         }
         path2.close()
-        ringPaint.strokeWidth = r * 0.012f
-        ringPaint.color = Color.argb((180 * alphaMul).toInt(), 255, 255, 255)
+        ringPaint.strokeWidth = r * 0.01f
+        ringPaint.color = Color.argb((160 * a).toInt(), 255, 255, 255)
         canvas.drawPath(path2, ringPaint)
     }
 
