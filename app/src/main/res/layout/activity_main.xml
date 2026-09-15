@@ -523,6 +523,14 @@
             android:background="@drawable/bg_quick_action" />
     </LinearLayout>
 
+    <!-- Hidden IDs kept for MainActivity bindings (not shown) -->
+    <TextView android:id="@+id/btnQuickFlash" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <TextView android:id="@+id/btnQuickWifi" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <TextView android:id="@+id/btnQuickBt" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <TextView android:id="@+id/btnQuickCall" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <TextView android:id="@+id/btnQuickMsg" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <TextView android:id="@+id/btnQuickWa" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+
     <!-- Bottom nav include -->
     <include
         android:id="@+id/bottomNavInclude"
