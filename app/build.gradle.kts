@@ -18,7 +18,7 @@ android {
     namespace = "com.jarvis.assistant"
     compileSdk = 34
 
-    setProperty("archivesBaseName", "Jarvis")
+    setProperty("archivesBaseName", "jarvis")
 
     defaultConfig {
         applicationId = "com.jarvis.assistant"
@@ -100,4 +100,12 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.3")
     debugImplementation("androidx.compose.ui:ui-tooling")
+}
+
+// Output APK always named jarvis.apk
+android.applicationVariants.configureEach {
+    outputs.configureEach {
+        (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl)
+            .outputFileName = "jarvis.apk"
+    }
 }
