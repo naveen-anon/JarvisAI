@@ -5,128 +5,136 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#020810"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
-    android:paddingTop="6dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingTop="4dp"
     android:paddingBottom="0dp">
 
     <com.jarvis.assistant.ui.HudOverlayView
         android:id="@+id/hudOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.18"
+        android:alpha="0.22"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- ========== TOP HEADER ========== -->
-    <com.jarvis.assistant.ui.ChamferedPanel
+    <!-- ========== HEADER: robot + title + clock + chat + settings ========== -->
+    <LinearLayout
         android:id="@+id/topBrandRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_header_panel"
+        android:paddingStart="10dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
+        <!-- Robot avatar ring -->
+        <FrameLayout
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_avatar_ring">
             <ImageView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_robot"
-                android:scaleType="fitCenter"
-                android:layout_marginEnd="8dp"
+                android:tint="#00E5FF"
                 android:contentDescription="JARVIS" />
+        </FrameLayout>
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/txtSystemLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="J.A.R.V.I.S"
-                    android:textColor="#00E5FF"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.14" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="JUST · A · REAL · VIRTUAL · INTELLIGENT · SYSTEM"
-                    android:textColor="#0A7A96"
-                    android:textSize="7sp"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.06" />
-            </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txtClock"
+                android:id="@+id/txtSystemLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="00:00:00"
+                android:text="J.A.R.V.I.S"
                 android:textColor="#00E5FF"
-                android:textSize="12sp"
+                android:textSize="20sp"
+                android:textStyle="bold"
                 android:fontFamily="monospace"
-                android:background="@drawable/bg_jg_chip"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:layout_marginEnd="6dp" />
+                android:letterSpacing="0.12" />
 
-            <FrameLayout
-                android:id="@+id/txtChatBtn"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_jg_chip"
-                android:layout_marginEnd="4dp">
-                <ImageView
-                    android:layout_width="16dp" android:layout_height="16dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_chat" android:tint="#00E5FF" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/txtSettingsBtn"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_jg_chip">
-                <ImageView
-                    android:layout_width="17dp" android:layout_height="17dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_settings" android:tint="#00E5FF" />
-            </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="JUST · A · REAL · VIRTUAL · INTELLIGENT · SYSTEM"
+                android:textColor="#0A7A96"
+                android:textSize="6.5sp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.04"
+                android:maxLines="1" />
         </LinearLayout>
-    </com.jarvis.assistant.ui.ChamferedPanel>
 
-    <!-- STANDING BY + STATUS CHIPS -->
+        <TextView
+            android:id="@+id/txtClock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00:00"
+            android:textColor="#00E5FF"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:background="@drawable/bg_round_chip"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginEnd="6dp" />
+
+        <FrameLayout
+            android:id="@+id/txtChatBtn"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_round_chip"
+            android:layout_marginEnd="4dp">
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_chat"
+                android:tint="#00E5FF" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/txtSettingsBtn"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_round_chip">
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_settings"
+                android:tint="#00E5FF" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- STANDING BY -->
     <TextView
         android:id="@+id/txtState"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="STANDING BY"
         android:textColor="#00E5FF"
-        android:textSize="11sp"
+        android:textSize="12sp"
         android:fontFamily="monospace"
-        android:letterSpacing="0.12"
+        android:letterSpacing="0.14"
         android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/topBrandRow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Status chips row -->
     <LinearLayout
         android:id="@+id/statusChipStrip"
         android:layout_width="0dp"
@@ -137,86 +145,105 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.jarvis.assistant.ui.ChamferedPanel
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:layout_weight="1"
-            android:layout_marginEnd="4dp">
-            <LinearLayout
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:gravity="center" android:orientation="horizontal" android:padding="8dp">
-                <ImageView android:layout_width="14dp" android:layout_height="14dp"
-                    android:src="@drawable/ic_battery_bolt" android:tint="#00E5FF"
-                    android:layout_marginEnd="5dp" />
-                <TextView
-                    android:id="@+id/txtBattery"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="BATT: —%"
-                    android:textColor="#00E5FF"
-                    android:textSize="10sp"
-                    android:fontFamily="monospace" />
-            </LinearLayout>
-        </com.jarvis.assistant.ui.ChamferedPanel>
+            android:layout_marginEnd="5dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_status_chip"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp">
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_battery_bolt"
+                android:tint="#00E5FF"
+                android:layout_marginEnd="4dp" />
+            <TextView
+                android:id="@+id/txtBattery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BATT: —%"
+                android:textColor="#00E5FF"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:maxLines="1" />
+        </LinearLayout>
 
-        <com.jarvis.assistant.ui.ChamferedPanel
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:layout_weight="1"
-            android:layout_marginEnd="4dp">
-            <LinearLayout
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:gravity="center" android:orientation="horizontal" android:padding="8dp">
-                <ImageView android:layout_width="14dp" android:layout_height="14dp"
-                    android:src="@drawable/ic_wifi" android:tint="#00E5FF"
-                    android:layout_marginEnd="5dp" />
-                <TextView
-                    android:id="@+id/txtNetwork"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WiFi"
-                    android:textColor="#00E5FF"
-                    android:textSize="10sp"
-                    android:fontFamily="monospace" />
-            </LinearLayout>
-        </com.jarvis.assistant.ui.ChamferedPanel>
+            android:layout_marginEnd="5dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_status_chip"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp">
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_wifi"
+                android:tint="#00E5FF"
+                android:layout_marginEnd="4dp" />
+            <TextView
+                android:id="@+id/txtNetwork"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WiFi"
+                android:textColor="#00E5FF"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:maxLines="1" />
+        </LinearLayout>
 
-        <com.jarvis.assistant.ui.ChamferedPanel
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-            <LinearLayout
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:gravity="center" android:orientation="horizontal" android:padding="8dp">
-                <ImageView android:layout_width="14dp" android:layout_height="14dp"
-                    android:src="@drawable/ic_ram_chip" android:tint="#00E5FF"
-                    android:layout_marginEnd="5dp" />
-                <TextView
-                    android:id="@+id/txtPerf"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="RAM: —%"
-                    android:textColor="#00E5FF"
-                    android:textSize="10sp"
-                    android:fontFamily="monospace" />
-            </LinearLayout>
-        </com.jarvis.assistant.ui.ChamferedPanel>
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_status_chip"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp">
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_ram_chip"
+                android:tint="#00E5FF"
+                android:layout_marginEnd="4dp" />
+            <TextView
+                android:id="@+id/txtPerf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RAM: —%"
+                android:textColor="#00E5FF"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:maxLines="1" />
+        </LinearLayout>
     </LinearLayout>
 
+    <!-- Location + Weather -->
     <LinearLayout
         android:id="@+id/locWeatherRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintTop_toBottomOf="@id/statusChipStrip"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView android:layout_width="12dp" android:layout_height="12dp"
-            android:src="@drawable/ic_location_pin" android:tint="#5A8A9A"
-            android:layout_marginEnd="4dp" />
+        <ImageView
+            android:layout_width="11dp"
+            android:layout_height="11dp"
+            android:src="@drawable/ic_location_pin"
+            android:tint="#5A8A9A"
+            android:layout_marginEnd="3dp" />
         <TextView
             android:id="@+id/txtLocation"
             android:layout_width="0dp"
@@ -227,9 +254,12 @@
             android:textSize="10sp"
             android:fontFamily="monospace" />
 
-        <ImageView android:layout_width="12dp" android:layout_height="12dp"
-            android:src="@drawable/ic_cloud" android:tint="#5A8A9A"
-            android:layout_marginEnd="4dp" />
+        <ImageView
+            android:layout_width="11dp"
+            android:layout_height="11dp"
+            android:src="@drawable/ic_cloud"
+            android:tint="#5A8A9A"
+            android:layout_marginEnd="3dp" />
         <TextView
             android:id="@+id/txtWeather"
             android:layout_width="wrap_content"
@@ -240,48 +270,47 @@
             android:fontFamily="monospace" />
     </LinearLayout>
 
-    <!-- SIDE LABELS + REACTOR + AI BADGE -->
+    <!-- MID: side labels + reactor + AI badge -->
     <LinearLayout
         android:id="@+id/midSection"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="horizontal"
         android:gravity="center"
+        android:layout_marginTop="2dp"
         app:layout_constraintTop_toBottomOf="@id/locWeatherRow"
         app:layout_constraintBottom_toTopOf="@id/txtTapHint"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.35">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Left menu -->
+        <!-- Left labels -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginEnd="4dp">
-
+            android:layout_marginEnd="2dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="☰ ANALYZE" android:textColor="#0A7A96" android:textSize="9sp"
-                android:fontFamily="monospace" android:layout_marginBottom="10dp" />
+                android:fontFamily="monospace" android:layout_marginBottom="6dp" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="☰ ASSIST" android:textColor="#0A7A96" android:textSize="9sp"
-                android:fontFamily="monospace" android:layout_marginBottom="10dp" />
+                android:fontFamily="monospace" android:layout_marginBottom="6dp" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="☰ EXECUTE" android:textColor="#0A7A96" android:textSize="9sp"
-                android:fontFamily="monospace" android:layout_marginBottom="10dp" />
+                android:fontFamily="monospace" android:layout_marginBottom="6dp" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="☰ LEARN" android:textColor="#0A7A96" android:textSize="9sp"
                 android:fontFamily="monospace" />
         </LinearLayout>
 
-        <!-- Reactor stack -->
+        <!-- Reactor -->
         <FrameLayout
             android:id="@+id/reactorStack"
-            android:layout_width="220dp"
-            android:layout_height="220dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp">
-
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp">
             <com.jarvis.assistant.ui.ArcReactorView
                 android:id="@+id/arcReactor"
                 android:layout_width="match_parent"
@@ -289,36 +318,38 @@
                 android:layout_gravity="center" />
         </FrameLayout>
 
-        <!-- Right AI badge -->
+        <!-- AI POWERED badge -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="56dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/bg_jg_chip"
-            android:padding="8dp">
-
+            android:background="@drawable/bg_ai_badge"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="A.I."
                 android:textColor="#00E5FF"
                 android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:fontFamily="monospace" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="POWERED"
                 android:textColor="#0A7A96"
-                android:textSize="8sp"
-                android:fontFamily="monospace" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🧠"
-                android:textSize="16sp"
-                android:layout_marginTop="2dp" />
+                android:textSize="7sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="4dp" />
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_brain"
+                android:tint="#00E5FF" />
         </LinearLayout>
     </LinearLayout>
 
@@ -330,197 +361,174 @@
         android:textColor="#0A7A96"
         android:textSize="11sp"
         android:fontFamily="monospace"
-        app:layout_constraintTop_toBottomOf="@id/midSection"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintBottom_toTopOf="@id/waveform"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/waveform" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.jarvis.assistant.ui.WaveformView
         android:id="@+id/waveform"
         android:layout_width="0dp"
         android:layout_height="28dp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@id/txtTapHint"
+        android:layout_marginBottom="6dp"
+        app:layout_constraintBottom_toTopOf="@id/btnTalkJarvis"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/btnTalkJarvis" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- TALK BUTTON -->
+    <!-- Talk button -->
     <TextView
         android:id="@+id/btnTalkJarvis"
         android:layout_width="0dp"
-        android:layout_height="54dp"
-        android:layout_marginTop="6dp"
-        android:background="@drawable/bg_talk_3d"
-        android:gravity="center"
+        android:layout_height="48dp"
         android:text="🎙  Talk"
         android:textColor="#00E5FF"
         android:textSize="16sp"
-        android:fontFamily="monospace"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/waveform"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:background="@drawable/bg_talk_glow"
+        android:layout_marginBottom="6dp"
+        app:layout_constraintBottom_toTopOf="@id/txtResponse"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/panelResponse" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- RESPONSE PANEL -->
-    <LinearLayout
-        android:id="@+id/panelResponse"
+    <!-- Response bar -->
+    <TextView
+        android:id="@+id/txtResponse"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:minHeight="36dp"
+        android:text="Online."
+        android:textColor="#00E5FF"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_response_bar"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="5dp"
+        android:maxLines="3"
+        app:layout_constraintBottom_toTopOf="@id/inputRow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Hidden transcript (kept for MainActivity) -->
+    <TextView
+        android:id="@+id/txtTranscript"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Input row -->
+    <LinearLayout
+        android:id="@+id/inputRow"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@drawable/bg_jg_card"
-        android:padding="10dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/btnTalkJarvis"
+        android:background="@drawable/bg_input_bar"
+        android:paddingStart="10dp"
+        android:paddingEnd="8dp"
+        android:layout_marginBottom="6dp"
+        app:layout_constraintBottom_toTopOf="@id/quickActionsRow"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/panelTranscript">
-
+        app:layout_constraintEnd_toEndOf="parent">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="💬"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-
+            android:text=">>"
+            android:textColor="#0A7A96"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:layout_marginEnd="6dp" />
         <TextView
-            android:id="@+id/txtResponse"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Online."
-            android:textColor="#00E5FF"
-            android:textSize="13sp"
-            android:fontFamily="monospace" />
-    </LinearLayout>
-
-    <!-- TRANSCRIPT / INPUT STYLE PANEL -->
-    <LinearLayout
-        android:id="@+id/panelTranscript"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/bg_jg_input"
-        android:padding="10dp"
-        android:layout_marginTop="6dp"
-        app:layout_constraintTop_toBottomOf="@id/panelResponse"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/quickActionsRow">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="≫"
-            android:textColor="#00E5FF"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/txtTranscript"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Type your message..."
-            android:textColor="#6A9AAB"
+            android:textColor="#4A6A7A"
             android:textSize="12sp"
             android:fontFamily="monospace" />
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_chevron_right"
+            android:tint="#00E5FF" />
     </LinearLayout>
 
-    <!-- QUICK ACTIONS: Briefing / System / Vision / Armor -->
+    <!-- Quick actions -->
     <LinearLayout
         android:id="@+id/quickActionsRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/panelTranscript"
+        android:layout_marginBottom="6dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavInclude"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/txtFooter">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:id="@+id/btnQuickBriefing"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:background="@drawable/bg_jg_button"
-            android:gravity="center"
             android:text="📋 Briefing"
             android:textColor="#00E5FF"
             android:textSize="10sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@drawable/bg_quick_action" />
 
         <TextView
             android:id="@+id/btnQuickCore"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:background="@drawable/bg_jg_button"
-            android:gravity="center"
             android:text="▣ System"
             android:textColor="#00E5FF"
             android:textSize="10sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@drawable/bg_quick_action" />
 
         <TextView
             android:id="@+id/btnQuickCam"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:background="@drawable/bg_jg_button"
-            android:gravity="center"
             android:text="👁 Vision"
             android:textColor="#00E5FF"
             android:textSize="10sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@drawable/bg_quick_action" />
 
         <TextView
             android:id="@+id/btnQuickMore"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_jg_button"
-            android:gravity="center"
             android:text="🛡 Armor"
             android:textColor="#00E5FF"
             android:textSize="10sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:background="@drawable/bg_quick_action" />
     </LinearLayout>
 
-    <!-- legacy IDs keep MainActivity safe -->
-    <TextView android:id="@+id/btnQuickCall" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-    <TextView android:id="@+id/btnQuickMsg" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-    <TextView android:id="@+id/btnQuickWa" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-    <TextView android:id="@+id/btnQuickFlash" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-    <TextView android:id="@+id/btnQuickWifi" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-    <TextView android:id="@+id/btnQuickBt" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/txtFooter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ONLINE"
-        android:textColor="#2A4A55"
-        android:textSize="8sp"
-        android:fontFamily="monospace"
-        android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@id/quickActionsRow"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavInclude"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+    <!-- Bottom nav include -->
     <include
         android:id="@+id/bottomNavInclude"
         layout="@layout/include_bottom_nav"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
