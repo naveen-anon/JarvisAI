@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:   # Manual trigger bhi allow karega
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,6 +23,8 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -30,7 +32,6 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
         env:
-          # Agar secrets set kiye hain to yahan use honge
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
