@@ -107,12 +107,13 @@ class ArcReactorView @JvmOverloads constructor(
         val cy = height / 2f
         val r = min(cx, cy) * 0.90f
 
-        // Keep cyan for LISTENING; only THINKING/EXECUTING go amber
+        // IDLE + LISTENING always cyan (ignore settings accent so it never goes yellow while listening)
         val base = when (state) {
             HudState.THINKING, HudState.EXECUTING -> Color.parseColor("#FFB020")
             HudState.SPEAKING -> Color.parseColor("#B0F8FF")
             HudState.ERROR -> Color.parseColor("#FF5252")
-            else -> accentColor
+            HudState.LISTENING -> Color.parseColor("#00E5FF")
+            else -> Color.parseColor("#00E5FF") // IDLE + DONE = cyan, not settings amber
         }
         val bright = when (state) {
             HudState.THINKING -> Color.parseColor("#FFE8A0")
