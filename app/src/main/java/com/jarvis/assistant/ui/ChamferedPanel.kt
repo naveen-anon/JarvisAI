@@ -53,7 +53,7 @@ class ChamferedPanel @JvmOverloads constructor(
 
     init {
         setWillNotDraw(false)
-        setPadding(paddingLeft + dp(6), paddingTop + dp(4), paddingRight + dp(6), paddingBottom + dp(4))
+        setPadding(paddingLeft + dp(4), paddingTop + dp(3), paddingRight + dp(4), paddingBottom + dp(3))
     }
 
     private fun dp(v: Int) = (v * density).toInt()
