@@ -133,10 +133,10 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         findViewById<TextView?>(R.id.btnTalkJarvis)?.setOnClickListener {
             service?.startListeningCycle()
         }
-        findViewById<TextView?>(R.id.btnQuickBriefing)?.setOnClickListener {
+        findViewById<View?>(R.id.btnQuickBriefing)?.setOnClickListener {
             startActivity(Intent(this, com.jarvis.assistant.ui.briefing.BriefingActivity::class.java))
         }
-        findViewById<TextView?>(R.id.btnQuickCore)?.setOnClickListener {
+        findViewById<View?>(R.id.btnQuickCore)?.setOnClickListener {
             startActivity(Intent(this, com.jarvis.assistant.ui.SystemCoreActivity::class.java))
         }
 
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         findViewById<TextView?>(R.id.btnQuickWa)?.setOnClickListener {
             openPkg("com.whatsapp")
         }
-        findViewById<TextView?>(R.id.btnQuickCam)?.setOnClickListener {
+        findViewById<View?>(R.id.btnQuickCam)?.setOnClickListener {
             try {
                 startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
             } catch (_: Exception) {
@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         findViewById<TextView?>(R.id.btnQuickBt)?.setOnClickListener {
             startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
         }
-        findViewById<TextView?>(R.id.btnQuickMore)?.setOnClickListener {
+        findViewById<View?>(R.id.btnQuickMore)?.setOnClickListener {
             // Label is "Armor" — open holographic Hall of Armor (fallback to suits list)
             try {
                 startActivity(Intent(this, com.jarvis.assistant.armor.ArmorHoloArchiveActivity::class.java))
