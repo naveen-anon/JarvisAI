@@ -56,7 +56,7 @@
                     android:background="@drawable/bg_jg_chip" android:padding="8dp">
                     <ImageView android:layout_width="18dp" android:layout_height="18dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_brain" android:tint="#00E5FF" />
+                        android:src="@drawable/ic_ai_spark" android:tint="#00E5FF" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="AI Powered" android:textColor="#7AB8C8" android:textSize="9sp"
                         android:fontFamily="monospace" android:layout_marginTop="4dp" />
