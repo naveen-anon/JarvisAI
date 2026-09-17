@@ -62,6 +62,9 @@ private val CyanMid = Color(0xFF004466)
 private val CyanSoft = Color(0xFF5A8A99)
 private val Amber = Color(0xFFFFAA00)
 private val AmberDim = Color(0xFFB07000)
+private val Orange = Color(0xFFFF8C00)
+private val OrangeBright = Color(0xFFFFC866)
+private val OrangeCore = Color(0xFFFFE8B0)
 private val Red = Color(0xFFFF3030)
 private val Bg = Color(0xFF03080E)
 private val BgDeep = Color(0xFF01040A)
@@ -801,15 +804,15 @@ private fun MarkViiReactor(
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
         val side = minOf(maxWidth, maxHeight)
         val reactorSize = (side * 0.96f).coerceAtLeast(160.dp)
-        val infinite = rememberInfiniteTransition(label = "mk7")
+        val infinite = rememberInfiniteTransition(label = "energyCore")
         val slow by infinite.animateFloat(
             0f, 360f,
-            infiniteRepeatable(tween(28000, easing = LinearEasing)),
+            infiniteRepeatable(tween(32000, easing = LinearEasing)),
             label = "slow"
         )
         val med by infinite.animateFloat(
             0f, 360f,
-            infiniteRepeatable(tween(14000, easing = LinearEasing)),
+            infiniteRepeatable(tween(16000, easing = LinearEasing)),
             label = "med"
         )
         val fast by infinite.animateFloat(
@@ -817,11 +820,11 @@ private fun MarkViiReactor(
             infiniteRepeatable(
                 tween(
                     when (state) {
-                        HudState.LISTENING -> 3500
-                        HudState.THINKING, HudState.EXECUTING -> 2500
-                        HudState.SPEAKING -> 5000
-                        HudState.DONE -> 12000
-                        else -> 8000
+                        HudState.LISTENING -> 2800
+                        HudState.THINKING, HudState.EXECUTING -> 1800
+                        HudState.SPEAKING -> 4200
+                        HudState.DONE -> 10000
+                        else -> 7000
                     },
                     easing = LinearEasing
                 )
@@ -831,133 +834,125 @@ private fun MarkViiReactor(
         val pulse by infinite.animateFloat(
             0f, 1f,
             infiniteRepeatable(
-                tween(if (state == HudState.LISTENING) 600 else 2200),
+                tween(if (state == HudState.LISTENING) 500 else 1800),
                 RepeatMode.Reverse
             ),
             label = "pulse"
         )
+        // Orange energy core (7th image style)
         val accent = when (state) {
-            HudState.THINKING, HudState.EXECUTING -> Amber
-            HudState.SPEAKING -> CyanBright
+            HudState.THINKING, HudState.EXECUTING -> OrangeBright
+            HudState.SPEAKING -> Orange
             HudState.ERROR -> Red
-            HudState.DONE -> CyanBright
-            else -> Cyan
+            HudState.DONE -> OrangeBright
+            else -> Orange
         }
+        val coreAccent = OrangeCore
 
         Canvas(modifier = Modifier.size(reactorSize)) {
             val cx = size.width / 2f
             val cy = size.height / 2f
-            val r = min(cx, cy) * 0.96f
+            val r = min(cx, cy) * 0.94f
 
-            // outer glow halo
-            drawCircle(accent.copy(alpha = 0.10f * (0.6f + 0.4f * pulse)), r * 1.10f, Offset(cx, cy))
-            drawCircle(accent.copy(alpha = 0.06f), r * 1.25f, Offset(cx, cy))
+            // Soft outer glow
+            drawCircle(accent.copy(alpha = 0.07f + 0.05f * pulse), r * 1.28f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.10f), r * 1.12f, Offset(cx, cy))
 
-            // Hexagonal outer frame
-            drawHexFrame(cx, cy, r * 0.98f, accent.copy(alpha = 0.85f), r * 0.012f)
-            // Inner hex frame
-            drawHexFrame(cx, cy, r * 0.88f, accent.copy(alpha = 0.45f), r * 0.006f)
-
-            // Compass tick marks around outer hex
-            rotate(slow * 0.3f, Offset(cx, cy)) {
-                for (i in 0 until 36) {
-                    val ang = Math.toRadians((i * 10.0))
-                    val isMajor = i % 3 == 0
-                    val inner = r * (if (isMajor) 0.84f else 0.86f)
-                    val outer = r * 0.92f
-                    val x1 = cx + (inner * cos(ang)).toFloat()
-                    val y1 = cy + (inner * sin(ang)).toFloat()
-                    val x2 = cx + (outer * cos(ang)).toFloat()
-                    val y2 = cy + (outer * sin(ang)).toFloat()
+            // Outer particle ring
+            rotate(slow * 0.25f, Offset(cx, cy)) {
+                val ticks = 72
+                for (i in 0 until ticks) {
+                    val a = Math.toRadians(i * 360.0 / ticks)
+                    val isMajor = i % 6 == 0
+                    val inner = r * (if (isMajor) 0.88f else 0.91f)
+                    val outer = r * (if (isMajor) 0.98f else 0.955f)
                     drawLine(
-                        accent.copy(alpha = if (isMajor) 0.85f else 0.35f),
-                        Offset(x1, y1), Offset(x2, y2),
-                        strokeWidth = if (isMajor) r * 0.012f else r * 0.005f
+                        accent.copy(alpha = if (isMajor) 0.75f else 0.28f),
+                        Offset(cx + (inner * cos(a)).toFloat(), cy + (inner * sin(a)).toFloat()),
+                        Offset(cx + (outer * cos(a)).toFloat(), cy + (outer * sin(a)).toFloat()),
+                        strokeWidth = if (isMajor) 2.2f else 1f,
+                        cap = StrokeCap.Round
                     )
                 }
             }
 
-            // N/S/E/W cardinal labels (drawn as small markers at the hex points)
-            drawCardinalMarkers(cx, cy, r * 0.92f, accent)
-
-            // Inner rotating dashed rings (Mark VII style)
-            rotate(fast * 0.5f, Offset(cx, cy)) {
-                drawCircle(
-                    accent.copy(alpha = 0.7f),
-                    r * 0.74f, Offset(cx, cy),
-                    style = Stroke(
-                        width = r * 0.018f,
-                        cap = StrokeCap.Round,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.10f, r * 0.04f))
-                    )
-                )
-            }
-            rotate(-med, Offset(cx, cy)) {
+            // Mid orbiting ring + dots
+            rotate(-med * 0.6f, Offset(cx, cy)) {
                 drawCircle(
                     accent.copy(alpha = 0.55f),
-                    r * 0.62f, Offset(cx, cy),
+                    r * 0.72f, Offset(cx, cy),
+                    style = Stroke(width = r * 0.014f)
+                )
+                for (i in 0 until 8) {
+                    val a = Math.toRadians(i * 45.0)
+                    val px = cx + (r * 0.72f * cos(a)).toFloat()
+                    val py = cy + (r * 0.72f * sin(a)).toFloat()
+                    drawCircle(accent.copy(alpha = 0.9f), r * 0.018f, Offset(px, py))
+                }
+            }
+
+            // Fast inner dashed ring
+            rotate(fast, Offset(cx, cy)) {
+                drawCircle(
+                    accent.copy(alpha = 0.65f),
+                    r * 0.52f, Offset(cx, cy),
                     style = Stroke(
                         width = r * 0.012f,
-                        cap = StrokeCap.Round,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.04f, r * 0.06f))
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 7f), 0f)
                     )
                 )
             }
-            rotate(med * 0.7f, Offset(cx, cy)) {
+
+            // Counter-rotating ring
+            rotate(-fast * 0.7f, Offset(cx, cy)) {
                 drawCircle(
-                    CyanMid.copy(alpha = 0.7f),
-                    r * 0.50f, Offset(cx, cy),
+                    accent.copy(alpha = 0.35f),
+                    r * 0.40f, Offset(cx, cy),
                     style = Stroke(
-                        width = r * 0.014f,
-                        cap = StrokeCap.Round,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.02f, r * 0.05f))
+                        width = r * 0.008f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 9f), 0f)
                     )
                 )
             }
 
-            // solid inner ring
-            drawCircle(accent.copy(alpha = 0.95f), r * 0.42f, Offset(cx, cy), style = Stroke(r * 0.025f))
-            drawCircle(Color.White.copy(alpha = 0.35f), r * 0.40f, Offset(cx, cy), style = Stroke(r * 0.008f))
+            // Core energy ball
+            val coreR = r * 0.18f
+            drawCircle(accent.copy(alpha = 0.18f * pulse), coreR * 2.1f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.30f), coreR * 1.5f, Offset(cx, cy))
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(coreAccent, accent, accent.copy(alpha = 0.3f)),
+                    center = Offset(cx, cy),
+                    radius = coreR * 1.1f
+                ),
+                coreR, Offset(cx, cy)
+            )
+            drawCircle(Color.White.copy(alpha = 0.9f), coreR * 0.22f, Offset(cx, cy))
 
-            // Inner suit silhouette (very stylized hex shape)
-            drawHexFrame(cx, cy, r * 0.32f, accent.copy(alpha = 0.85f), r * 0.008f)
-
-            // Reactor core triangle + glow
-            val coreR = r * (0.18f + 0.04f * pulse)
-            drawCircle(accent.copy(alpha = 0.5f * (0.6f + 0.4f * pulse)), coreR * 1.7f, Offset(cx, cy))
-            drawCircle(accent.copy(alpha = 0.9f), coreR * 0.6f, Offset(cx, cy))
-            drawCircle(CyanCore.copy(alpha = 0.95f), coreR * 0.32f, Offset(cx, cy))
-            drawCircle(Color.White, coreR * 0.14f, Offset(cx, cy))
-
-            val triR = coreR * 1.3f
-            val path = Path()
-            for (i in 0..2) {
-                val ang = Math.toRadians((-90 + i * 120).toDouble())
-                val x = cx + (triR * cos(ang)).toFloat()
-                val y = cy + (triR * sin(ang)).toFloat()
-                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-            }
-            path.close()
-            drawPath(path, accent.copy(alpha = 0.95f), style = Stroke(r * 0.020f))
-
-            // Mark-VII crosshair lines through core
+            // Cross lines
+            val crossLen = r * 0.28f
             drawLine(
-                accent.copy(alpha = 0.5f),
-                Offset(cx - r * 0.30f, cy), Offset(cx + r * 0.30f, cy),
-                strokeWidth = r * 0.006f
+                accent.copy(alpha = 0.55f),
+                Offset(cx - crossLen, cy), Offset(cx + crossLen, cy),
+                strokeWidth = r * 0.007f
             )
             drawLine(
-                accent.copy(alpha = 0.5f),
-                Offset(cx, cy - r * 0.30f), Offset(cx, cy + r * 0.30f),
-                strokeWidth = r * 0.006f
+                accent.copy(alpha = 0.55f),
+                Offset(cx, cy - crossLen), Offset(cx, cy + crossLen),
+                strokeWidth = r * 0.007f
             )
 
-            // Outer ring labels text approximation - small ticks at hex points
-            for (i in 0..5) {
-                val ang = Math.toRadians((60.0 * i - 30.0))
-                val px = cx + (r * 0.98f * cos(ang)).toFloat()
-                val py = cy + (r * 0.98f * sin(ang)).toFloat()
-                drawCircle(accent, r * 0.02f, Offset(px, py))
+            // Orbital particles near core
+            rotate(fast * 1.3f, Offset(cx, cy)) {
+                for (i in 0 until 5) {
+                    val a = Math.toRadians(i * 72.0)
+                    val pr = coreR * 1.7f
+                    drawCircle(
+                        accent.copy(alpha = 0.8f),
+                        r * 0.012f,
+                        Offset(cx + (pr * cos(a)).toFloat(), cy + (pr * sin(a)).toFloat())
+                    )
+                }
             }
         }
     }
