@@ -312,7 +312,7 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
 
             // ── Bottom status + suit selector ──
             LiquidGlassCard(modifier = Modifier.fillMaxWidth(), glow = glow) {
-                Column(Modifier = Modifier.padding(10.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -403,7 +403,7 @@ private fun LiquidTopBar(suitName: String, mark: String, glow: Color) {
             Text("🛡", fontSize = 16.sp)
         }
         Spacer(Modifier.width(10.dp))
-        Column(Modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 "STARK INDUSTRIES  ·  ARMOR ARCHIVE",
                 color = glow,
