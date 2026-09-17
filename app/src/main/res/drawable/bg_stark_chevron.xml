@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="60dp"
+    android:viewportWidth="120"
+    android:viewportHeight="60">
+    <!-- Stark Industries angled chevron panel - tapers on the left -->
+    <path
+        android:fillColor="#0A1825"
+        android:fillAlpha="0.85"
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.55"
+        android:pathData="M8,4 L114,4 L120,30 L114,56 L8,56 L2,30 Z" />
+    <!-- Inner accent line -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.35"
+        android:pathData="M14,9 L110,9 L115,30 L110,51 L14,51 L9,30 Z" />
+    <!-- Tip highlight -->
+    <path
+        android:fillColor="#00D9FF"
+        android:fillAlpha="0.18"
+        android:pathData="M2,30 L8,28 L8,32 Z" />
+</vector>

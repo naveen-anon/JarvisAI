@@ -1,0 +1,35 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Hexagonal outer frame -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="1.5"
+        android:pathData="M24,3 L43,13.5 L43,34.5 L24,45 L5,34.5 L5,13.5 Z" />
+    <!-- Inner hex -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="0.8"
+        android:pathData="M24,9 L37,16 L37,32 L24,39 L11,32 L11,16 Z" />
+    <!-- Center reactor ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="1.2"
+        android:pathData="M24,18 A6,6 0 1,0 24,30 A6,6 0 1,0 24,18 Z" />
+    <!-- Center dot -->
+    <path
+        android:fillColor="#00D9FF"
+        android:pathData="M24,23 A1,1 0 1,0 24,25 A1,1 0 1,0 24,23 Z" />
+    <!-- Stark Industries label tick marks on outer hex -->
+    <path
+        android:fillColor="#00D9FF"
+        android:pathData="M23,5 L25,5 L25,7 L23,7 Z" />
+    <path
+        android:fillColor="#00D9FF"
+        android:pathData="M23,41 L25,41 L25,43 L23,43 Z" />
+</vector>

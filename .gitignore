@@ -13,3 +13,11 @@
 app/build/
 jarvis-backend/node_modules/
 jarvis-backend/.wrangler/
+
+# Mark-VII patch backup
+.patch_backup/
+JarvisAI-MarkVII-HUD-patch.zip
+Jarvis-Compose-HUD.zip
+Jarvis-LiquidGlass-UI.zip
+Jarvis-Reference-UI*.zip
+Jarvis-UI-Final.zip

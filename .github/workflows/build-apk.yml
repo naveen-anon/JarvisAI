@@ -3,6 +3,7 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -10,6 +11,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # release create karne ke liye chahiye
 
     steps:
       - name: Checkout code
@@ -39,10 +42,22 @@ jobs:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
 
-      - name: Upload APK
+      - name: Upload APK (artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: Jarvis-APK
+          name: Jarvis-APK-${{ github.sha }}
           path: app/build/outputs/apk/debug/jarvis.apk
-          retention-days: 7
-          if-no-files-found: warn
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Publish prerelease
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Jarvis AI — latest debug build"
+          prerelease: true
+          generate_release_notes: true
+          files: app/build/outputs/apk/debug/jarvis.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

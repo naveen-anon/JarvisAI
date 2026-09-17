@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -51,14 +53,23 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-// Navy-cyan liquid glass palette (reference)
-private val Cyan = Color(0xFF00E5FF)
-private val CyanDim = Color(0xFF0A7A96)
-private val CyanSoft = Color(0xFF7AB8C8)
-private val Bg = Color(0xFF020810)
-private val Glass = Color(0xB0051528)
-private val GlassBorder = Color(0x9900E5FF)
-private val PurpleEdge = Color(0xAA7B2FFF)
+/* ───────── Stark Industries / Mark-VII palette ───────── */
+private val Cyan = Color(0xFF00D9FF)
+private val CyanBright = Color(0xFFB8ECFF)
+private val CyanCore = Color(0xFFE8FBFF)
+private val CyanDim = Color(0xFF007A99)
+private val CyanMid = Color(0xFF004466)
+private val CyanSoft = Color(0xFF5A8A99)
+private val Amber = Color(0xFFFFAA00)
+private val AmberDim = Color(0xFFB07000)
+private val Red = Color(0xFFFF3030)
+private val Bg = Color(0xFF03080E)
+private val BgDeep = Color(0xFF01040A)
+private val Panel = Color(0xFF0A1825)
+private val PanelDim = Color(0xFF050E16)
+private val GridLine = Color(0xFF1A3040)
+
+/* ───────── State ───────── */
 
 data class JarvisHudUiState(
     val stateLabel: String = "STANDING BY",
@@ -89,6 +100,8 @@ data class JarvisHudActions(
     val onNavMore: () -> Unit = {}
 )
 
+/* ───────── Screen root ───────── */
+
 @Composable
 fun JarvisHudScreen(
     ui: JarvisHudUiState,
@@ -98,44 +111,43 @@ fun JarvisHudScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Bg)
+            .background(
+                Brush.verticalGradient(listOf(BgDeep, Bg, BgDeep))
+            )
     ) {
-        // Circuit + grid overlay
-        CircuitBackground(Modifier.fillMaxSize())
+        HexGridBackground(Modifier.fillMaxSize())
+        ScanlineOverlay(Modifier.fillMaxSize())
+        CornerBrackets(Modifier.fillMaxSize())
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
-            HeaderBar(
+            StarkHeader(
                 clock = ui.clock,
+                mode = modeFor(ui.hudState),
+                network = ui.network,
                 onChat = actions.onChat,
                 onSettings = actions.onSettings
             )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = ui.stateLabel.uppercase(),
-                color = Cyan,
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace,
-                letterSpacing = 1.5.sp,
-                fontWeight = FontWeight.Medium
+            Spacer(Modifier.height(8.dp))
+            DiagnosticChips(
+                battery = ui.battery,
+                network = ui.network,
+                ram = ui.ram,
+                location = ui.location
             )
             Spacer(Modifier.height(6.dp))
-            StatusChips(ui.battery, ui.network, ui.ram)
-            Spacer(Modifier.height(4.dp))
-            LocationWeatherRow(ui.location, ui.weather)
-            Spacer(Modifier.height(4.dp))
 
-            // Mid: labels + reactor + AI badge
+            // Center Mark-VII circular HUD with flanking side panels
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SideLabels(Modifier.padding(end = 4.dp))
+                SuitDiagnosticsPanel(modifier = Modifier.padding(end = 4.dp))
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -143,29 +155,23 @@ fun JarvisHudScreen(
                         .clickable { actions.onReactorTap() },
                     contentAlignment = Alignment.Center
                 ) {
-                    ArcReactorCompose(
+                    MarkViiReactor(
                         state = ui.hudState,
-                        modifier = Modifier.size(200.dp)
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
-                AiBadge(Modifier.padding(start = 4.dp))
+                EnergyMatrixPanel(
+                    cpu = ui.ram,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
             }
 
-            Text(
-                text = ui.stateLabel.replaceFirstChar { it.lowercase() }.replace("...", ""),
-                color = CyanDim,
-                fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            Spacer(Modifier.height(6.dp))
+            StateStatusBar(label = ui.stateLabel, state = ui.hudState)
             Spacer(Modifier.height(4.dp))
             WaveformBar(active = ui.waveformActive)
-            Spacer(Modifier.height(8.dp))
-            TalkButton(onClick = actions.onTalk)
             Spacer(Modifier.height(6.dp))
             ResponseBar(ui.response)
-            Spacer(Modifier.height(5.dp))
-            InputBarPlaceholder()
             Spacer(Modifier.height(6.dp))
             QuickActions(
                 onBriefing = actions.onBriefing,
@@ -185,102 +191,189 @@ fun JarvisHudScreen(
     }
 }
 
+/* ───────── Backgrounds ───────── */
+
 @Composable
-private fun CircuitBackground(modifier: Modifier = Modifier) {
-    val infinite = rememberInfiniteTransition(label = "circuit")
+private fun HexGridBackground(modifier: Modifier = Modifier) {
+    val infinite = rememberInfiniteTransition(label = "hex")
     val t by infinite.animateFloat(
         0f, 1f,
-        infiniteRepeatable(tween(8000, easing = LinearEasing)),
-        label = "ct"
+        infiniteRepeatable(tween(14000, easing = LinearEasing)),
+        label = "hexT"
     )
     Canvas(modifier) {
         val w = size.width
         val h = size.height
-        val c = CyanDim.copy(alpha = 0.18f)
-        // grid
-        val step = 48.dp.toPx()
-        var x = 0f
-        while (x < w) {
-            drawLine(c, Offset(x, 0f), Offset(x, h), 1f)
-            x += step
+        val r = 28.dp.toPx()               // hex outer radius
+        val dx = r * 1.5f                  // horizontal step
+        val dy = r * kotlin.math.sqrt(3f)  // vertical step
+        // Faint vertical scan band
+        val bandW = w * 0.6f
+        val bandX = (w + bandW) * t - bandW
+        val band = Brush.horizontalGradient(
+            colors = listOf(Color.Transparent, Cyan.copy(alpha = 0.06f), Color.Transparent),
+            startX = bandX - bandW * 0.5f,
+            endX = bandX + bandW * 0.5f
+        )
+        drawRect(band)
+
+        var row = 0
+        var y = -dy
+        while (y < h + dy) {
+            val offsetX = if (row % 2 == 0) 0f else dx / 2f
+            var x = -dx + offsetX
+            while (x < w + dx) {
+                drawHex(x, y, r, GridLine.copy(alpha = 0.55f), strokeW = 0.8f)
+                x += dx
+            }
+            row++
+            y += dy
         }
+    }
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawHex(
+    cx: Float, cy: Float, r: Float, color: Color, strokeW: Float
+) {
+    val path = Path()
+    for (i in 0..5) {
+        val a = Math.toRadians((60.0 * i - 30.0))
+        val px = cx + (r * cos(a)).toFloat()
+        val py = cy + (r * sin(a)).toFloat()
+        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+    }
+    path.close()
+    drawPath(path, color, style = Stroke(strokeW))
+}
+
+@Composable
+private fun ScanlineOverlay(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        val gap = 3.dp.toPx()
         var y = 0f
         while (y < h) {
-            drawLine(c, Offset(0f, y), Offset(w, y), 1f)
-            y += step
+            drawLine(
+                Color(0x1400D9FF),
+                Offset(0f, y), Offset(w, y),
+                strokeWidth = 0.5f
+            )
+            y += gap
         }
-        // circuit traces near center
-        val cx = w / 2f
-        val cy = h * 0.38f
-        val trace = Cyan.copy(alpha = 0.22f + 0.08f * t)
-        drawLine(trace, Offset(cx - 140.dp.toPx(), cy), Offset(cx - 90.dp.toPx(), cy), 1.5f)
-        drawLine(trace, Offset(cx + 90.dp.toPx(), cy), Offset(cx + 140.dp.toPx(), cy), 1.5f)
-        drawLine(trace, Offset(cx - 120.dp.toPx(), cy - 40.dp.toPx()), Offset(cx - 120.dp.toPx(), cy + 40.dp.toPx()), 1.2f)
-        drawLine(trace, Offset(cx + 120.dp.toPx(), cy - 40.dp.toPx()), Offset(cx + 120.dp.toPx(), cy + 40.dp.toPx()), 1.2f)
     }
 }
 
 @Composable
-private fun GlassBox(
-    modifier: Modifier = Modifier,
-    corner: Int = 16,
-    content: @Composable () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(corner.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0x3500E5FF), Glass, Color(0xE0020810))
-                )
-            )
-            .border(1.2.dp, GlassBorder, RoundedCornerShape(corner.dp))
-            .padding(horizontal = 10.dp, vertical = 8.dp)
-    ) { content() }
+private fun CornerBrackets(modifier: Modifier = Modifier) {
+    val len = 22.dp.toPx()
+    val pad = 10.dp.toPx()
+    val w = 1.5f
+    val c = Cyan.copy(alpha = 0.7f)
+    Canvas(modifier) {
+        // Top-left
+        drawLine(c, Offset(pad, pad), Offset(pad + len, pad), w)
+        drawLine(c, Offset(pad, pad), Offset(pad, pad + len), w)
+        // Top-right
+        drawLine(c, Offset(size.width - pad - len, pad), Offset(size.width - pad, pad), w)
+        drawLine(c, Offset(size.width - pad, pad), Offset(size.width - pad, pad + len), w)
+        // Bottom-left
+        drawLine(c, Offset(pad, size.height - pad), Offset(pad + len, size.height - pad), w)
+        drawLine(c, Offset(pad, size.height - pad - len), Offset(pad, size.height - pad), w)
+        // Bottom-right
+        drawLine(c, Offset(size.width - pad - len, size.height - pad), Offset(size.width - pad, size.height - pad), w)
+        drawLine(c, Offset(size.width - pad, size.height - pad - len), Offset(size.width - pad, size.height - pad), w)
+    }
 }
 
+/* ───────── Header ───────── */
+
 @Composable
-private fun HeaderBar(clock: String, onChat: () -> Unit, onSettings: () -> Unit) {
-    GlassBox(Modifier.fillMaxWidth(), corner = 14) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            // Robot avatar
+private fun StarkHeader(
+    clock: String,
+    mode: String,
+    network: String,
+    onChat: () -> Unit,
+    onSettings: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                Brush.verticalGradient(listOf(Color(0xCC0A1825), Color(0xCC050E16)))
+            )
+            .border(1.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0x2200E5FF))
-                    .border(2.dp, Cyan, CircleShape),
+                    .background(Color(0x3300D9FF))
+                    .border(1.2.dp, Cyan, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painterResource(R.drawable.ic_robot),
+                    painterResource(R.drawable.ic_stark_hex),
                     contentDescription = null,
-                    tint = Cyan,
-                    modifier = Modifier.size(26.dp)
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(30.dp)
                 )
             }
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "STARK INDUSTRIES",
+                        color = Cyan,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 1.2.sp
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Amber.copy(alpha = 0.25f))
+                            .border(0.5.dp, Amber, RoundedCornerShape(2.dp))
+                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            "MK · VII",
+                            color = Amber,
+                            fontSize = 7.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
                 Text(
-                    "J.A.R.V.I.S",
-                    color = Cyan,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    letterSpacing = 1.2.sp,
-                    maxLines = 1
-                )
-                Text(
-                    "JUST · A · REAL · VIRTUAL · INTELLIGENT · SYSTEM",
-                    color = CyanDim,
+                    "J.A.R.V.I.S · ONLINE · ${mode.uppercase()}",
+                    color = CyanSoft,
                     fontSize = 7.sp,
                     fontFamily = FontFamily.Monospace,
+                    letterSpacing = 1.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            GlassChip {
-                Text(clock, color = Cyan, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    clock,
+                    color = CyanBright,
+                    fontSize = 13.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    network.uppercase(),
+                    color = CyanSoft,
+                    fontSize = 7.sp,
+                    fontFamily = FontFamily.Monospace
+                )
             }
             Spacer(Modifier.width(4.dp))
             RoundIconBtn(R.drawable.ic_chat, onChat)
@@ -291,188 +384,679 @@ private fun HeaderBar(clock: String, onChat: () -> Unit, onSettings: () -> Unit)
 }
 
 @Composable
-private fun GlassChip(content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xCC061830))
-            .border(1.dp, GlassBorder, RoundedCornerShape(14.dp))
-            .padding(horizontal = 8.dp, vertical = 5.dp)
-    ) { content() }
-}
-
-@Composable
 private fun RoundIconBtn(iconRes: Int, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(34.dp)
+            .size(32.dp)
             .clip(CircleShape)
-            .background(Color(0xCC061830))
-            .border(1.dp, GlassBorder, CircleShape)
+            .background(Color(0xCC06121C))
+            .border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(painterResource(iconRes), null, tint = Cyan, modifier = Modifier.size(16.dp))
+        Icon(painterResource(iconRes), null, tint = Cyan, modifier = Modifier.size(15.dp))
     }
 }
 
+private fun modeFor(state: HudState): String = when (state) {
+    HudState.LISTENING -> "LISTENING"
+    HudState.THINKING -> "PROCESSING"
+    HudState.EXECUTING -> "EXECUTING"
+    HudState.SPEAKING -> "RESPONDING"
+    HudState.DONE -> "COMPLETE"
+    HudState.ERROR -> "ERROR"
+    HudState.IDLE -> "STANDBY"
+}
+
+/* ───────── Diagnostic chips ───────── */
+
 @Composable
-private fun StatusChips(battery: String, network: String, ram: String) {
+private fun DiagnosticChips(
+    battery: String,
+    network: String,
+    ram: String,
+    location: String
+) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        StatusChip(Modifier.weight(1f), R.drawable.ic_battery_bolt, battery)
-        StatusChip(Modifier.weight(1f), R.drawable.ic_wifi, network)
-        StatusChip(Modifier.weight(1f), R.drawable.ic_ram_chip, ram)
+        DiagnosticGauge(
+            modifier = Modifier.weight(1f),
+            icon = R.drawable.ic_battery_bolt,
+            label = "BATT",
+            valueText = battery.substringAfter("BATT:").trim().ifBlank { "—" },
+            percent = parsePercent(battery),
+            accent = if (parsePercent(battery) < 20) Red else Cyan
+        )
+        DiagnosticGauge(
+            modifier = Modifier.weight(1f),
+            icon = R.drawable.ic_wifi,
+            label = "SIG",
+            valueText = network,
+            percent = signalPercent(network),
+            accent = Cyan
+        )
+        DiagnosticGauge(
+            modifier = Modifier.weight(1f),
+            icon = R.drawable.ic_ram_chip,
+            label = "MEM",
+            valueText = ram.substringAfter("RAM:").trim().ifBlank { "—" },
+            percent = parsePercent(ram),
+            accent = if (parsePercent(ram) > 80) Amber else Cyan
+        )
+        DiagnosticGauge(
+            modifier = Modifier.weight(1f),
+            icon = R.drawable.ic_location_pin,
+            label = "GPS",
+            valueText = location,
+            percent = if (location == "—") 0f else 100f,
+            accent = Cyan
+        )
     }
 }
 
+private fun parsePercent(s: String): Float =
+    Regex("(\\d+)%?").find(s)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+
+private fun signalPercent(s: String): Float = when {
+    s.contains("5G", true) -> 100f
+    s.contains("4G", true) -> 85f
+    s.contains("wifi", true) -> 95f
+    s.contains("3G", true) -> 55f
+    s.contains("2G", true) -> 25f
+    s.equals("none", true) -> 0f
+    else -> 70f
+}
+
 @Composable
-private fun StatusChip(modifier: Modifier, icon: Int, text: String) {
-    Row(
+private fun DiagnosticGauge(
+    modifier: Modifier,
+    icon: Int,
+    label: String,
+    valueText: String,
+    percent: Float,
+    accent: Color
+) {
+    Box(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xB0051525))
-            .border(1.2.dp, GlassBorder, RoundedCornerShape(18.dp))
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+            .height(58.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(PanelDim)
+            .border(1.dp, accent.copy(alpha = 0.55f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 6.dp, vertical = 4.dp)
     ) {
-        Icon(painterResource(icon), null, tint = Cyan, modifier = Modifier.size(14.dp))
-        Spacer(Modifier.width(4.dp))
-        Text(text, color = Cyan, fontSize = 10.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
-    }
-}
-
-@Composable
-private fun LocationWeatherRow(loc: String, weather: String) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(painterResource(R.drawable.ic_location_pin), null, tint = CyanSoft, modifier = Modifier.size(11.dp))
-        Spacer(Modifier.width(3.dp))
-        Text(loc, color = CyanSoft, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
-        Icon(painterResource(R.drawable.ic_cloud), null, tint = CyanSoft, modifier = Modifier.size(11.dp))
-        Spacer(Modifier.width(3.dp))
-        Text(weather, color = CyanSoft, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-    }
-}
-
-@Composable
-private fun SideLabels(modifier: Modifier = Modifier) {
-    Column(modifier) {
-        listOf("ANALYZE", "ASSIST", "EXECUTE", "LEARN").forEach {
-            Text(
-                "☰ $it",
-                color = CyanDim,
-                fontSize = 9.sp,
-                fontFamily = FontFamily.Monospace,
-                modifier = Modifier.padding(vertical = 3.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun AiBadge(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .width(56.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xCC061830))
-            .border(1.2.dp, GlassBorder, RoundedCornerShape(12.dp))
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("A.I.", color = Cyan, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-        Text("POWERED", color = CyanDim, fontSize = 7.sp, fontFamily = FontFamily.Monospace)
-        Spacer(Modifier.height(4.dp))
-        Icon(painterResource(R.drawable.ic_brain), null, tint = Cyan, modifier = Modifier.size(18.dp))
-    }
-}
-
-@Composable
-fun ArcReactorCompose(state: HudState, modifier: Modifier = Modifier) {
-    val infinite = rememberInfiniteTransition(label = "reactor")
-    val rot by infinite.animateFloat(
-        0f, 360f,
-        infiniteRepeatable(
-            tween(
-                when (state) {
-                    HudState.LISTENING -> 4500
-                    HudState.THINKING, HudState.EXECUTING -> 3200
-                    HudState.SPEAKING -> 7000
-                    else -> 18000
-                },
-                easing = LinearEasing
-            )
-        ),
-        label = "rot"
-    )
-    val pulse by infinite.animateFloat(
-        0f, 1f,
-        infiniteRepeatable(
-            tween(if (state == HudState.LISTENING) 700 else 2400),
-            RepeatMode.Reverse
-        ),
-        label = "pulse"
-    )
-    val base = when (state) {
-        HudState.THINKING, HudState.EXECUTING -> Color(0xFFFFB020)
-        HudState.SPEAKING -> Color(0xFFB8F4FF)
-        HudState.ERROR -> Color(0xFFFF5252)
-        else -> Cyan
-    }
-
-    Canvas(modifier) {
-        val cx = size.width / 2f
-        val cy = size.height / 2f
-        val r = min(cx, cy) * 0.92f
-        val a = if (state == HudState.IDLE) 0.92f else 1f
-
-        // glow disc
-        drawCircle(base.copy(alpha = 0.15f * a), r * 1.05f, Offset(cx, cy))
-        drawCircle(base.copy(alpha = 0.08f * a), r * 1.2f, Offset(cx, cy))
-
-        // solid outer
-        drawCircle(base.copy(alpha = 0.9f * a), r * 0.96f, Offset(cx, cy), style = Stroke(r * 0.04f))
-        drawCircle(Color.White.copy(alpha = 0.35f * a), r * 0.93f, Offset(cx, cy), style = Stroke(r * 0.01f))
-
-        fun dashedRing(radius: Float, dash: Float, gap: Float, width: Float, color: Color, angle: Float) {
-            rotate(angle, Offset(cx, cy)) {
-                drawCircle(
-                    color,
-                    radius,
-                    Offset(cx, cy),
-                    style = Stroke(
-                        width = width,
-                        cap = StrokeCap.Round,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, gap))
-                    )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(38.dp)) {
+                val infinite = rememberInfiniteTransition(label = label)
+                val rot by infinite.animateFloat(
+                    0f, 360f,
+                    infiniteRepeatable(tween(9000, easing = LinearEasing)),
+                    label = "rot"
+                )
+                Canvas(Modifier.size(38.dp)) {
+                    val cx = size.width / 2f
+                    val cy = size.height / 2f
+                    val r = min(cx, cy) * 0.92f
+                    // outer ring
+                    drawCircle(accent.copy(alpha = 0.35f), r, Offset(cx, cy), style = Stroke(r * 0.10f))
+                    // progress arc
+                    val sweep = (percent.coerceIn(0f, 100f) / 100f) * 360f
+                    rotate(-90f, Offset(cx, cy)) {
+                        drawArc(
+                            color = accent,
+                            startAngle = 0f,
+                            sweepAngle = sweep,
+                            useCenter = false,
+                            topLeft = Offset(cx - r, cy - r),
+                            size = Size(r * 2, r * 2),
+                            style = Stroke(r * 0.20f, cap = StrokeCap.Round)
+                        )
+                    }
+                    // tick marks
+                    rotate(rot, Offset(cx, cy)) {
+                        for (i in 0 until 12) {
+                            val ang = Math.toRadians((i * 30.0))
+                            val rx1 = cx + (r * 0.55f * cos(ang)).toFloat()
+                            val ry1 = cy + (r * 0.55f * sin(ang)).toFloat()
+                            val rx2 = cx + (r * 0.78f * cos(ang)).toFloat()
+                            val ry2 = cy + (r * 0.78f * sin(ang)).toFloat()
+                            drawLine(accent.copy(alpha = 0.6f), Offset(rx1, ry1), Offset(rx2, ry2), strokeWidth = 0.8f)
+                        }
+                    }
+                    // core icon dot
+                    drawCircle(accent.copy(alpha = 0.3f), r * 0.25f, Offset(cx, cy))
+                }
+                Icon(
+                    painterResource(icon), null, tint = accent,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            Column {
+                Text(
+                    label,
+                    color = accent,
+                    fontSize = 7.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    valueText.take(8),
+                    color = CyanBright,
+                    fontSize = 9.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
-
-        dashedRing(r * 0.82f, r * 0.11f, r * 0.04f, r * 0.028f, base.copy(alpha = 0.85f * a), rot * 0.35f)
-        dashedRing(r * 0.70f, r * 0.08f, r * 0.035f, r * 0.022f, base.copy(alpha = 0.75f * a), rot)
-        dashedRing(r * 0.58f, r * 0.03f, r * 0.04f, r * 0.016f, Color(0xFF0090B8).copy(alpha = 0.6f * a), -rot * 0.5f)
-        dashedRing(r * 0.46f, r * 0.05f, r * 0.025f, r * 0.024f, base.copy(alpha = 0.9f * a), rot * 1.6f)
-        drawCircle(Color.White.copy(alpha = 0.5f * a), r * 0.36f, Offset(cx, cy), style = Stroke(r * 0.012f))
-
-        // core
-        val coreR = r * (0.20f + 0.03f * pulse)
-        drawCircle(base.copy(alpha = 0.5f), coreR * 1.6f, Offset(cx, cy))
-        drawCircle(Color(0xFFE8FDFF), coreR * 0.5f, Offset(cx, cy))
-        drawCircle(Color.White, coreR * 0.2f, Offset(cx, cy))
-
-        // triangle
-        val triR = coreR * 1.2f
-        val path = Path()
-        for (i in 0..2) {
-            val ang = Math.toRadians((-90 + i * 120).toDouble())
-            val x = cx + (triR * cos(ang)).toFloat()
-            val y = cy + (triR * sin(ang)).toFloat()
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-        }
-        path.close()
-        drawPath(path, base.copy(alpha = 0.95f * a), style = Stroke(r * 0.026f))
     }
+}
+
+/* ───────── Side panels ───────── */
+
+@Composable
+private fun SuitDiagnosticsPanel(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .width(54.dp)
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(10.dp))
+            .background(PanelDim)
+            .border(1.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 4.dp, vertical = 6.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                "SUIT",
+                color = Cyan,
+                fontSize = 7.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Text(
+                "DIAG",
+                color = CyanDim,
+                fontSize = 6.sp,
+                fontFamily = FontFamily.Monospace
+            )
+            Spacer(Modifier.height(6.dp))
+            VerticalBarMeter(label = "PWR", percent = 0.78f, accent = Cyan)
+            Spacer(Modifier.height(4.dp))
+            VerticalBarMeter(label = "ARM", percent = 0.62f, accent = Amber)
+            Spacer(Modifier.height(4.dp))
+            VerticalBarMeter(label = "FLT", percent = 0.45f, accent = Cyan)
+            Spacer(Modifier.height(4.dp))
+            VerticalBarMeter(label = "REP", percent = 0.88f, accent = Cyan)
+            Spacer(Modifier.weight(1f))
+            SuitIcon()
+        }
+    }
+}
+
+@Composable
+private fun VerticalBarMeter(label: String, percent: Float, accent: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .width(14.dp)
+                .height(60.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color(0xFF050E16))
+                .border(0.5.dp, accent.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+        ) {
+            // ticks
+            val infinite = rememberInfiniteTransition(label = label)
+            val pulse by infinite.animateFloat(
+                0f, 1f,
+                infiniteRepeatable(tween(1500), RepeatMode.Reverse),
+                label = "p"
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(percent.coerceIn(0f, 1f))
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(accent.copy(alpha = 0.9f), accent.copy(alpha = 0.4f * pulse + 0.2f))
+                        )
+                    )
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+        Text(label, color = accent, fontSize = 6.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun SuitIcon() {
+    Box(
+        modifier = Modifier
+            .size(46.dp)
+            .clip(CircleShape)
+            .background(Color(0x3300D9FF))
+            .border(1.dp, Cyan, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painterResource(R.drawable.ic_ironman_full),
+            contentDescription = null,
+            tint = Cyan,
+            modifier = Modifier.size(36.dp)
+        )
+    }
+}
+
+@Composable
+private fun EnergyMatrixPanel(
+    cpu: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .width(54.dp)
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(10.dp))
+            .background(PanelDim)
+            .border(1.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 4.dp, vertical = 6.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                "ENERGY",
+                color = Cyan,
+                fontSize = 7.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Text(
+                "MATRIX",
+                color = CyanDim,
+                fontSize = 6.sp,
+                fontFamily = FontFamily.Monospace
+            )
+            Spacer(Modifier.height(6.dp))
+            CircularEnergyGauge(percent = parsePercent(cpu), accent = Cyan)
+            Spacer(Modifier.height(6.dp))
+            listOf(
+                Triple("01", 0.92f, Cyan),
+                Triple("02", 0.74f, Cyan),
+                Triple("03", 0.55f, Amber),
+                Triple("04", 0.31f, Red)
+            ).forEach { (id, p, c) ->
+                CompactRow(id, p, c)
+                Spacer(Modifier.height(3.dp))
+            }
+            Spacer(Modifier.weight(1f))
+            Text(
+                "v3.0.1",
+                color = CyanSoft,
+                fontSize = 6.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        }
+    }
+}
+
+@Composable
+private fun CircularEnergyGauge(percent: Float, accent: Color) {
+    val infinite = rememberInfiniteTransition(label = "energy")
+    val rot by infinite.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(6000, easing = LinearEasing)),
+        label = "erot"
+    )
+    Box(
+        modifier = Modifier.size(46.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(Modifier.fillMaxSize()) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = min(cx, cy) * 0.85f
+            // outer dashed ring
+            rotate(rot, Offset(cx, cy)) {
+                drawCircle(
+                    accent.copy(alpha = 0.55f),
+                    r,
+                    Offset(cx, cy),
+                    style = Stroke(
+                        width = r * 0.06f,
+                        cap = StrokeCap.Round,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.25f, r * 0.12f))
+                    )
+                )
+            }
+            // progress arc
+            val sweep = (percent.coerceIn(0f, 100f) / 100f) * 360f
+            rotate(-90f, Offset(cx, cy)) {
+                drawArc(
+                    color = accent,
+                    startAngle = 0f,
+                    sweepAngle = sweep,
+                    useCenter = false,
+                    topLeft = Offset(cx - r, cy - r),
+                    size = Size(r * 2, r * 2),
+                    style = Stroke(r * 0.18f, cap = StrokeCap.Round)
+                )
+            }
+            // inner ring
+            drawCircle(Color(0xFF050E16), r * 0.55f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.45f), r * 0.55f, Offset(cx, cy), style = Stroke(r * 0.04f))
+        }
+        Text(
+            "${percent.toInt()}",
+            color = accent,
+            fontSize = 13.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun CompactRow(id: String, percent: Float, accent: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(10.dp)
+    ) {
+        Text(
+            id,
+            color = accent,
+            fontSize = 6.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(14.dp)
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color(0xFF050E16))
+                .border(0.5.dp, accent.copy(alpha = 0.45f), RoundedCornerShape(2.dp))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(percent.coerceIn(0f, 1f))
+                    .fillMaxHeight()
+                    .background(accent)
+            )
+        }
+    }
+}
+
+/* ───────── Mark VII central reactor ───────── */
+
+@Composable
+private fun MarkViiReactor(
+    state: HudState,
+    modifier: Modifier = Modifier
+) {
+    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
+        val side = min(maxWidth, maxHeight)
+        val size = (side * 0.96f).coerceAtLeast(160.dp)
+        val infinite = rememberInfiniteTransition(label = "mk7")
+        val slow by infinite.animateFloat(
+            0f, 360f,
+            infiniteRepeatable(tween(28000, easing = LinearEasing)),
+            label = "slow"
+        )
+        val med by infinite.animateFloat(
+            0f, 360f,
+            infiniteRepeatable(tween(14000, easing = LinearEasing)),
+            label = "med"
+        )
+        val fast by infinite.animateFloat(
+            0f, 360f,
+            infiniteRepeatable(
+                tween(
+                    when (state) {
+                        HudState.LISTENING -> 3500
+                        HudState.THINKING, HudState.EXECUTING -> 2500
+                        HudState.SPEAKING -> 5000
+                        HudState.DONE -> 12000
+                        else -> 8000
+                    },
+                    easing = LinearEasing
+                )
+            ),
+            label = "fast"
+        )
+        val pulse by infinite.animateFloat(
+            0f, 1f,
+            infiniteRepeatable(
+                tween(if (state == HudState.LISTENING) 600 else 2200),
+                RepeatMode.Reverse
+            ),
+            label = "pulse"
+        )
+        val accent = when (state) {
+            HudState.THINKING, HudState.EXECUTING -> Amber
+            HudState.SPEAKING -> CyanBright
+            HudState.ERROR -> Red
+            HudState.DONE -> CyanBright
+            else -> Cyan
+        }
+
+        Canvas(modifier = Modifier.size(size)) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = min(cx, cy) * 0.96f
+
+            // outer glow halo
+            drawCircle(accent.copy(alpha = 0.10f * (0.6f + 0.4f * pulse)), r * 1.10f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.06f), r * 1.25f, Offset(cx, cy))
+
+            // Hexagonal outer frame
+            drawHexFrame(cx, cy, r * 0.98f, accent.copy(alpha = 0.85f), r * 0.012f)
+            // Inner hex frame
+            drawHexFrame(cx, cy, r * 0.88f, accent.copy(alpha = 0.45f), r * 0.006f)
+
+            // Compass tick marks around outer hex
+            rotate(slow * 0.3f, Offset(cx, cy)) {
+                for (i in 0 until 36) {
+                    val ang = Math.toRadians((i * 10.0))
+                    val isMajor = i % 3 == 0
+                    val inner = r * (if (isMajor) 0.84f else 0.86f)
+                    val outer = r * 0.92f
+                    val x1 = cx + (inner * cos(ang)).toFloat()
+                    val y1 = cy + (inner * sin(ang)).toFloat()
+                    val x2 = cx + (outer * cos(ang)).toFloat()
+                    val y2 = cy + (outer * sin(ang)).toFloat()
+                    drawLine(
+                        accent.copy(alpha = if (isMajor) 0.85f else 0.35f),
+                        Offset(x1, y1), Offset(x2, y2),
+                        strokeWidth = if (isMajor) r * 0.012f else r * 0.005f
+                    )
+                }
+            }
+
+            // N/S/E/W cardinal labels (drawn as small markers at the hex points)
+            drawCardinalMarkers(cx, cy, r * 0.92f, accent)
+
+            // Inner rotating dashed rings (Mark VII style)
+            rotate(fast * 0.5f, Offset(cx, cy)) {
+                drawCircle(
+                    accent.copy(alpha = 0.7f),
+                    r * 0.74f, Offset(cx, cy),
+                    style = Stroke(
+                        width = r * 0.018f,
+                        cap = StrokeCap.Round,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.10f, r * 0.04f))
+                    )
+                )
+            }
+            rotate(-med, Offset(cx, cy)) {
+                drawCircle(
+                    accent.copy(alpha = 0.55f),
+                    r * 0.62f, Offset(cx, cy),
+                    style = Stroke(
+                        width = r * 0.012f,
+                        cap = StrokeCap.Round,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.04f, r * 0.06f))
+                    )
+                )
+            }
+            rotate(med * 0.7f, Offset(cx, cy)) {
+                drawCircle(
+                    CyanMid.copy(alpha = 0.7f),
+                    r * 0.50f, Offset(cx, cy),
+                    style = Stroke(
+                        width = r * 0.014f,
+                        cap = StrokeCap.Round,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.02f, r * 0.05f))
+                    )
+                )
+            }
+
+            // solid inner ring
+            drawCircle(accent.copy(alpha = 0.95f), r * 0.42f, Offset(cx, cy), style = Stroke(r * 0.025f))
+            drawCircle(Color.White.copy(alpha = 0.35f), r * 0.40f, Offset(cx, cy), style = Stroke(r * 0.008f))
+
+            // Inner suit silhouette (very stylized hex shape)
+            drawHexFrame(cx, cy, r * 0.32f, accent.copy(alpha = 0.85f), r * 0.008f)
+
+            // Reactor core triangle + glow
+            val coreR = r * (0.18f + 0.04f * pulse)
+            drawCircle(accent.copy(alpha = 0.5f * (0.6f + 0.4f * pulse)), coreR * 1.7f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.9f), coreR * 0.6f, Offset(cx, cy))
+            drawCircle(CyanCore.copy(alpha = 0.95f), coreR * 0.32f, Offset(cx, cy))
+            drawCircle(Color.White, coreR * 0.14f, Offset(cx, cy))
+
+            val triR = coreR * 1.3f
+            val path = Path()
+            for (i in 0..2) {
+                val ang = Math.toRadians((-90 + i * 120).toDouble())
+                val x = cx + (triR * cos(ang)).toFloat()
+                val y = cy + (triR * sin(ang)).toFloat()
+                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+            }
+            path.close()
+            drawPath(path, accent.copy(alpha = 0.95f), style = Stroke(r * 0.020f))
+
+            // Mark-VII crosshair lines through core
+            drawLine(
+                accent.copy(alpha = 0.5f),
+                Offset(cx - r * 0.30f, cy), Offset(cx + r * 0.30f, cy),
+                strokeWidth = r * 0.006f
+            )
+            drawLine(
+                accent.copy(alpha = 0.5f),
+                Offset(cx, cy - r * 0.30f), Offset(cx, cy + r * 0.30f),
+                strokeWidth = r * 0.006f
+            )
+
+            // Outer ring labels text approximation - small ticks at hex points
+            for (i in 0..5) {
+                val ang = Math.toRadians((60.0 * i - 30.0))
+                val px = cx + (r * 0.98f * cos(ang)).toFloat()
+                val py = cy + (r * 0.98f * sin(ang)).toFloat()
+                drawCircle(accent, r * 0.02f, Offset(px, py))
+            }
+        }
+    }
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawHexFrame(
+    cx: Float, cy: Float, r: Float, color: Color, width: Float
+) {
+    val path = Path()
+    for (i in 0..5) {
+        val a = Math.toRadians((60.0 * i - 30.0))
+        val px = cx + (r * cos(a)).toFloat()
+        val py = cy + (r * sin(a)).toFloat()
+        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+    }
+    path.close()
+    drawPath(path, color, style = Stroke(width))
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCardinalMarkers(
+    cx: Float, cy: Float, r: Float, color: Color
+) {
+    val sides = listOf("MK7", "JARV", "FRID", "EDITH")
+    for (i in sides.indices) {
+        val ang = Math.toRadians((60.0 * i - 30.0).toDouble())
+        val mx = cx + (r * cos(ang)).toFloat()
+        val my = cy + (r * sin(ang)).toFloat()
+        drawCircle(color, 2.5f, Offset(mx, my))
+        // small line to outer ring
+        val ex = cx + ((r + 14f) * cos(ang)).toFloat()
+        val ey = cy + ((r + 14f) * sin(ang)).toFloat()
+        drawLine(color.copy(alpha = 0.6f), Offset(mx, my), Offset(ex, ey), strokeWidth = 1.2f)
+    }
+}
+
+/* ───────── State + waveform + response ───────── */
+
+@Composable
+private fun StateStatusBar(label: String, state: HudState) {
+    val color = when (state) {
+        HudState.LISTENING -> Cyan
+        HudState.THINKING, HudState.EXECUTING -> Amber
+        HudState.SPEAKING -> CyanBright
+        HudState.ERROR -> Red
+        HudState.DONE -> CyanBright
+        HudState.IDLE -> CyanSoft
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(PanelDim)
+            .border(1.dp, color.copy(alpha = 0.55f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PulsingDot(color)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            "SYS",
+            color = CyanSoft,
+            fontSize = 8.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            "▸ $label",
+            color = color,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            "// 0x${(System.currentTimeMillis() and 0xFFFF).toString(16).uppercase()}",
+            color = CyanSoft,
+            fontSize = 7.sp,
+            fontFamily = FontFamily.Monospace
+        )
+    }
+}
+
+@Composable
+private fun PulsingDot(color: Color) {
+    val infinite = rememberInfiniteTransition(label = "dot")
+    val a by infinite.animateFloat(
+        0.4f, 1f,
+        infiniteRepeatable(tween(900), RepeatMode.Reverse),
+        label = "a"
+    )
+    Box(
+        modifier = Modifier
+            .size(8.dp)
+            .clip(CircleShape)
+            .background(color.copy(alpha = a))
+            .border(0.8.dp, color, CircleShape)
+    )
 }
 
 @Composable
@@ -480,27 +1064,32 @@ private fun WaveformBar(active: Boolean) {
     val infinite = rememberInfiniteTransition(label = "wf")
     val phase by infinite.animateFloat(
         0f, 1f,
-        infiniteRepeatable(tween(if (active) 600 else 2000, easing = LinearEasing)),
+        infiniteRepeatable(tween(if (active) 500 else 2200, easing = LinearEasing)),
         label = "wfp"
     )
     Canvas(
         Modifier
             .fillMaxWidth()
-            .height(28.dp)
+            .height(22.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(Color(0xFF050E16))
+            .border(0.5.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(4.dp))
     ) {
-        val n = 48
+        val n = 56
         val w = size.width / n
         for (i in 0 until n) {
             val mid = n / 2f
             val dist = kotlin.math.abs(i - mid) / mid
             val h = if (active) {
-                size.height * (0.15f + 0.7f * (0.5f + 0.5f * sin((i * 0.4f + phase * 6.28f).toDouble()).toFloat()) * (1f - dist * 0.5f))
+                size.height * (0.10f + 0.85f *
+                    (0.5f + 0.5f * sin((i * 0.4f + phase * 6.28f).toDouble()).toFloat()) *
+                    (1f - dist * 0.4f))
             } else {
-                size.height * (0.12f + 0.08f * sin((i * 0.3f).toDouble()).toFloat())
+                size.height * (0.10f + 0.06f * sin((i * 0.3f + phase * 6.28f).toDouble()).toFloat())
             }
             val x = i * w + w / 2
             drawLine(
-                Cyan.copy(alpha = 0.5f + 0.5f * (1f - dist)),
+                (if (active) Cyan else CyanSoft).copy(alpha = 0.5f + 0.5f * (1f - dist)),
                 Offset(x, size.height / 2 - h / 2),
                 Offset(x, size.height / 2 + h / 2),
                 strokeWidth = w * 0.45f,
@@ -511,61 +1100,40 @@ private fun WaveformBar(active: Boolean) {
 }
 
 @Composable
-private fun TalkButton(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .clip(RoundedCornerShape(28.dp))
-            .background(
-                Brush.verticalGradient(listOf(Color(0x4000E5FF), Color(0xD0082030)))
-            )
-            .border(1.8.dp, Cyan, RoundedCornerShape(28.dp))
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Icon(painterResource(R.drawable.ic_mic), null, tint = Cyan, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(8.dp))
-        Text("Talk", color = Cyan, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-    }
-}
-
-@Composable
 private fun ResponseBar(text: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xCC061830))
-            .border(1.dp, GlassBorder.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .clip(RoundedCornerShape(10.dp))
+            .background(PanelDim)
+            .border(1.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(painterResource(R.drawable.ic_chat), null, tint = Cyan, modifier = Modifier.size(14.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(text, color = Cyan, fontSize = 12.sp, fontFamily = FontFamily.Monospace, maxLines = 3)
+        Icon(painterResource(R.drawable.ic_robot), null, tint = Cyan, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(6.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                "▸ JARVIS RESPONSE",
+                color = CyanSoft,
+                fontSize = 6.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Text(
+                text,
+                color = CyanBright,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
-@Composable
-private fun InputBarPlaceholder() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xCC041018))
-            .border(1.dp, Color(0x4400E5FF), RoundedCornerShape(18.dp))
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(">>", color = CyanDim, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-        Spacer(Modifier.width(8.dp))
-        Text("Type your message...", color = Color(0xFF4A6A7A), fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
-        Text("➤", color = Cyan, fontSize = 14.sp)
-    }
-}
+/* ───────── Quick actions + bottom nav ───────── */
 
 @Composable
 private fun QuickActions(
@@ -575,24 +1143,41 @@ private fun QuickActions(
     onArmor: () -> Unit
 ) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        listOf(
-            "📋 Briefing" to onBriefing,
-            "▣ System" to onSystem,
-            "👁 Vision" to onVision,
-            "🛡 Armor" to onArmor
-        ).forEach { (label, action) ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xE0081A28))
-                    .border(1.2.dp, PurpleEdge, RoundedCornerShape(12.dp))
-                    .clickable(onClick = action),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(label, color = Cyan, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-            }
+        ChevronAction(Modifier.weight(1f), "BRIEF", R.drawable.ic_info, onBriefing)
+        ChevronAction(Modifier.weight(1f), "SYS", R.drawable.ic_cpu, onSystem)
+        ChevronAction(Modifier.weight(1f), "VISN", R.drawable.ic_eye, onVision)
+        ChevronAction(Modifier.weight(1f), "ARMOR", R.drawable.ic_shield, onArmor)
+    }
+}
+
+@Composable
+private fun ChevronAction(
+    modifier: Modifier,
+    label: String,
+    icon: Int,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .height(34.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(PanelDim)
+            .border(1.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(icon), null, tint = Cyan, modifier = Modifier.size(13.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(
+                label,
+                color = Cyan,
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
         }
     }
 }
@@ -605,37 +1190,45 @@ private fun BottomNav(
     onVision: () -> Unit,
     onMore: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xF0051018))
-            .border(1.2.dp, Color(0x5500E5FF), RoundedCornerShape(20.dp))
+            .height(58.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                Brush.verticalGradient(listOf(Color(0xF0050E16), Color(0xF003080E)))
+            )
+            .border(1.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
             .padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        contentAlignment = Alignment.Center
     ) {
-        NavItem(Modifier.weight(1f), R.drawable.ic_home, "Home", true, onHome)
-        NavItem(Modifier.weight(1f), R.drawable.ic_chat, "Chat", false, onChat)
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(Color(0x1A082030))
-                .border(2.5.dp, Cyan, CircleShape)
-                .clickable(onClick = onMic),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(painterResource(R.drawable.ic_robot), null, tint = Cyan, modifier = Modifier.size(26.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            NavItem(Modifier.weight(1f), R.drawable.ic_home, "HOME", onHome)
+            NavItem(Modifier.weight(1f), R.drawable.ic_chat, "CHAT", onChat)
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x4000D9FF))
+                    .border(2.dp, Cyan, CircleShape)
+                    .clickable(onClick = onMic),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_stark_hex),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(34.dp)
+                )
+            }
+            NavItem(Modifier.weight(1f), R.drawable.ic_person, "VISN", onVision)
+            NavItem(Modifier.weight(1f), R.drawable.ic_settings, "MORE", onMore)
         }
-        NavItem(Modifier.weight(1f), R.drawable.ic_person, "Vision", false, onVision)
-        NavItem(Modifier.weight(1f), R.drawable.ic_shield, "More", false, onMore)
     }
 }
 
 @Composable
-private fun NavItem(modifier: Modifier, icon: Int, label: String, active: Boolean, onClick: () -> Unit) {
-    val c = if (active) Cyan else CyanSoft
+private fun NavItem(modifier: Modifier, icon: Int, label: String, onClick: () -> Unit) {
     Column(
         modifier = modifier
             .fillMaxHeight()
@@ -643,7 +1236,8 @@ private fun NavItem(modifier: Modifier, icon: Int, label: String, active: Boolea
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(painterResource(icon), null, tint = c, modifier = Modifier.size(22.dp))
-        Text(label, color = c, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Icon(painterResource(icon), null, tint = Cyan, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.height(2.dp))
+        Text(label, color = CyanSoft, fontSize = 7.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
     }
 }

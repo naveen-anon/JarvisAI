@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Mark VII / Stark Industries — full bleed dark HUD theme -->
     <style name="Theme.Jarvis" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:statusBarColor">#030A12</item>
-        <item name="android:navigationBarColor">#030A12</item>
-        <item name="android:windowBackground">#030A12</item>
-        <item name="colorPrimary">#00E5FF</item>
-        <item name="colorPrimaryDark">#030A12</item>
-        <item name="colorAccent">#00E5FF</item>
-        <item name="android:colorBackground">#030A12</item>
+        <item name="android:statusBarColor">#03080E</item>
+        <item name="android:navigationBarColor">#03080E</item>
+        <item name="android:windowBackground">#03080E</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:textColorPrimary">#E8F7FF</item>
-        <item name="android:textColorSecondary">#6B9AAB</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+
+        <item name="colorPrimary">#00D9FF</item>
+        <item name="colorPrimaryDark">#03080E</item>
+        <item name="colorAccent">#FFAA00</item>
+
+        <item name="android:colorBackground">#03080E</item>
+        <item name="android:textColorPrimary">#B8ECFF</item>
+        <item name="android:textColorSecondary">#5A8A99</item>
     </style>
 </resources>
