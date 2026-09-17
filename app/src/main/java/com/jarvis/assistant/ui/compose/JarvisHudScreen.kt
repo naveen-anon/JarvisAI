@@ -162,6 +162,15 @@ fun JarvisHudScreen(
                         state = ui.hudState,
                         modifier = Modifier.fillMaxSize()
                     )
+                    // Iron Man silhouette overlay (Pinterest-style)
+                    Icon(
+                        painterResource(R.drawable.ic_ironman_full),
+                        contentDescription = null,
+                        tint = Cyan.copy(alpha = 0.55f),
+                        modifier = Modifier
+                            .fillMaxHeight(0.72f)
+                            .padding(bottom = 8.dp)
+                    )
                 }
                 EnergyMatrixPanel(
                     cpu = ui.ram,
