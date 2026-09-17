@@ -799,8 +799,8 @@ private fun MarkViiReactor(
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
-        val side = min(maxWidth, maxHeight)
-        val size = (side * 0.96f).coerceAtLeast(160.dp)
+        val side = minOf(maxWidth, maxHeight)
+        val reactorSize = (side * 0.96f).coerceAtLeast(160.dp)
         val infinite = rememberInfiniteTransition(label = "mk7")
         val slow by infinite.animateFloat(
             0f, 360f,
@@ -844,7 +844,7 @@ private fun MarkViiReactor(
             else -> Cyan
         }
 
-        Canvas(modifier = Modifier.size(size)) {
+        Canvas(modifier = Modifier.size(reactorSize)) {
             val cx = size.width / 2f
             val cy = size.height / 2f
             val r = min(cx, cy) * 0.96f
