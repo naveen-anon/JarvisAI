@@ -839,15 +839,15 @@ private fun MarkViiReactor(
             ),
             label = "pulse"
         )
-        // Orange energy core (7th image style)
+        // Cyan cinematic core (Pinterest-style) with orange accent on activity
         val accent = when (state) {
             HudState.THINKING, HudState.EXECUTING -> OrangeBright
-            HudState.SPEAKING -> Orange
+            HudState.SPEAKING -> CyanBright
             HudState.ERROR -> Red
-            HudState.DONE -> OrangeBright
-            else -> Orange
+            HudState.DONE -> CyanBright
+            else -> Cyan
         }
-        val coreAccent = OrangeCore
+        val coreAccent = CyanCore
 
         Canvas(modifier = Modifier.size(reactorSize)) {
             val cx = size.width / 2f
