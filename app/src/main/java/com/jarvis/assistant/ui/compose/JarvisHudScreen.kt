@@ -266,11 +266,11 @@ private fun ScanlineOverlay(modifier: Modifier = Modifier) {
 
 @Composable
 private fun CornerBrackets(modifier: Modifier = Modifier) {
-    val len = 22.dp.toPx()
-    val pad = 10.dp.toPx()
-    val w = 1.5f
     val c = Cyan.copy(alpha = 0.7f)
     Canvas(modifier) {
+        val len = 22.dp.toPx()
+        val pad = 10.dp.toPx()
+        val w = 1.5f
         // Top-left
         drawLine(c, Offset(pad, pad), Offset(pad + len, pad), w)
         drawLine(c, Offset(pad, pad), Offset(pad, pad + len), w)
