@@ -29,6 +29,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -138,22 +141,31 @@ fun JarvisHudScreen(
                 onSettings = actions.onSettings
             )
             Spacer(Modifier.height(8.dp))
+            Text(
+                ui.stateLabel,
+                color = Cyan,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.height(6.dp))
             DiagnosticChips(
                 battery = ui.battery,
                 network = ui.network,
-                ram = ui.ram,
-                location = ui.location
+                ram = ui.ram
             )
+            Spacer(Modifier.height(4.dp))
+            LocationWeatherRow(location = ui.location, weather = ui.weather)
             Spacer(Modifier.height(6.dp))
 
-            // Center Mark-VII circular HUD with flanking side panels
+            // Center reactor with flanking simple lists (ANALYZE list + A.I. badge)
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SuitDiagnosticsPanel(modifier = Modifier.padding(end = 4.dp))
+                AnalyzeList(modifier = Modifier.padding(end = 4.dp))
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -165,28 +177,26 @@ fun JarvisHudScreen(
                         state = ui.hudState,
                         modifier = Modifier.fillMaxSize()
                     )
-                    // Iron Man silhouette overlay (Pinterest-style)
-                    Icon(
-                        painterResource(R.drawable.ic_ironman_full),
-                        contentDescription = null,
-                        tint = Cyan.copy(alpha = 0.55f),
-                        modifier = Modifier
-                            .fillMaxHeight(0.72f)
-                            .padding(bottom = 8.dp)
-                    )
                 }
-                EnergyMatrixPanel(
-                    cpu = ui.ram,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
+                AiPoweredBadge(modifier = Modifier.padding(start = 4.dp))
             }
 
             Spacer(Modifier.height(6.dp))
-            StateStatusBar(label = ui.stateLabel, state = ui.hudState)
+            Text(
+                "Standing by",
+                color = CyanDim,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
             Spacer(Modifier.height(4.dp))
             WaveformBar(active = ui.waveformActive)
             Spacer(Modifier.height(6.dp))
+            TalkButton(onClick = actions.onTalk)
+            Spacer(Modifier.height(6.dp))
             ResponseBar(ui.response)
+            Spacer(Modifier.height(6.dp))
+            MessageInputRow()
             Spacer(Modifier.height(6.dp))
             QuickActions(
                 onBriefing = actions.onBriefing,
@@ -201,6 +211,104 @@ fun JarvisHudScreen(
                 onMic = actions.onNavMic,
                 onVision = actions.onNavVision,
                 onMore = actions.onNavMore
+            )
+        }
+    }
+}
+
+@Composable
+private fun AnalyzeList(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.width(78.dp)) {
+        listOf("ANALYZE", "ASSIST", "EXECUTE", "LEARN").forEach { label ->
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 5.dp)) {
+                Text("\u2261", color = Cyan, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    label,
+                    color = Cyan,
+                    fontSize = 8.sp,
+                    fontFamily = FontFamily.Monospace,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AiPoweredBadge(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .width(56.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(PanelDim)
+            .border(1.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(10.dp))
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("A.I.", color = Cyan, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Text("POWERED", color = CyanDim, fontSize = 6.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
+        Spacer(Modifier.height(4.dp))
+        Icon(painterResource(R.drawable.ic_ai_spark), null, tint = Cyan, modifier = Modifier.size(16.dp))
+    }
+}
+
+@Composable
+private fun TalkButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(Color(0x330A1825))
+            .border(1.5.dp, Cyan, RoundedCornerShape(26.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(R.drawable.ic_mic), null, tint = Cyan, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(10.dp))
+            Text("Talk", color = Cyan, fontSize = 17.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun MessageInputRow() {
+    var text by remember { mutableStateOf("") }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(Color(0x330A1825))
+            .border(1.dp, Cyan.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
+            .padding(horizontal = 14.dp, vertical = 4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("\u00BB", color = CyanDim, fontSize = 14.sp, fontFamily = FontFamily.Monospace)
+            Spacer(Modifier.width(8.dp))
+            androidx.compose.foundation.text.BasicTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.weight(1f),
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    color = CyanBright,
+                    fontSize = 13.sp,
+                    fontFamily = FontFamily.Monospace
+                ),
+                cursorBrush = androidx.compose.ui.graphics.SolidColor(Cyan),
+                decorationBox = { inner ->
+                    if (text.isEmpty()) {
+                        Text(
+                            "Type your message...",
+                            color = CyanDim,
+                            fontSize = 13.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    inner()
+                }
             )
         }
     }
@@ -331,46 +439,28 @@ private fun StarkHeader(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painterResource(R.drawable.ic_stark_hex),
+                    painterResource(R.drawable.ic_robot_face),
                     contentDescription = null,
                     tint = Color.Unspecified,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "STARK INDUSTRIES",
-                        color = Cyan,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        letterSpacing = 1.2.sp
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(Amber.copy(alpha = 0.25f))
-                            .border(0.5.dp, Amber, RoundedCornerShape(2.dp))
-                            .padding(horizontal = 4.dp, vertical = 1.dp)
-                    ) {
-                        Text(
-                            "MK · VII",
-                            color = Amber,
-                            fontSize = 7.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
                 Text(
-                    "J.A.R.V.I.S · ONLINE · ${mode.uppercase()}",
-                    color = CyanSoft,
-                    fontSize = 7.sp,
+                    "J.A.R.V.I.S",
+                    color = Cyan,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    letterSpacing = 1.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    "JUST · A · REAL · VIRTUAL · INTELLIGENT · SYSTEM",
+                    color = CyanSoft,
+                    fontSize = 6.sp,
+                    fontFamily = FontFamily.Monospace,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -379,15 +469,10 @@ private fun StarkHeader(
                 Text(
                     clock,
                     color = CyanBright,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    network.uppercase(),
-                    color = CyanSoft,
-                    fontSize = 7.sp,
-                    fontFamily = FontFamily.Monospace
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
             }
             Spacer(Modifier.width(4.dp))
@@ -429,41 +514,61 @@ private fun modeFor(state: HudState): String = when (state) {
 private fun DiagnosticChips(
     battery: String,
     network: String,
-    ram: String,
-    location: String
+    ram: String
 ) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        DiagnosticGauge(
+        SimpleStatChip(modifier = Modifier.weight(1f), icon = R.drawable.ic_battery_bolt, text = battery)
+        SimpleStatChip(modifier = Modifier.weight(1f), icon = R.drawable.ic_wifi, text = network)
+        SimpleStatChip(modifier = Modifier.weight(1f), icon = R.drawable.ic_ram_chip, text = ram)
+    }
+}
+
+@Composable
+private fun SimpleStatChip(modifier: Modifier = Modifier, icon: Int, text: String) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(PanelDim)
+            .border(1.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 8.dp, vertical = 10.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(icon), null, tint = Cyan, modifier = Modifier.size(14.dp))
+            Spacer(Modifier.width(5.dp))
+            Text(
+                text,
+                color = Cyan,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun LocationWeatherRow(location: String, weather: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(painterResource(R.drawable.ic_location_pin), null, tint = CyanDim, modifier = Modifier.size(12.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(
+            location,
+            color = CyanDim,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
             modifier = Modifier.weight(1f),
-            icon = R.drawable.ic_battery_bolt,
-            label = "BATT",
-            valueText = battery.substringAfter("BATT:").trim().ifBlank { "—" },
-            percent = parsePercent(battery),
-            accent = if (parsePercent(battery) < 20) Red else Cyan
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
-        DiagnosticGauge(
-            modifier = Modifier.weight(1f),
-            icon = R.drawable.ic_wifi,
-            label = "SIG",
-            valueText = network,
-            percent = signalPercent(network),
-            accent = Cyan
-        )
-        DiagnosticGauge(
-            modifier = Modifier.weight(1f),
-            icon = R.drawable.ic_ram_chip,
-            label = "MEM",
-            valueText = ram.substringAfter("RAM:").trim().ifBlank { "—" },
-            percent = parsePercent(ram),
-            accent = if (parsePercent(ram) > 80) Amber else Cyan
-        )
-        DiagnosticGauge(
-            modifier = Modifier.weight(1f),
-            icon = R.drawable.ic_location_pin,
-            label = "GPS",
-            valueText = location,
-            percent = if (location == "—") 0f else 100f,
-            accent = NavyBlue
+        Icon(painterResource(R.drawable.ic_cloud), null, tint = CyanDim, modifier = Modifier.size(12.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(
+            weather,
+            color = CyanDim,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+            maxLines = 1
         )
     }
 }
@@ -1196,7 +1301,7 @@ private fun ResponseBar(text: String) {
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(painterResource(R.drawable.ic_robot), null, tint = Cyan, modifier = Modifier.size(14.dp))
+        Icon(painterResource(R.drawable.ic_robot_face), null, tint = Color.Unspecified, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(6.dp))
         Column(Modifier.weight(1f)) {
             Text(
@@ -1229,10 +1334,10 @@ private fun QuickActions(
     onArmor: () -> Unit
 ) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        ChevronAction(Modifier.weight(1f), "BRIEF", R.drawable.ic_info, onBriefing)
-        ChevronAction(Modifier.weight(1f), "SYS", R.drawable.ic_cpu, onSystem)
-        ChevronAction(Modifier.weight(1f), "VISN", R.drawable.ic_eye, onVision)
-        ChevronAction(Modifier.weight(1f), "ARMOR", R.drawable.ic_shield, onArmor)
+        ChevronAction(Modifier.weight(1f), "Briefing", R.drawable.ic_calendar, onBriefing)
+        ChevronAction(Modifier.weight(1f), "System", R.drawable.ic_cpu, onSystem)
+        ChevronAction(Modifier.weight(1f), "Vision", R.drawable.ic_eye, onVision)
+        ChevronAction(Modifier.weight(1f), "Armor", R.drawable.ic_shield, onArmor)
     }
 }
 
@@ -1259,10 +1364,11 @@ private fun ChevronAction(
             Text(
                 label,
                 color = Cyan,
-                fontSize = 9.sp,
+                fontSize = 8.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
