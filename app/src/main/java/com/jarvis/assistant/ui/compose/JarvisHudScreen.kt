@@ -451,9 +451,25 @@ private fun GlassCard(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xCC050E16))
-            .border(1.dp, Cyan.copy(alpha = 0.22f), RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0x990A1825),
+                        Color(0x88050E16)
+                    )
+                )
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Cyan.copy(alpha = 0.35f),
+                        Cyan.copy(alpha = 0.12f)
+                    )
+                ),
+                shape = RoundedCornerShape(18.dp)
+            )
     ) {
         content()
     }
@@ -526,12 +542,23 @@ private fun StarkHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(
-                Brush.verticalGradient(listOf(Color(0xCC0A1825), Color(0xCC050E16)))
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0x990A1825),
+                        Color(0x88050E16)
+                    )
+                )
             )
-            .border(1.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
-            .padding(horizontal = 10.dp, vertical = 8.dp)
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    listOf(Cyan.copy(alpha = 0.40f), Cyan.copy(alpha = 0.15f))
+                ),
+                shape = RoundedCornerShape(18.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
