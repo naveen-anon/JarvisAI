@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -61,18 +62,21 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-/* ───────── Liquid Glass / Mark-VII palette ───────── */
+/* ───────── Orange Armor Hall palette (mockup style) ───────── */
 private val Cyan = Color(0xFF00D9FF)
 private val CyanBright = Color(0xFFB8ECFF)
 private val CyanCore = Color(0xFFE8FBFF)
 private val CyanDim = Color(0xFF007A99)
 private val CyanSoft = Color(0xFF5A8A99)
 private val Amber = Color(0xFFFFAA00)
+private val Orange = Color(0xFFFF8C00)
+private val OrangeBright = Color(0xFFFFB040)
+private val OrangeSoft = Color(0xFFCC7A20)
 private val BgDeep = Color(0xFF01040A)
 private val Bg = Color(0xFF03080E)
-private val Glass = Color(0x2200D9FF)
-private val GlassBorder = Color(0x5500D9FF)
-private val PanelDark = Color(0xCC050E16)
+private val Glass = Color(0x22FF8C00)
+private val GlassBorder = Color(0x55FF8C00)
+private val PanelDark = Color(0xCC0A0E14)
 
 /**
  * Armor Suit window — redesigned as a full Mark-VII diagnostic HUD
@@ -131,182 +135,147 @@ fun ArmorSuitWindow(onClose: (() -> Unit)? = null) {
 
             Spacer(Modifier.height(8.dp))
 
-            // ── Main diagnostic area ──
+            // ── Armor Hall main (mockup style) ──
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Left glass panel
-                LiquidSidePanel(
+                // Left – suit stats
+                Column(
                     modifier = Modifier
-                        .width(78.dp)
+                        .width(100.dp)
                         .fillMaxHeight()
-                        .padding(end = 6.dp),
-                    glow = glow
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(PanelDark)
+                        .border(1.dp, Orange.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                        .padding(8.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(6.dp)
-                    ) {
-                        Text("SUIT", color = glow, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        Text("DIAG", color = CyanSoft, fontSize = 7.sp, fontFamily = FontFamily.Monospace)
-                        Spacer(Modifier.height(8.dp))
-                        MiniGauge("PWR", 0.92f, glow)
-                        Spacer(Modifier.height(6.dp))
-                        MiniGauge("REP", 0.78f, glow)
-                        Spacer(Modifier.height(6.dp))
-                        MiniGauge("ARM", 0.85f, Amber)
-                        Spacer(Modifier.height(6.dp))
-                        MiniGauge("SYS", 0.96f, glow)
-                        Spacer(Modifier.weight(1f))
-                        Text(
-                            currentSuit.systemMode.take(8),
-                            color = CyanSoft,
-                            fontSize = 7.sp,
-                            fontFamily = FontFamily.Monospace,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        currentSuit.mark.name.replace('_', ' '),
+                        color = OrangeBright,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    StatRowOrange("POWER", "100%")
+                    StatRowOrange("ARMOR", "100%")
+                    StatRowOrange("ENERGY", "100%")
+                    StatRowOrange("STABILITY", "100%")
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        "\"Sometimes you gotta\nrun before you can walk.\"",
+                        color = OrangeSoft,
+                        fontSize = 8.sp,
+                        fontFamily = FontFamily.Monospace,
+                        lineHeight = 11.sp
+                    )
                 }
 
-                // Center — Iron Man + Arc Reactor
+                // Center – full body suit
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(PanelDark)
+                        .border(1.dp, Orange.copy(alpha = 0.30f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Outer rotating ring
-                    Canvas(Modifier.fillMaxSize()) {
-                        val cx = size.width / 2f
-                        val cy = size.height / 2f
-                        val r = min(cx, cy) * 0.92f
-                        drawCircle(
-                            glow.copy(alpha = 0.08f + 0.04f * pulse),
-                            r * 1.05f,
-                            Offset(cx, cy)
+                    // Soft glow under suit
+                    Box(
+                        Modifier
+                            .size(140.dp)
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 24.dp)
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Orange.copy(alpha = 0.25f), Color.Transparent)
+                                ),
+                                CircleShape
+                            )
+                    )
+                    if (vectorId != 0) {
+                        Image(
+                            painter = painterResource(id = vectorId),
+                            contentDescription = currentSuit.name,
+                            modifier = Modifier
+                                .fillMaxHeight(0.85f)
+                                .padding(8.dp)
                         )
-                        drawCircle(
-                            glow.copy(alpha = 0.25f),
-                            r,
-                            Offset(cx, cy),
-                            style = Stroke(width = 1.5f)
-                        )
-                        // dashed outer
-                        val dashCount = 48
-                        for (i in 0 until dashCount) {
-                            val a = Math.toRadians((i * 360.0 / dashCount) + slowSpin.toDouble())
-                            val inner = r * 0.96f
-                            val outer = r * 1.02f
-                            drawLine(
-                                glow.copy(alpha = if (i % 4 == 0) 0.7f else 0.25f),
-                                Offset(cx + (inner * cos(a)).toFloat(), cy + (inner * sin(a)).toFloat()),
-                                Offset(cx + (outer * cos(a)).toFloat(), cy + (outer * sin(a)).toFloat()),
-                                strokeWidth = if (i % 4 == 0) 2f else 1f,
-                                cap = StrokeCap.Round
-                            )
-                        }
-                    }
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(contentAlignment = Alignment.Center) {
-                            // Soft glow behind suit
-                            Box(
-                                modifier = Modifier
-                                    .size(190.dp)
-                                    .background(
-                                        Brush.radialGradient(
-                                            listOf(
-                                                glow.copy(alpha = 0.22f * pulse),
-                                                glow.copy(alpha = 0.06f),
-                                                Color.Transparent
-                                            )
-                                        ),
-                                        CircleShape
-                                    )
-                            )
-                            if (vectorId != 0) {
-                                Image(
-                                    painter = painterResource(id = vectorId),
-                                    contentDescription = currentSuit.name,
-                                    modifier = Modifier
-                                        .height(168.dp)
-                                        .wrapContentSize()
-                                )
-                            }
-                            // Arc reactor core overlay
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .align(Alignment.Center)
-                                    .background(
-                                        Brush.radialGradient(
-                                            listOf(CyanCore, glow, glow.copy(alpha = 0.3f))
-                                        ),
-                                        CircleShape
-                                    )
-                                    .border(1.5.dp, CyanBright.copy(alpha = 0.8f), CircleShape)
-                            )
-                        }
-
-                        Spacer(Modifier.height(6.dp))
+                    } else {
                         Text(
-                            currentSuit.name.uppercase(),
-                            color = primary,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            "MARK ${currentSuit.mark.name.replace('_', ' ')}  ·  ONLINE",
-                            color = glow,
-                            fontSize = 10.sp,
+                            currentSuit.name,
+                            color = OrangeBright,
+                            fontSize = 14.sp,
                             fontFamily = FontFamily.Monospace
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            "Current power level is at 100 percent and holding steady.",
-                            color = CyanSoft,
-                            fontSize = 9.sp,
-                            fontFamily = FontFamily.Monospace,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(horizontal = 8.dp)
                         )
                     }
                 }
 
-                // Right glass panel
-                LiquidSidePanel(
+                // Right – mark list
+                Column(
                     modifier = Modifier
-                        .width(78.dp)
+                        .width(96.dp)
                         .fillMaxHeight()
-                        .padding(start = 6.dp),
-                    glow = glow
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(PanelDark)
+                        .border(1.dp, Orange.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                        .padding(6.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(6.dp)
+                    Text(
+                        "SELECT",
+                        color = OrangeBright,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text("ENERGY", color = glow, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        Text("MATRIX", color = CyanSoft, fontSize = 7.sp, fontFamily = FontFamily.Monospace)
-                        Spacer(Modifier.height(8.dp))
-                        CircularMiniGauge(0.88f, glow)
-                        Spacer(Modifier.height(8.dp))
-                        StatusRow("CPU", "34%", glow)
-                        StatusRow("RAM", "61%", glow)
-                        StatusRow("NET", "OK", glow)
-                        StatusRow("GPS", "LOCK", glow)
-                        Spacer(Modifier.weight(1f))
-                        Text("v3.0.1", color = CyanSoft, fontSize = 7.sp, fontFamily = FontFamily.Monospace)
+                        items(suitList, key = { it.id }) { suit ->
+                            val selected = suit.id == currentSuit.id
+                            val r = Color(suit.arcReactorColor)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(if (selected) Orange.copy(alpha = 0.2f) else Color(0x22000000))
+                                    .border(
+                                        1.dp,
+                                        if (selected) OrangeBright else Color(0x33FFFFFF),
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable { ArmorController.equipSuit(suit) }
+                                    .padding(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    Modifier
+                                        .size(8.dp)
+                                        .background(if (selected) OrangeBright else r, CircleShape)
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    suit.mark.name.replace('_', ' ').take(10),
+                                    color = if (selected) Color.White else OrangeSoft,
+                                    fontSize = 9.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
                     }
                 }
             }
+
+            Spacer(Modifier.height(8.dp))
 
             Spacer(Modifier.height(8.dp))
 
@@ -405,7 +374,7 @@ private fun LiquidTopBar(suitName: String, mark: String, glow: Color) {
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "STARK INDUSTRIES  ·  ARMOR ARCHIVE",
+                "ARMOR HALL  ·  SELECT YOUR SUIT",
                 color = glow,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
@@ -517,6 +486,19 @@ private fun CircularMiniGauge(value: Float, accent: Color) {
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace
         )
+    }
+}
+
+@Composable
+private fun StatRowOrange(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, color = OrangeSoft, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text(value, color = OrangeBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
     }
 }
 
