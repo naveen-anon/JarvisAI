@@ -1103,125 +1103,119 @@ private fun MarkViiReactor(
         Canvas(modifier = Modifier.size(reactorSize)) {
             val cx = size.width / 2f
             val cy = size.height / 2f
-            val r = min(cx, cy) * 0.94f
+            val r = min(cx, cy) * 0.92f
 
-            // Soft outer glow halo
-            drawCircle(accent.copy(alpha = 0.06f + 0.06f * pulse), r * 1.32f, Offset(cx, cy))
-            drawCircle(accent.copy(alpha = 0.09f), r * 1.15f, Offset(cx, cy))
+            // Outer glow
+            drawCircle(accent.copy(alpha = 0.05f + 0.05f * pulse), r * 1.35f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.08f), r * 1.18f, Offset(cx, cy))
 
-            // Outer dense particle ring (image-style)
-            rotate(slow * 0.2f, Offset(cx, cy)) {
-                for (i in 0 until 96) {
-                    val a = Math.toRadians(i * 360.0 / 96)
-                    val isMajor = i % 4 == 0
-                    val inner = r * (if (isMajor) 0.86f else 0.90f)
-                    val outer = r * (if (isMajor) 0.99f else 0.95f)
+            // Dense outer particle field (reference style)
+            rotate(slow * 0.15f, Offset(cx, cy)) {
+                for (i in 0 until 120) {
+                    val a = Math.toRadians(i * 3.0 + slow * 0.1)
+                    val dist = r * (0.82f + 0.14f * ((i * 17) % 10) / 10f)
+                    val len = r * (0.03f + 0.06f * ((i * 13) % 7) / 7f)
+                    val x1 = cx + (dist * cos(a)).toFloat()
+                    val y1 = cy + (dist * sin(a)).toFloat()
+                    val x2 = cx + ((dist + len) * cos(a)).toFloat()
+                    val y2 = cy + ((dist + len) * sin(a)).toFloat()
                     drawLine(
-                        accent.copy(alpha = if (isMajor) 0.80f else 0.25f),
-                        Offset(cx + (inner * cos(a)).toFloat(), cy + (inner * sin(a)).toFloat()),
-                        Offset(cx + (outer * cos(a)).toFloat(), cy + (outer * sin(a)).toFloat()),
-                        strokeWidth = if (isMajor) 2.4f else 0.9f,
+                        accent.copy(alpha = 0.15f + 0.45f * ((i % 5) / 4f)),
+                        Offset(x1, y1), Offset(x2, y2),
+                        strokeWidth = if (i % 5 == 0) 1.8f else 0.8f,
                         cap = StrokeCap.Round
                     )
                 }
             }
 
-            // Elliptical orbit ring 1
-            rotate(med * 0.45f, Offset(cx, cy)) {
-                drawCircle(
-                    accent.copy(alpha = 0.40f),
-                    r * 0.78f, Offset(cx, cy),
-                    style = Stroke(width = r * 0.010f)
-                )
-                for (i in 0 until 12) {
-                    val a = Math.toRadians(i * 30.0)
+            // Multiple tilted orbital ellipses (simulated by rotated circles + arcs)
+            for (orbit in 0 until 5) {
+                val orbitR = r * (0.35f + orbit * 0.11f)
+                val speed = if (orbit % 2 == 0) med * (0.4f + orbit * 0.15f) else -med * (0.5f + orbit * 0.12f)
+                rotate(speed, Offset(cx, cy)) {
                     drawCircle(
-                        accent.copy(alpha = 0.85f),
-                        r * 0.014f,
-                        Offset(cx + (r * 0.78f * cos(a)).toFloat(), cy + (r * 0.78f * sin(a)).toFloat())
+                        accent.copy(alpha = 0.25f + orbit * 0.06f),
+                        orbitR, Offset(cx, cy),
+                        style = Stroke(
+                            width = r * (0.006f + orbit * 0.001f),
+                            pathEffect = if (orbit % 2 == 1)
+                                PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
+                            else null
+                        )
+                    )
+                    // Nodes on orbit
+                    val nodes = 4 + orbit
+                    for (n in 0 until nodes) {
+                        val a = Math.toRadians(n * 360.0 / nodes)
+                        drawCircle(
+                            accent.copy(alpha = 0.7f),
+                            r * 0.012f,
+                            Offset(cx + (orbitR * cos(a)).toFloat(), cy + (orbitR * sin(a)).toFloat())
+                        )
+                    }
+                }
+            }
+
+            // Chaotic inner energy strands
+            rotate(fast * 0.6f, Offset(cx, cy)) {
+                for (i in 0 until 24) {
+                    val a0 = Math.toRadians(i * 15.0 + fast * 0.2)
+                    val a1 = a0 + Math.toRadians(25.0 + (i % 5) * 8.0)
+                    val r0 = r * 0.12f
+                    val r1 = r * (0.28f + 0.08f * pulse)
+                    drawLine(
+                        accent.copy(alpha = 0.35f + 0.25f * pulse),
+                        Offset(cx + (r0 * cos(a0)).toFloat(), cy + (r0 * sin(a0)).toFloat()),
+                        Offset(cx + (r1 * cos(a1)).toFloat(), cy + (r1 * sin(a1)).toFloat()),
+                        strokeWidth = 1.2f,
+                        cap = StrokeCap.Round
                     )
                 }
             }
 
-            // Elliptical orbit ring 2 (counter)
-            rotate(-med * 0.7f, Offset(cx, cy)) {
+            // Fast spinning dashed core ring
+            rotate(fast * 1.4f, Offset(cx, cy)) {
                 drawCircle(
-                    accent.copy(alpha = 0.50f),
-                    r * 0.62f, Offset(cx, cy),
+                    accent.copy(alpha = 0.75f),
+                    r * 0.22f, Offset(cx, cy),
                     style = Stroke(
-                        width = r * 0.012f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 8f), 0f)
+                        width = r * 0.014f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f), 0f)
                     )
                 )
             }
 
-            // Fast spinning inner ring
-            rotate(fast * 1.1f, Offset(cx, cy)) {
-                drawCircle(
-                    accent.copy(alpha = 0.70f),
-                    r * 0.48f, Offset(cx, cy),
-                    style = Stroke(width = r * 0.015f)
-                )
-                for (i in 0 until 6) {
-                    val a = Math.toRadians(i * 60.0)
-                    drawCircle(
-                        accent.copy(alpha = 0.95f),
-                        r * 0.016f,
-                        Offset(cx + (r * 0.48f * cos(a)).toFloat(), cy + (r * 0.48f * sin(a)).toFloat())
-                    )
-                }
-            }
-
-            // Tight counter ring
-            rotate(-fast * 0.85f, Offset(cx, cy)) {
+            // Counter ring
+            rotate(-fast * 0.9f, Offset(cx, cy)) {
                 drawCircle(
                     accent.copy(alpha = 0.45f),
-                    r * 0.36f, Offset(cx, cy),
-                    style = Stroke(
-                        width = r * 0.008f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
-                    )
+                    r * 0.30f, Offset(cx, cy),
+                    style = Stroke(width = r * 0.008f)
                 )
             }
 
-            // Radial energy spikes near core
-            rotate(fast * 0.3f, Offset(cx, cy)) {
-                for (i in 0 until 16) {
-                    val a = Math.toRadians(i * 22.5)
-                    val inner = r * 0.22f
-                    val outer = r * (0.30f + 0.04f * pulse)
-                    drawLine(
-                        accent.copy(alpha = 0.55f),
-                        Offset(cx + (inner * cos(a)).toFloat(), cy + (inner * sin(a)).toFloat()),
-                        Offset(cx + (outer * cos(a)).toFloat(), cy + (outer * sin(a)).toFloat()),
-                        strokeWidth = 1.5f,
-                        cap = StrokeCap.Round
-                    )
-                }
-            }
-
-            // Core energy ball
-            val coreR = r * 0.16f
-            drawCircle(accent.copy(alpha = 0.20f * pulse), coreR * 2.4f, Offset(cx, cy))
-            drawCircle(accent.copy(alpha = 0.35f), coreR * 1.6f, Offset(cx, cy))
+            // Bright core
+            val coreR = r * 0.14f
+            drawCircle(accent.copy(alpha = 0.22f * pulse), coreR * 2.6f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.40f), coreR * 1.7f, Offset(cx, cy))
             drawCircle(
                 Brush.radialGradient(
-                    listOf(coreAccent, accent, accent.copy(alpha = 0.25f)),
+                    listOf(coreAccent, accent, accent.copy(alpha = 0.2f)),
                     center = Offset(cx, cy),
-                    radius = coreR * 1.2f
+                    radius = coreR * 1.3f
                 ),
                 coreR, Offset(cx, cy)
             )
-            drawCircle(Color.White.copy(alpha = 0.95f), coreR * 0.25f, Offset(cx, cy))
+            drawCircle(Color.White.copy(alpha = 0.95f), coreR * 0.28f, Offset(cx, cy))
 
-            // Orbiting micro particles around core
-            rotate(fast * 1.6f, Offset(cx, cy)) {
-                for (i in 0 until 8) {
-                    val a = Math.toRadians(i * 45.0)
-                    val pr = coreR * (1.9f + 0.3f * ((i % 3) / 2f))
+            // Micro orbiting particles
+            rotate(fast * 1.8f, Offset(cx, cy)) {
+                for (i in 0 until 10) {
+                    val a = Math.toRadians(i * 36.0)
+                    val pr = coreR * (2.0f + (i % 3) * 0.4f)
                     drawCircle(
-                        accent.copy(alpha = 0.75f),
-                        r * 0.011f,
+                        accent.copy(alpha = 0.8f),
+                        r * 0.010f,
                         Offset(cx + (pr * cos(a)).toFloat(), cy + (pr * sin(a)).toFloat())
                     )
                 }
