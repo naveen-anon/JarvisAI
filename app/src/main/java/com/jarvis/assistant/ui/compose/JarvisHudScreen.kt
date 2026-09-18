@@ -605,6 +605,11 @@ private fun SuitDiagnosticsPanel(modifier: Modifier = Modifier) {
             Spacer(Modifier.height(4.dp))
             VerticalBarMeter(label = "REP", percent = 0.88f, accent = Cyan)
             Spacer(Modifier.weight(1f))
+            MiniPieChart(
+                modifier = Modifier.size(32.dp),
+                slices = listOf(0.45f to Cyan, 0.25f to NavyBlue, 0.18f to Amber, 0.12f to Red)
+            )
+            Spacer(Modifier.height(4.dp))
             SuitIcon()
         }
     }
@@ -664,6 +669,69 @@ private fun SuitIcon() {
     }
 }
 
+/** Small decorative pie chart — HUD dashboard flavor (non-functional, purely visual). */
+@Composable
+private fun MiniPieChart(modifier: Modifier = Modifier, slices: List<Pair<Float, Color>>) {
+    Canvas(modifier = modifier) {
+        val strokeW = size.minDimension * 0.16f
+        val inset = strokeW / 2f
+        val arcRect = androidx.compose.ui.geometry.Rect(inset, inset, size.width - inset, size.height - inset)
+        var startAngle = -90f
+        slices.forEach { (fraction, color) ->
+            val sweep = fraction * 360f
+            drawArc(
+                color = color.copy(alpha = 0.85f),
+                startAngle = startAngle,
+                sweepAngle = sweep - 3f,
+                useCenter = false,
+                topLeft = Offset(arcRect.left, arcRect.top),
+                size = Size(arcRect.width, arcRect.height),
+                style = Stroke(width = strokeW, cap = StrokeCap.Butt)
+            )
+            startAngle += sweep
+        }
+    }
+}
+
+/** Small decorative radar sweep — rotating gradient wedge over dim concentric rings. */
+@Composable
+private fun MiniRadarSweep(modifier: Modifier = Modifier, accent: Color) {
+    val infinite = rememberInfiniteTransition(label = "radar")
+    val angle by infinite.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(3200, easing = LinearEasing)),
+        label = "radarAngle"
+    )
+    Canvas(modifier = modifier) {
+        val cx = size.width / 2f
+        val cy = size.height / 2f
+        val r = size.minDimension / 2f
+        listOf(0.35f, 0.62f, 0.9f).forEach { f ->
+            drawCircle(
+                accent.copy(alpha = 0.25f),
+                r * f, Offset(cx, cy),
+                style = Stroke(width = 0.6.dp.toPx())
+            )
+        }
+        rotate(angle, Offset(cx, cy)) {
+            drawArc(
+                brush = Brush.sweepGradient(
+                    0f to Color.Transparent,
+                    0.75f to Color.Transparent,
+                    1f to accent.copy(alpha = 0.7f),
+                    center = Offset(cx, cy)
+                ),
+                startAngle = 0f,
+                sweepAngle = 360f,
+                useCenter = true,
+                topLeft = Offset(cx - r, cy - r),
+                size = Size(r * 2, r * 2)
+            )
+        }
+        drawCircle(accent, r * 0.06f, Offset(cx, cy))
+    }
+}
+
 @Composable
 private fun EnergyMatrixPanel(
     cpu: String,
@@ -706,6 +774,8 @@ private fun EnergyMatrixPanel(
                 Spacer(Modifier.height(3.dp))
             }
             Spacer(Modifier.weight(1f))
+            MiniRadarSweep(modifier = Modifier.size(34.dp), accent = NavyBlue)
+            Spacer(Modifier.height(4.dp))
             Text(
                 "v3.0.1",
                 color = CyanSoft,
