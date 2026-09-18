@@ -115,18 +115,28 @@ fun JarvisHudScreen(
         modifier = modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(listOf(BgDeep, Bg, BgDeep))
+                Brush.verticalGradient(listOf(BgDeep, Bg, Color(0xFF02060C)))
             )
     ) {
-        HexGridBackground(Modifier.fillMaxSize())
-        ScanlineOverlay(Modifier.fillMaxSize())
+        // Soft ambient glow instead of heavy grid
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(Cyan.copy(alpha = 0.04f), Color.Transparent),
+                        radius = 900f
+                    )
+                )
+        )
         CornerBrackets(Modifier.fillMaxSize())
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 6.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
+            // ── Glass Header ──
             StarkHeader(
                 clock = ui.clock,
                 mode = modeFor(ui.hudState),
@@ -134,64 +144,86 @@ fun JarvisHudScreen(
                 onChat = actions.onChat,
                 onSettings = actions.onSettings
             )
-            Spacer(Modifier.height(8.dp))
+
+            Spacer(Modifier.height(10.dp))
+
+            // ── Stats row (glass chips) ──
             DiagnosticChips(
                 battery = ui.battery,
                 network = ui.network,
                 ram = ui.ram,
                 location = ui.location
             )
-            Spacer(Modifier.height(6.dp))
 
-            // Center Mark-VII circular HUD with flanking side panels
+            Spacer(Modifier.height(10.dp))
+
+            // ── Main content area ──
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SuitDiagnosticsPanel(modifier = Modifier.padding(end = 4.dp))
+                // Left glass panel
+                SuitDiagnosticsPanel(modifier = Modifier.padding(end = 6.dp))
+
+                // Center – reactor + silhouette
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xAA050E16))
+                        .border(1.dp, Cyan.copy(alpha = 0.22f), RoundedCornerShape(20.dp))
                         .clickable { actions.onReactorTap() },
                     contentAlignment = Alignment.Center
                 ) {
                     MarkViiReactor(
                         state = ui.hudState,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(0.92f)
                     )
-                    // Iron Man silhouette overlay (Pinterest-style)
                     Icon(
                         painterResource(R.drawable.ic_ironman_full),
                         contentDescription = null,
-                        tint = Cyan.copy(alpha = 0.55f),
+                        tint = Cyan.copy(alpha = 0.45f),
                         modifier = Modifier
-                            .fillMaxHeight(0.72f)
-                            .padding(bottom = 8.dp)
+                            .fillMaxHeight(0.68f)
+                            .padding(bottom = 6.dp)
                     )
                 }
+
+                // Right glass panel
                 EnergyMatrixPanel(
                     cpu = ui.ram,
-                    modifier = Modifier.padding(start = 4.dp)
+                    modifier = Modifier.padding(start = 6.dp)
                 )
             }
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
+
+            // ── Status + waveform ──
             StateStatusBar(label = ui.stateLabel, state = ui.hudState)
             Spacer(Modifier.height(4.dp))
             WaveformBar(active = ui.waveformActive)
-            Spacer(Modifier.height(6.dp))
+
+            Spacer(Modifier.height(8.dp))
+
+            // ── Response (glass) ──
             ResponseBar(ui.response)
-            Spacer(Modifier.height(6.dp))
+
+            Spacer(Modifier.height(8.dp))
+
+            // ── Quick actions ──
             QuickActions(
                 onBriefing = actions.onBriefing,
                 onSystem = actions.onSystem,
                 onVision = actions.onVision,
                 onArmor = actions.onArmor
             )
-            Spacer(Modifier.height(6.dp))
+
+            Spacer(Modifier.height(8.dp))
+
+            // ── Bottom nav ──
             BottomNav(
                 onHome = actions.onNavHome,
                 onChat = actions.onNavChat,
