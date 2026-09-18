@@ -66,6 +66,9 @@ private val Orange = Color(0xFFFF8C00)
 private val OrangeBright = Color(0xFFFFC866)
 private val OrangeCore = Color(0xFFFFE8B0)
 private val Red = Color(0xFFFF3030)
+private val NavyBlue = Color(0xFF3B6FE0)
+private val NavyBlueBright = Color(0xFF8FB4FF)
+private val NavyBlueDim = Color(0xFF1E3A8A)
 private val Bg = Color(0xFF03080E)
 private val BgDeep = Color(0xFF01040A)
 private val Panel = Color(0xFF0A1825)
@@ -460,7 +463,7 @@ private fun DiagnosticChips(
             label = "GPS",
             valueText = location,
             percent = if (location == "—") 0f else 100f,
-            accent = Cyan
+            accent = NavyBlue
         )
     }
 }
@@ -596,7 +599,7 @@ private fun SuitDiagnosticsPanel(modifier: Modifier = Modifier) {
             Spacer(Modifier.height(6.dp))
             VerticalBarMeter(label = "PWR", percent = 0.78f, accent = Cyan)
             Spacer(Modifier.height(4.dp))
-            VerticalBarMeter(label = "ARM", percent = 0.62f, accent = Amber)
+            VerticalBarMeter(label = "ARM", percent = 0.62f, accent = NavyBlue)
             Spacer(Modifier.height(4.dp))
             VerticalBarMeter(label = "FLT", percent = 0.45f, accent = Cyan)
             Spacer(Modifier.height(4.dp))
@@ -691,11 +694,11 @@ private fun EnergyMatrixPanel(
                 fontFamily = FontFamily.Monospace
             )
             Spacer(Modifier.height(6.dp))
-            CircularEnergyGauge(percent = parsePercent(cpu), accent = Cyan)
+            CircularEnergyGauge(percent = parsePercent(cpu), accent = NavyBlue)
             Spacer(Modifier.height(6.dp))
             listOf(
                 Triple("01", 0.92f, Cyan),
-                Triple("02", 0.74f, Cyan),
+                Triple("02", 0.74f, NavyBlue),
                 Triple("03", 0.55f, Amber),
                 Triple("04", 0.31f, Red)
             ).forEach { (id, p, c) ->
@@ -883,6 +886,15 @@ private fun MarkViiReactor(
                         cap = StrokeCap.Round
                     )
                 }
+            }
+
+            // Secondary purple accent ring (HUD dashboard accent, independent of state)
+            rotate(med * 0.4f, Offset(cx, cy)) {
+                drawCircle(
+                    NavyBlue.copy(alpha = 0.38f),
+                    r * 0.82f, Offset(cx, cy),
+                    style = Stroke(width = r * 0.008f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(r * 0.05f, r * 0.03f)))
+                )
             }
 
             // Mid orbiting ring + dots
