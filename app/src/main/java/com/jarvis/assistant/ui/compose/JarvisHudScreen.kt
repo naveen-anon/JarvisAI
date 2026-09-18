@@ -157,53 +157,165 @@ fun JarvisHudScreen(
 
             Spacer(Modifier.height(10.dp))
 
-            // ── Main content area ──
+            // ── Main dashboard grid (glass cards) ──
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Left glass panel
-                SuitDiagnosticsPanel(modifier = Modifier.padding(end = 6.dp))
-
-                // Center – reactor + silhouette
-                Box(
+                // Left column
+                Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xAA050E16))
-                        .border(1.dp, Cyan.copy(alpha = 0.22f), RoundedCornerShape(20.dp))
-                        .clickable { actions.onReactorTap() },
-                    contentAlignment = Alignment.Center
+                        .weight(0.9f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    MarkViiReactor(
-                        state = ui.hudState,
-                        modifier = Modifier.fillMaxSize(0.92f)
-                    )
-                    Icon(
-                        painterResource(R.drawable.ic_ironman_full),
-                        contentDescription = null,
-                        tint = Cyan.copy(alpha = 0.45f),
-                        modifier = Modifier
-                            .fillMaxHeight(0.68f)
-                            .padding(bottom = 6.dp)
-                    )
+                    // System Status card
+                    GlassCard(modifier = Modifier.weight(1f)) {
+                        Column(Modifier.padding(10.dp)) {
+                            Text(
+                                "SYSTEM STATUS",
+                                color = Cyan,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            StatusLine("CPU", "34%", 0.34f)
+                            StatusLine("RAM", parsePercent(ui.ram).let { "${it.toInt()}%" }, parsePercent(ui.ram) / 100f)
+                            StatusLine("BATT", parsePercent(ui.battery).let { "${it.toInt()}%" }, parsePercent(ui.battery) / 100f)
+                            StatusLine("NET", ui.network.take(8), 0.9f)
+                        }
+                    }
+                    // Location / Activity card
+                    GlassCard(modifier = Modifier.weight(0.7f)) {
+                        Column(
+                            Modifier.padding(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "LOCATION",
+                                color = Cyan,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                ui.location.ifBlank { "—" },
+                                color = CyanBright,
+                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                modeFor(ui.hudState),
+                                color = CyanSoft,
+                                fontSize = 9.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
                 }
 
-                // Right glass panel
-                EnergyMatrixPanel(
-                    cpu = ui.ram,
-                    modifier = Modifier.padding(start = 6.dp)
-                )
+                // Center – reactor focus
+                GlassCard(
+                    modifier = Modifier
+                        .weight(1.2f)
+                        .fillMaxHeight()
+                        .clickable { actions.onReactorTap() }
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        MarkViiReactor(
+                            state = ui.hudState,
+                            modifier = Modifier.fillMaxSize(0.9f)
+                        )
+                        Icon(
+                            painterResource(R.drawable.ic_ironman_full),
+                            contentDescription = null,
+                            tint = Cyan.copy(alpha = 0.40f),
+                            modifier = Modifier
+                                .fillMaxHeight(0.55f)
+                                .padding(bottom = 4.dp)
+                        )
+                    }
+                }
+
+                // Right column
+                Column(
+                    modifier = Modifier
+                        .weight(0.9f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GlassCard(modifier = Modifier.weight(1f)) {
+                        Column(
+                            Modifier.padding(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "ENERGY",
+                                color = Cyan,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                "${parsePercent(ui.ram).toInt().coerceIn(0, 100)}",
+                                color = CyanBright,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                "% LOAD",
+                                color = CyanSoft,
+                                fontSize = 8.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            MiniBar("01", 0.9f, Cyan)
+                            MiniBar("02", 0.7f, Cyan)
+                            MiniBar("03", 0.45f, Amber)
+                            MiniBar("04", 0.25f, Red)
+                        }
+                    }
+                    GlassCard(modifier = Modifier.weight(0.55f)) {
+                        Column(
+                            Modifier.padding(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "STATE",
+                                color = CyanSoft,
+                                fontSize = 8.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                ui.stateLabel,
+                                color = CyanBright,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(Modifier.height(8.dp))
 
-            // ── Status + waveform ──
-            StateStatusBar(label = ui.stateLabel, state = ui.hudState)
-            Spacer(Modifier.height(4.dp))
+            // ── Waveform ──
             WaveformBar(active = ui.waveformActive)
 
             Spacer(Modifier.height(8.dp))
@@ -327,6 +439,77 @@ private fun CornerBrackets(modifier: Modifier = Modifier) {
         // Bottom-right
         drawLine(c, Offset(size.width - pad - len, size.height - pad), Offset(size.width - pad, size.height - pad), w)
         drawLine(c, Offset(size.width - pad, size.height - pad - len), Offset(size.width - pad, size.height - pad), w)
+    }
+}
+
+/* ───────── Glass helpers ───────── */
+
+@Composable
+private fun GlassCard(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xCC050E16))
+            .border(1.dp, Cyan.copy(alpha = 0.22f), RoundedCornerShape(16.dp))
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun StatusLine(label: String, value: String, fraction: Float) {
+    Column(Modifier.padding(vertical = 3.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(label, color = CyanSoft, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Text(value, color = CyanBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+        Spacer(Modifier.height(2.dp))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(3.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color(0xFF0A1825))
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth(fraction.coerceIn(0f, 1f))
+                    .fillMaxHeight()
+                    .background(Cyan.copy(alpha = 0.8f))
+            )
+        }
+    }
+}
+
+@Composable
+private fun MiniBar(label: String, fraction: Float, color: Color) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, color = CyanSoft, fontSize = 8.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.width(18.dp))
+        Box(
+            Modifier
+                .weight(1f)
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color(0xFF0A1825))
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth(fraction.coerceIn(0f, 1f))
+                    .fillMaxHeight()
+                    .background(color.copy(alpha = 0.85f))
+            )
+        }
     }
 }
 
