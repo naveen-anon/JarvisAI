@@ -32,22 +32,28 @@ class HoloArmorGridView @JvmOverloads constructor(
     private val cellH = 158f
     private val pad = 28f
 
-    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#020B14") }
+    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#01060C") }
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#0A3A4A"); strokeWidth = 1f; style = Paint.Style.STROKE
+        color = Color.parseColor("#0A2A38"); strokeWidth = 1f; style = Paint.Style.STROKE
     }
     private val framePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#C41E3A"); strokeWidth = 4f; style = Paint.Style.STROKE
+        color = Color.parseColor("#00D9FF"); strokeWidth = 2.5f; style = Paint.Style.STROKE
     }
     private val cyanStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E5FF"); strokeWidth = 1.4f; style = Paint.Style.STROKE
+        color = Color.parseColor("#00E5FF"); strokeWidth = 1.2f; style = Paint.Style.STROKE
+    }
+    private val cellBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#0A1520"); style = Paint.Style.FILL
+    }
+    private val cellBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#1A4A5A"); strokeWidth = 1.5f; style = Paint.Style.STROKE
     }
     private val selectPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#3500E5FF"); style = Paint.Style.FILL
+        color = Color.parseColor("#2800E5FF"); style = Paint.Style.FILL
     }
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00E5FF"); style = Paint.Style.STROKE; strokeWidth = 2.5f
-        maskFilter = BlurMaskFilter(10f, BlurMaskFilter.Blur.OUTER)
+        color = Color.parseColor("#00E5FF"); style = Paint.Style.STROKE; strokeWidth = 2.8f
+        maskFilter = BlurMaskFilter(12f, BlurMaskFilter.Blur.OUTER)
     }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#7AD4E8"); textAlign = Paint.Align.CENTER
@@ -55,7 +61,11 @@ class HoloArmorGridView @JvmOverloads constructor(
     }
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#00E5FF"); textAlign = Paint.Align.CENTER
-        textSize = 24f; typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+        textSize = 22f; typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+    }
+    private val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#5AA8B8"); textAlign = Paint.Align.CENTER
+        textSize = 11f; typeface = Typeface.MONOSPACE
     }
 
     private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -116,29 +126,47 @@ class HoloArmorGridView @JvmOverloads constructor(
         canvas.drawRoundRect(8f, 8f, contentW - 8f, contentH - 8f, 16f, 16f, framePaint)
         canvas.drawRoundRect(14f, 14f, contentW - 14f, contentH - 14f, 12f, 12f, cyanStroke)
 
+        // Title bar
+        titlePaint.textSize = 20f
+        canvas.drawText("IRON MAN", contentW / 2f, 36f, titlePaint)
+        subtitlePaint.textSize = 10f
+        canvas.drawText("ALL ARMOR  ·  STARK INDUSTRIES", contentW / 2f, 52f, subtitlePaint)
+
         marks.forEachIndexed { i, mark ->
             val col = i % cols; val row = i / cols
             var cx = pad + col * cellW + cellW / 2f
-            var cy = pad + 52f + row * cellH + cellH / 2f
+            var cy = pad + 64f + row * cellH + cellH / 2f
             suitOffsets[i]?.let { cx += it.x; cy += it.y }
+
+            val left = cx - cellW * 0.44f
+            val top = cy - cellH * 0.44f
+            val right = cx + cellW * 0.44f
+            val bottom = cy + cellH * 0.44f
+
+            // Cell background card
+            canvas.drawRoundRect(left, top, right, bottom, 10f, 10f, cellBgPaint)
+            canvas.drawRoundRect(left, top, right, bottom, 10f, 10f, cellBorderPaint)
+
             if (i == selectedIndex) {
-                canvas.drawRoundRect(cx - cellW * 0.42f, cy - cellH * 0.42f, cx + cellW * 0.42f, cy + cellH * 0.42f, 10f, 10f, selectPaint)
-                canvas.drawRoundRect(cx - cellW * 0.42f, cy - cellH * 0.42f, cx + cellW * 0.42f, cy + cellH * 0.42f, 10f, 10f, glowPaint)
+                canvas.drawRoundRect(left, top, right, bottom, 10f, 10f, selectPaint)
+                canvas.drawRoundRect(left, top, right, bottom, 10f, 10f, glowPaint)
             }
+
             ArmorBlueprintDrawer.draw(
-                canvas, cx, cy, cellH * 0.38f, mark,
+                canvas, cx, cy - 6f, cellH * 0.36f, mark,
                 ArmorBlueprintDrawer.Style.HOLO, selected = i == selectedIndex
             )
             textPaint.color = if (i == selectedIndex) Color.parseColor("#E0FFFF") else Color.parseColor("#5AA8B8")
-            canvas.drawText(mark.roman, cx, cy + cellH * 0.40f, textPaint)
+            textPaint.textSize = 10f
+            canvas.drawText("MARK ${mark.roman}", cx, cy + cellH * 0.38f, textPaint)
         }
         canvas.restore()
-        textPaint.textSize = 12f; textPaint.color = Color.parseColor("#7AD4E8")
-        canvas.drawText("PINCH · DRAG · LONG-PRESS move · TAP select · DOUBLE-TAP open", w / 2f, h - 22f, textPaint)
+        textPaint.textSize = 11f; textPaint.color = Color.parseColor("#5AA8B8")
+        canvas.drawText("TAP select  ·  DOUBLE-TAP open  ·  PINCH zoom", w / 2f, h - 18f, textPaint)
         if (selectedIndex in marks.indices) {
-            titlePaint.textSize = 14f
+            titlePaint.textSize = 13f
             val m = marks[selectedIndex]
-            canvas.drawText("MARK ${m.roman}  ·  ${m.codename}", w / 2f, h - 44f, titlePaint)
+            canvas.drawText("MARK ${m.roman}  ·  ${m.codename}", w / 2f, h - 38f, titlePaint)
         }
     }
 
