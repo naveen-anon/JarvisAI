@@ -29,9 +29,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -320,8 +326,18 @@ fun JarvisHudScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // ── Talk button ──
+            TalkButton(onClick = actions.onTalk)
+
+            Spacer(Modifier.height(8.dp))
+
             // ── Response (glass) ──
             ResponseBar(ui.response)
+
+            Spacer(Modifier.height(8.dp))
+
+            // ── Message input ──
+            MessageInputRow()
 
             Spacer(Modifier.height(8.dp))
 
@@ -342,6 +358,68 @@ fun JarvisHudScreen(
                 onMic = actions.onNavMic,
                 onVision = actions.onNavVision,
                 onMore = actions.onNavMore
+            )
+        }
+    }
+}
+
+@Composable
+private fun TalkButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(
+                Brush.verticalGradient(listOf(Color(0x990A1825), Color(0x88050E16)))
+            )
+            .border(
+                width = 1.5.dp,
+                brush = Brush.verticalGradient(listOf(Cyan, Cyan.copy(alpha = 0.4f))),
+                shape = RoundedCornerShape(26.dp)
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(R.drawable.ic_mic), null, tint = Cyan, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(10.dp))
+            Text("Talk", color = Cyan, fontSize = 17.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun MessageInputRow() {
+    var text by remember { mutableStateOf("") }
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("\u00BB", color = CyanSoft, fontSize = 14.sp, fontFamily = FontFamily.Monospace)
+            Spacer(Modifier.width(8.dp))
+            BasicTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.weight(1f),
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    color = CyanBright,
+                    fontSize = 13.sp,
+                    fontFamily = FontFamily.Monospace
+                ),
+                cursorBrush = SolidColor(Cyan),
+                decorationBox = { inner ->
+                    if (text.isEmpty()) {
+                        Text(
+                            "Type your message...",
+                            color = CyanSoft,
+                            fontSize = 13.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    inner()
+                }
             )
         }
     }
@@ -449,14 +527,22 @@ private fun GlassCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val shape = RoundedCornerShape(22.dp)
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
+            .shadow(
+                elevation = 10.dp,
+                shape = shape,
+                ambientColor = Cyan.copy(alpha = 0.25f),
+                spotColor = Cyan.copy(alpha = 0.25f)
+            )
+            .clip(shape)
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        Color(0x990A1825),
-                        Color(0x88050E16)
+                        Color(0x330A1825),
+                        Color(0x99081420),
+                        Color(0xB3050E16)
                     )
                 )
             )
@@ -464,13 +550,40 @@ private fun GlassCard(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     listOf(
-                        Cyan.copy(alpha = 0.35f),
-                        Cyan.copy(alpha = 0.12f)
+                        Cyan.copy(alpha = 0.55f),
+                        Cyan.copy(alpha = 0.10f)
                     )
                 ),
-                shape = RoundedCornerShape(18.dp)
+                shape = shape
             )
     ) {
+        // Glossy top sheen — the "liquid glass" highlight
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.42f)
+                .align(Alignment.TopCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0x33FFFFFF),
+                            Color(0x0DFFFFFF),
+                            Color.Transparent
+                        )
+                    ),
+                    shape = shape
+                )
+        )
+        // Faint inner edge glow
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .border(
+                    width = 0.6.dp,
+                    color = Color(0x40FFFFFF),
+                    shape = shape
+                )
+        )
         content()
     }
 }
@@ -539,27 +652,42 @@ private fun StarkHeader(
     onChat: () -> Unit,
     onSettings: () -> Unit
 ) {
+    val headerShape = RoundedCornerShape(20.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .shadow(elevation = 8.dp, shape = headerShape, ambientColor = Cyan.copy(alpha = 0.2f), spotColor = Cyan.copy(alpha = 0.2f))
+            .clip(headerShape)
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        Color(0x990A1825),
-                        Color(0x88050E16)
+                        Color(0x330A1825),
+                        Color(0x99081420),
+                        Color(0xB3050E16)
                     )
                 )
             )
             .border(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
-                    listOf(Cyan.copy(alpha = 0.40f), Cyan.copy(alpha = 0.15f))
+                    listOf(Cyan.copy(alpha = 0.55f), Cyan.copy(alpha = 0.15f))
                 ),
-                shape = RoundedCornerShape(18.dp)
+                shape = headerShape
             )
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.5f)
+                .align(Alignment.TopCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0x2EFFFFFF), Color(0x0AFFFFFF), Color.Transparent)
+                    ),
+                    shape = headerShape
+                )
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
@@ -580,9 +708,9 @@ private fun StarkHeader(
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "STARK INDUSTRIES",
+                        "J.A.R.V.I.S",
                         color = Cyan,
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
                         letterSpacing = 1.2.sp
@@ -605,7 +733,7 @@ private fun StarkHeader(
                     }
                 }
                 Text(
-                    "J.A.R.V.I.S · ONLINE · ${mode.uppercase()}",
+                    "ONLINE · SYSTEM ACTIVE · ${mode.uppercase()}",
                     color = CyanSoft,
                     fontSize = 7.sp,
                     fontFamily = FontFamily.Monospace,
