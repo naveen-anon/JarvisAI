@@ -4,18 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:background="@drawable/widget_jarvis_bg"
-    android:padding="8dp">
+    android:gravity="center_horizontal"
+    android:padding="12dp"
+    android:background="@drawable/widget_jarvis_bg">
 
     <TextView
         android:id="@+id/widgetTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="JARVIS AI"
-        android:textColor="#FFAA00"
-        android:textSize="11sp"
-        android:letterSpacing="0.15"
+        android:text="J.A.R.V.I.S"
+        android:textColor="#FFB040"
+        android:textSize="12sp"
+        android:letterSpacing="0.12"
         android:fontFamily="monospace"
         android:textStyle="bold" />
 
@@ -25,33 +25,63 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:text="SYSTEMS NOMINAL"
-        android:textColor="#B07000"
-        android:textSize="8sp"
+        android:textColor="#CC7A20"
+        android:textSize="9sp"
         android:fontFamily="monospace" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:padding="6dp">
+
+        <TextView
+            android:id="@+id/widgetBatt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BATT  —%"
+            android:textColor="#FFB040"
+            android:textSize="10sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/widgetNet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="NET   —"
+            android:textColor="#FFB040"
+            android:textSize="10sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/widgetRam"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="RAM   —%"
+            android:textColor="#FFB040"
+            android:textSize="10sp"
+            android:fontFamily="monospace" />
+    </LinearLayout>
+
     <FrameLayout
-        android:layout_width="84dp"
-        android:layout_height="84dp"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="4dp">
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/widget_reactor_ring_outer"
-            android:contentDescription="@null" />
-
-        <ImageView
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center"
             android:src="@drawable/widget_reactor_ring"
             android:contentDescription="@null" />
 
         <ImageView
             android:id="@+id/widgetMicButton"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_mark42"
             android:contentDescription="@string/app_name" />
@@ -62,17 +92,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TAP TO LISTEN"
-        android:textColor="#FFAA00"
+        android:textColor="#FF8C00"
         android:textSize="9sp"
-        android:letterSpacing="0.12"
-        android:fontFamily="monospace" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:text="NAVEEN KHATRI"
-        android:textColor="#3A2408"
-        android:textSize="7sp"
+        android:letterSpacing="0.10"
         android:fontFamily="monospace" />
 </LinearLayout>
