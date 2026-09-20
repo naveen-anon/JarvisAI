@@ -12,8 +12,8 @@
         android:id="@+id/widgetTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="J.A.R.V.I.S"
-        android:textColor="#00E5FF"
+        android:text="JARVIS AI"
+        android:textColor="#FFAA00"
         android:textSize="11sp"
         android:letterSpacing="0.15"
         android:fontFamily="monospace"
@@ -25,26 +25,33 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:text="SYSTEMS NOMINAL"
-        android:textColor="#5C8A94"
+        android:textColor="#B07000"
         android:textSize="8sp"
         android:fontFamily="monospace" />
 
     <FrameLayout
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="84dp"
+        android:layout_height="84dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="4dp">
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:src="@drawable/widget_reactor_ring_outer"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
             android:src="@drawable/widget_reactor_ring"
             android:contentDescription="@null" />
 
         <ImageView
             android:id="@+id/widgetMicButton"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_mark42"
             android:contentDescription="@string/app_name" />
@@ -55,7 +62,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TAP TO LISTEN"
-        android:textColor="#00E5FF"
+        android:textColor="#FFAA00"
         android:textSize="9sp"
         android:letterSpacing="0.12"
         android:fontFamily="monospace" />
@@ -65,7 +72,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:text="NAVEEN KHATRI"
-        android:textColor="#1A3A4A"
+        android:textColor="#3A2408"
         android:textSize="7sp"
         android:fontFamily="monospace" />
 </LinearLayout>
