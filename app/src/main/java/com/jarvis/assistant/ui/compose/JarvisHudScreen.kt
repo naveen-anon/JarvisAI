@@ -1072,8 +1072,6 @@ private fun CompactRow(id: String, percent: Float, accent: Color) {
 /* ───────── Mark VII central reactor ───────── */
 
 @Composable
-
-@Composable
 private fun BootPowerOnOverlay(progress: Float) {
     Box(
         Modifier
@@ -1129,6 +1127,7 @@ private fun BootPowerOnOverlay(progress: Float) {
     }
 }
 
+@Composable
 private fun MarkViiReactor(
     state: HudState,
     modifier: Modifier = Modifier
