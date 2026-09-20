@@ -142,216 +142,46 @@ fun JarvisHudScreen(
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            // ── Glass Header ──
-            StarkHeader(
-                clock = ui.clock,
-                mode = modeFor(ui.hudState),
-                network = ui.network,
-                onChat = actions.onChat,
-                onSettings = actions.onSettings
-            )
+            // ── Header ──
+            JarvisAiHeader(onSettings = actions.onSettings)
 
             Spacer(Modifier.height(10.dp))
 
-            // ── Stats row (glass chips) ──
-            DiagnosticChips(
-                battery = ui.battery,
-                network = ui.network,
-                ram = ui.ram,
-                location = ui.location
-            )
-
-            Spacer(Modifier.height(10.dp))
-
-            // ── Main dashboard grid (glass cards) ──
+            // ── Radar visual + side menu ──
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Left column
-                Column(
+                JarvisRadarVisual(
                     modifier = Modifier
-                        .weight(0.9f)
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // System Status card
-                    GlassCard(modifier = Modifier.weight(1f)) {
-                        Column(Modifier.padding(10.dp)) {
-                            Text(
-                                "SYSTEM STATUS",
-                                color = Cyan,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                letterSpacing = 1.sp
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            StatusLine("CPU", "34%", 0.34f)
-                            StatusLine("RAM", parsePercent(ui.ram).let { "${it.toInt()}%" }, parsePercent(ui.ram) / 100f)
-                            StatusLine("BATT", parsePercent(ui.battery).let { "${it.toInt()}%" }, parsePercent(ui.battery) / 100f)
-                            StatusLine("NET", ui.network.take(8), 0.9f)
-                        }
-                    }
-                    // Location / Activity card
-                    GlassCard(modifier = Modifier.weight(0.7f)) {
-                        Column(
-                            Modifier.padding(10.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "LOCATION",
-                                color = Cyan,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                ui.location.ifBlank { "—" },
-                                color = CyanBright,
-                                fontSize = 11.sp,
-                                fontFamily = FontFamily.Monospace,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                modeFor(ui.hudState),
-                                color = CyanSoft,
-                                fontSize = 9.sp,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        }
-                    }
-                }
-
-                // Center – reactor focus
-                GlassCard(
-                    modifier = Modifier
-                        .weight(1.2f)
+                        .weight(1f)
                         .fillMaxHeight()
                         .clickable { actions.onReactorTap() }
-                ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        MarkViiReactor(
-                            state = ui.hudState,
-                            modifier = Modifier.fillMaxSize(0.9f)
-                        )
-                        Icon(
-                            painterResource(R.drawable.ic_ironman_full),
-                            contentDescription = null,
-                            tint = Cyan.copy(alpha = 0.40f),
-                            modifier = Modifier
-                                .fillMaxHeight(0.55f)
-                                .padding(bottom = 4.dp)
-                        )
-                    }
-                }
-
-                // Right column
-                Column(
+                )
+                HomeSideMenu(
                     modifier = Modifier
-                        .weight(0.9f)
+                        .width(92.dp)
                         .fillMaxHeight(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    GlassCard(modifier = Modifier.weight(1f)) {
-                        Column(
-                            Modifier.padding(10.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "ENERGY",
-                                color = Cyan,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                "${parsePercent(ui.ram).toInt().coerceIn(0, 100)}",
-                                color = CyanBright,
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            )
-                            Text(
-                                "% LOAD",
-                                color = CyanSoft,
-                                fontSize = 8.sp,
-                                fontFamily = FontFamily.Monospace
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            MiniBar("01", 0.9f, Cyan)
-                            MiniBar("02", 0.7f, Cyan)
-                            MiniBar("03", 0.45f, Amber)
-                            MiniBar("04", 0.25f, Red)
-                        }
-                    }
-                    GlassCard(modifier = Modifier.weight(0.55f)) {
-                        Column(
-                            Modifier.padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "STATE",
-                                color = CyanSoft,
-                                fontSize = 8.sp,
-                                fontFamily = FontFamily.Monospace
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                ui.stateLabel,
-                                color = CyanBright,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-                        }
-                    }
-                }
+                    onArmorSuits = actions.onArmor,
+                    onSystems = actions.onSystem,
+                    onAiAssistant = actions.onChat,
+                    onSettings = actions.onSettings
+                )
             }
 
             Spacer(Modifier.height(8.dp))
-
-            // ── Waveform ──
+            OnlineStatusBar(label = ui.stateLabel, detail = ui.response)
+            Spacer(Modifier.height(8.dp))
             WaveformBar(active = ui.waveformActive)
-
             Spacer(Modifier.height(8.dp))
-
-            // ── Talk button ──
-            TalkButton(onClick = actions.onTalk)
-
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) { ResponseBar(ui.response) }
+                Spacer(Modifier.width(8.dp))
+                CompactTalkButton(onClick = actions.onTalk)
+            }
             Spacer(Modifier.height(8.dp))
-
-            // ── Response (glass) ──
-            ResponseBar(ui.response)
-
-            Spacer(Modifier.height(8.dp))
-
-            // ── Message input ──
-            MessageInputRow()
-
-            Spacer(Modifier.height(8.dp))
-
-            // ── Quick actions ──
-            QuickActions(
-                onBriefing = actions.onBriefing,
-                onSystem = actions.onSystem,
-                onVision = actions.onVision,
-                onArmor = actions.onArmor
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            // ── Bottom nav ──
             BottomNav(
                 onHome = actions.onNavHome,
                 onChat = actions.onNavChat,
@@ -360,6 +190,179 @@ fun JarvisHudScreen(
                 onMore = actions.onNavMore
             )
         }
+    }
+}
+
+@Composable
+private fun JarvisAiHeader(onSettings: () -> Unit) {
+    val shape = RoundedCornerShape(20.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 8.dp, shape = shape, ambientColor = Amber.copy(alpha = 0.25f), spotColor = Amber.copy(alpha = 0.25f))
+            .clip(shape)
+            .background(
+                Brush.verticalGradient(listOf(Color(0x330A1508), Color(0x99160C04), Color(0xB30A0603)))
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(listOf(Amber.copy(alpha = 0.6f), Amber.copy(alpha = 0.15f))),
+                shape = shape
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "JARVIS AI",
+                    color = Amber,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    "YOUR AI ASSISTANT",
+                    color = AmberDim,
+                    fontSize = 8.sp,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 1.sp
+                )
+            }
+            RoundIconBtn(R.drawable.ic_settings, onSettings, accent = Amber)
+        }
+    }
+}
+
+/** Big glowing radar/orbit visual, amber accent — center of the new Home layout. */
+@Composable
+private fun JarvisRadarVisual(modifier: Modifier = Modifier) {
+    val infinite = rememberInfiniteTransition(label = "radarSpin")
+    val spin by infinite.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(9000, easing = LinearEasing)),
+        label = "radarSpinVal"
+    )
+    val pulse by infinite.animateFloat(
+        0.85f, 1f,
+        infiniteRepeatable(tween(1400, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "radarPulse"
+    )
+    Canvas(modifier = modifier) {
+        val cx = size.width / 2f
+        val cy = size.height / 2f
+        val r = size.minDimension / 2f * 0.92f
+
+        listOf(1f, 0.78f, 0.56f, 0.34f).forEach { f ->
+            drawCircle(Amber.copy(alpha = 0.35f), r * f, Offset(cx, cy), style = Stroke(width = 1.2.dp.toPx()))
+        }
+        rotate(spin, Offset(cx, cy)) {
+            for (i in 0 until 24) {
+                val a = Math.toRadians((i * 15).toDouble())
+                val inner = r * 1.02f
+                val outer = r * (if (i % 3 == 0) 1.14f else 1.08f)
+                drawLine(
+                    Amber.copy(alpha = 0.55f),
+                    Offset(cx + (inner * cos(a)).toFloat(), cy + (inner * sin(a)).toFloat()),
+                    Offset(cx + (outer * cos(a)).toFloat(), cy + (outer * sin(a)).toFloat()),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+        }
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(OrangeCore, Amber, Amber.copy(alpha = 0f)),
+                center = Offset(cx, cy),
+                radius = r * 0.42f * pulse
+            ),
+            radius = r * 0.42f * pulse,
+            center = Offset(cx, cy)
+        )
+        drawCircle(Color.White.copy(alpha = 0.9f), r * 0.06f * pulse, Offset(cx, cy))
+    }
+}
+
+@Composable
+private fun HomeSideMenu(
+    modifier: Modifier = Modifier,
+    onArmorSuits: () -> Unit,
+    onSystems: () -> Unit,
+    onAiAssistant: () -> Unit,
+    onSettings: () -> Unit
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SideMenuRow(R.drawable.ic_shield, "ARMOR", "SUITS", onArmorSuits)
+        SideMenuRow(R.drawable.ic_cpu, "SYSTEMS", "", onSystems)
+        SideMenuRow(R.drawable.ic_ai_spark, "AI", "ASSISTANT", onAiAssistant)
+        SideMenuRow(R.drawable.ic_settings, "SETTINGS", "", onSettings)
+        Spacer(Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun SideMenuRow(icon: Int, line1: String, line2: String, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(10.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Color(0x330A1508))
+            .border(1.dp, Amber.copy(alpha = 0.45f), shape)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(painterResource(icon), null, tint = Amber, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.height(3.dp))
+        Text(line1, color = Amber, fontSize = 7.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1)
+        if (line2.isNotEmpty()) {
+            Text(line2, color = Amber, fontSize = 7.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun OnlineStatusBar(label: String, detail: String) {
+    val shape = RoundedCornerShape(14.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Color(0x330A1508))
+            .border(1.dp, Amber.copy(alpha = 0.5f), shape)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+    ) {
+        Column {
+            Text(
+                "JARVIS ONLINE",
+                color = Amber,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                detail.ifBlank { "All systems operational" },
+                color = AmberDim,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun CompactTalkButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(Color(0x330A1508))
+            .border(1.5.dp, Amber, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(painterResource(R.drawable.ic_mic), null, tint = Amber, modifier = Modifier.size(20.dp))
     }
 }
 
@@ -766,17 +769,17 @@ private fun StarkHeader(
 }
 
 @Composable
-private fun RoundIconBtn(iconRes: Int, onClick: () -> Unit) {
+private fun RoundIconBtn(iconRes: Int, onClick: () -> Unit, accent: Color = Cyan) {
     Box(
         modifier = Modifier
             .size(32.dp)
             .clip(CircleShape)
             .background(Color(0xCC06121C))
-            .border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape)
+            .border(1.dp, accent.copy(alpha = 0.55f), CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(painterResource(iconRes), null, tint = Cyan, modifier = Modifier.size(15.dp))
+        Icon(painterResource(iconRes), null, tint = accent, modifier = Modifier.size(15.dp))
     }
 }
 
