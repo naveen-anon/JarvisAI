@@ -290,6 +290,7 @@ fun JarvisHudScreen(
     }
 }
 
+/* Home core-only layout v2 */
 /* ───────── Backgrounds ───────── */
 
 @Composable
