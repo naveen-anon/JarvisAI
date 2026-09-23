@@ -1,5 +1,6 @@
 package com.jarvis.assistant.ui.compose
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -28,16 +29,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.animation.core.animateFloatAsState
-import kotlinx.coroutines.delay
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -68,10 +69,12 @@ private val CyanMid = Color(0xFF004466)
 private val CyanSoft = Color(0xFF5A8A99)
 private val Amber = Color(0xFFFFAA00)
 private val AmberDim = Color(0xFFB07000)
+private val NavyBlue = Color(0xFF3B6FE0)
+private val NavyBlueBright = Color(0xFF8FB4FF)
+private val NavyBlueDim = Color(0xFF1E3A8A)
 private val Orange = Color(0xFFFF8C00)
 private val OrangeBright = Color(0xFFFFC866)
 private val OrangeCore = Color(0xFFFFE8B0)
-private val OrangeSoft = Color(0xFFCC7A20)
 private val Red = Color(0xFFFF3030)
 private val Bg = Color(0xFF03080E)
 private val BgDeep = Color(0xFF01040A)
@@ -131,125 +134,369 @@ fun JarvisHudScreen(
                 .fillMaxSize()
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(Orange.copy(alpha = 0.06f), Color.Transparent),
+                        colors = listOf(NavyBlue.copy(alpha = 0.04f), Color.Transparent),
                         radius = 900f
                     )
                 )
         )
         CornerBrackets(Modifier.fillMaxSize())
 
-        // Boot sequence overlay (power-on once)
-        var booting by remember { mutableStateOf(true) }
-        var bootProgress by remember { mutableStateOf(0f) }
-        LaunchedEffect(Unit) {
-            for (i in 1..20) {
-                bootProgress = i / 20f
-                delay(40)
-            }
-            delay(200)
-            booting = false
-        }
-        if (booting) {
-            BootPowerOnOverlay(progress = bootProgress)
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
+            // ── Header ──
+            JarvisAiHeader(onSettings = actions.onSettings)
+
+            Spacer(Modifier.height(10.dp))
+
+            // ── Radar visual + side menu ──
             Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        "JARVIS AI",
-                        color = OrangeBright,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Text(
-                        "YOUR AI ASSISTANT",
-                        color = OrangeSoft,
-                        fontSize = 10.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-                Box(
-                    Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, Orange.copy(alpha = 0.5f), CircleShape)
-                        .clickable { actions.onSettings() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painterResource(R.drawable.ic_settings),
-                        null,
-                        tint = OrangeBright,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            Spacer(Modifier.weight(0.12f))
-
-            // Home: ONLY orange energy core
-            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .weight(1f)
-                    .clickable { actions.onReactorTap() },
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                MarkViiReactor(
-                    state = ui.hudState,
-                    modifier = Modifier.fillMaxSize(0.95f)
+                JarvisRadarVisual(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable { actions.onReactorTap() }
+                )
+                HomeSideMenu(
+                    modifier = Modifier
+                        .width(92.dp)
+                        .fillMaxHeight(),
+                    onArmorSuits = actions.onArmor,
+                    onSystems = actions.onSystem,
+                    onAiAssistant = actions.onChat,
+                    onSettings = actions.onSettings
                 )
             }
 
             Spacer(Modifier.height(8.dp))
-
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0x990A1825))
-                    .border(1.dp, Orange.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
-            ) {
-                Column {
-                    Text(
-                        "JARVIS ONLINE",
-                        color = OrangeBright,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Text(
-                        ui.stateLabel,
-                        color = OrangeSoft,
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-            }
-
+            OnlineStatusBar(label = ui.stateLabel, detail = ui.response)
             Spacer(Modifier.height(8.dp))
             WaveformBar(active = ui.waveformActive)
-            Spacer(Modifier.height(6.dp))
-            ResponseBar(ui.response)
             Spacer(Modifier.height(8.dp))
-
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) { ResponseBar(ui.response) }
+                Spacer(Modifier.width(8.dp))
+                CompactTalkButton(onClick = actions.onTalk)
+            }
+            Spacer(Modifier.height(8.dp))
             BottomNav(
                 onHome = actions.onNavHome,
                 onChat = actions.onNavChat,
                 onMic = actions.onNavMic,
                 onVision = actions.onNavVision,
                 onMore = actions.onNavMore
+            )
+        }
+    }
+}
+
+@Composable
+private fun JarvisAiHeader(onSettings: () -> Unit) {
+    val shape = RoundedCornerShape(20.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 8.dp, shape = shape, ambientColor = NavyBlue.copy(alpha = 0.25f), spotColor = NavyBlue.copy(alpha = 0.25f))
+            .clip(shape)
+            .background(
+                Brush.verticalGradient(listOf(Color(0x330A1508), Color(0x99160C04), Color(0xB30A0603)))
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(listOf(NavyBlue.copy(alpha = 0.6f), NavyBlue.copy(alpha = 0.15f))),
+                shape = shape
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "JARVIS AI",
+                    color = NavyBlue,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    "YOUR AI ASSISTANT",
+                    color = AmberDim,
+                    fontSize = 8.sp,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 1.sp
+                )
+            }
+            RoundIconBtn(R.drawable.ic_settings, onSettings, accent = NavyBlue)
+        }
+    }
+}
+
+/** Big glowing radar/orbit visual — radiating spikes + particle scatter + warm core,
+ *  matching the reference "sunburst reactor" look. Fully warm-toned (this visual only);
+ *  rest of the screen stays navy blue. */
+@Composable
+private fun JarvisRadarVisual(modifier: Modifier = Modifier) {
+    val infinite = rememberInfiniteTransition(label = "radarSpin")
+    val spin by infinite.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(14000, easing = LinearEasing)),
+        label = "radarSpinVal"
+    )
+    val spinSlow by infinite.animateFloat(
+        0f, -360f,
+        infiniteRepeatable(tween(26000, easing = LinearEasing)),
+        label = "radarSpinSlow"
+    )
+    val pulse by infinite.animateFloat(
+        0.88f, 1f,
+        infiniteRepeatable(tween(1300, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "radarPulse"
+    )
+
+    // Deterministic random spikes + particles (stable across recompositions)
+    val spikes = remember {
+        val rnd = kotlin.random.Random(7)
+        List(18) {
+            Triple(
+                rnd.nextInt(0, 360).toFloat(),          // angle
+                0.55f + rnd.nextFloat() * 0.55f,          // length factor
+                0.6f + rnd.nextFloat() * 0.4f             // alpha factor
+            )
+        }
+    }
+    val particles = remember {
+        val rnd = kotlin.random.Random(13)
+        List(70) {
+            Triple(
+                rnd.nextFloat() * 360f,                  // angle
+                0.32f + rnd.nextFloat() * 0.66f,          // radius factor
+                0.5f + rnd.nextFloat() * 3.5f             // size dp
+            )
+        }
+    }
+
+    Canvas(modifier = modifier) {
+        val cx = size.width / 2f
+        val cy = size.height / 2f
+        val r = size.minDimension / 2f * 0.92f
+
+        // Ambient warm halo behind everything
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Orange.copy(alpha = 0.16f), Color.Transparent),
+                center = Offset(cx, cy),
+                radius = r * 1.05f
+            ),
+            radius = r * 1.05f,
+            center = Offset(cx, cy)
+        )
+
+        // Concentric rings — warm gold
+        listOf(0.98f, 0.74f, 0.5f, 0.3f).forEach { f ->
+            drawCircle(Amber.copy(alpha = 0.30f), r * f, Offset(cx, cy), style = Stroke(width = 1.dp.toPx()))
+        }
+
+        // Radiating spikes (rotating)
+        rotate(spin, Offset(cx, cy)) {
+            spikes.forEach { (angle, lenF, alphaF) ->
+                val a = Math.toRadians(angle.toDouble())
+                val outer = r * (0.98f + lenF * 0.5f)
+                val dx = cos(a).toFloat()
+                val dy = sin(a).toFloat()
+                // soft wide glow pass
+                drawLine(
+                    OrangeBright.copy(alpha = 0.10f * alphaF),
+                    Offset(cx, cy),
+                    Offset(cx + outer * dx, cy + outer * dy),
+                    strokeWidth = 3.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+                // crisp bright core line
+                drawLine(
+                    Orange.copy(alpha = 0.75f * alphaF),
+                    Offset(cx + r * 0.12f * dx, cy + r * 0.12f * dy),
+                    Offset(cx + outer * dx, cy + outer * dy),
+                    strokeWidth = 1.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+        }
+
+        // Particle scatter ring (slow counter-rotation)
+        rotate(spinSlow, Offset(cx, cy)) {
+            particles.forEach { (angle, radF, sizeDp) ->
+                val a = Math.toRadians(angle.toDouble())
+                val rad = r * radF
+                drawCircle(
+                    OrangeBright.copy(alpha = 0.55f),
+                    sizeDp.dp.toPx() / 2f,
+                    Offset(cx + (rad * cos(a)).toFloat(), cy + (rad * sin(a)).toFloat())
+                )
+            }
+        }
+
+        // Hot glowing core
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFFFFFDE0), OrangeCore, Orange, Orange.copy(alpha = 0f)),
+                center = Offset(cx, cy),
+                radius = r * 0.4f * pulse
+            ),
+            radius = r * 0.4f * pulse,
+            center = Offset(cx, cy)
+        )
+        drawCircle(Color.White.copy(alpha = 0.95f), r * 0.07f * pulse, Offset(cx, cy))
+    }
+}
+
+@Composable
+private fun HomeSideMenu(
+    modifier: Modifier = Modifier,
+    onArmorSuits: () -> Unit,
+    onSystems: () -> Unit,
+    onAiAssistant: () -> Unit,
+    onSettings: () -> Unit
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SideMenuRow(R.drawable.ic_shield, "ARMOR", "SUITS", onArmorSuits)
+        SideMenuRow(R.drawable.ic_cpu, "SYSTEMS", "", onSystems)
+        SideMenuRow(R.drawable.ic_ai_spark, "AI", "ASSISTANT", onAiAssistant)
+        SideMenuRow(R.drawable.ic_settings, "SETTINGS", "", onSettings)
+        Spacer(Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun SideMenuRow(icon: Int, line1: String, line2: String, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(10.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Color(0x330A1508))
+            .border(1.dp, NavyBlue.copy(alpha = 0.45f), shape)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(painterResource(icon), null, tint = NavyBlue, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.height(3.dp))
+        Text(line1, color = NavyBlue, fontSize = 7.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1)
+        if (line2.isNotEmpty()) {
+            Text(line2, color = NavyBlue, fontSize = 7.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun OnlineStatusBar(label: String, detail: String) {
+    val shape = RoundedCornerShape(14.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Color(0x330A1508))
+            .border(1.dp, NavyBlue.copy(alpha = 0.5f), shape)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+    ) {
+        Column {
+            Text(
+                "JARVIS ONLINE",
+                color = NavyBlue,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                detail.ifBlank { "All systems operational" },
+                color = AmberDim,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun CompactTalkButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(Color(0x330A1508))
+            .border(1.5.dp, NavyBlue, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(painterResource(R.drawable.ic_mic), null, tint = NavyBlue, modifier = Modifier.size(20.dp))
+    }
+}
+
+@Composable
+private fun TalkButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(
+                Brush.verticalGradient(listOf(Color(0x990A1825), Color(0x88050E16)))
+            )
+            .border(
+                width = 1.5.dp,
+                brush = Brush.verticalGradient(listOf(Cyan, Cyan.copy(alpha = 0.4f))),
+                shape = RoundedCornerShape(26.dp)
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(R.drawable.ic_mic), null, tint = Cyan, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(10.dp))
+            Text("Talk", color = Cyan, fontSize = 17.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun MessageInputRow() {
+    var text by remember { mutableStateOf("") }
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("\u00BB", color = CyanSoft, fontSize = 14.sp, fontFamily = FontFamily.Monospace)
+            Spacer(Modifier.width(8.dp))
+            BasicTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.weight(1f),
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    color = CyanBright,
+                    fontSize = 13.sp,
+                    fontFamily = FontFamily.Monospace
+                ),
+                cursorBrush = SolidColor(Cyan),
+                decorationBox = { inner ->
+                    if (text.isEmpty()) {
+                        Text(
+                            "Type your message...",
+                            color = CyanSoft,
+                            fontSize = 13.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    inner()
+                }
             )
         }
     }
@@ -330,7 +577,7 @@ private fun ScanlineOverlay(modifier: Modifier = Modifier) {
 
 @Composable
 private fun CornerBrackets(modifier: Modifier = Modifier) {
-    val c = Cyan.copy(alpha = 0.7f)
+    val c = NavyBlue.copy(alpha = 0.7f)
     Canvas(modifier) {
         val len = 22.dp.toPx()
         val pad = 10.dp.toPx()
@@ -357,14 +604,22 @@ private fun GlassCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val shape = RoundedCornerShape(22.dp)
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
+            .shadow(
+                elevation = 10.dp,
+                shape = shape,
+                ambientColor = Cyan.copy(alpha = 0.25f),
+                spotColor = Cyan.copy(alpha = 0.25f)
+            )
+            .clip(shape)
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        Color(0x990A1825),
-                        Color(0x88050E16)
+                        Color(0x330A1825),
+                        Color(0x99081420),
+                        Color(0xB3050E16)
                     )
                 )
             )
@@ -372,13 +627,40 @@ private fun GlassCard(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     listOf(
-                        Cyan.copy(alpha = 0.35f),
-                        Cyan.copy(alpha = 0.12f)
+                        Cyan.copy(alpha = 0.55f),
+                        Cyan.copy(alpha = 0.10f)
                     )
                 ),
-                shape = RoundedCornerShape(18.dp)
+                shape = shape
             )
     ) {
+        // Glossy top sheen — the "liquid glass" highlight
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.42f)
+                .align(Alignment.TopCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0x33FFFFFF),
+                            Color(0x0DFFFFFF),
+                            Color.Transparent
+                        )
+                    ),
+                    shape = shape
+                )
+        )
+        // Faint inner edge glow
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .border(
+                    width = 0.6.dp,
+                    color = Color(0x40FFFFFF),
+                    shape = shape
+                )
+        )
         content()
     }
 }
@@ -447,27 +729,42 @@ private fun StarkHeader(
     onChat: () -> Unit,
     onSettings: () -> Unit
 ) {
+    val headerShape = RoundedCornerShape(20.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .shadow(elevation = 8.dp, shape = headerShape, ambientColor = Cyan.copy(alpha = 0.2f), spotColor = Cyan.copy(alpha = 0.2f))
+            .clip(headerShape)
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        Color(0x990A1825),
-                        Color(0x88050E16)
+                        Color(0x330A1825),
+                        Color(0x99081420),
+                        Color(0xB3050E16)
                     )
                 )
             )
             .border(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
-                    listOf(Cyan.copy(alpha = 0.40f), Cyan.copy(alpha = 0.15f))
+                    listOf(Cyan.copy(alpha = 0.55f), Cyan.copy(alpha = 0.15f))
                 ),
-                shape = RoundedCornerShape(18.dp)
+                shape = headerShape
             )
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.5f)
+                .align(Alignment.TopCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0x2EFFFFFF), Color(0x0AFFFFFF), Color.Transparent)
+                    ),
+                    shape = headerShape
+                )
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
@@ -488,9 +785,9 @@ private fun StarkHeader(
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "STARK INDUSTRIES",
+                        "J.A.R.V.I.S",
                         color = Cyan,
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
                         letterSpacing = 1.2.sp
@@ -513,7 +810,7 @@ private fun StarkHeader(
                     }
                 }
                 Text(
-                    "J.A.R.V.I.S · ONLINE · ${mode.uppercase()}",
+                    "ONLINE · SYSTEM ACTIVE · ${mode.uppercase()}",
                     color = CyanSoft,
                     fontSize = 7.sp,
                     fontFamily = FontFamily.Monospace,
@@ -546,17 +843,17 @@ private fun StarkHeader(
 }
 
 @Composable
-private fun RoundIconBtn(iconRes: Int, onClick: () -> Unit) {
+private fun RoundIconBtn(iconRes: Int, onClick: () -> Unit, accent: Color = Cyan) {
     Box(
         modifier = Modifier
             .size(32.dp)
             .clip(CircleShape)
             .background(Color(0xCC06121C))
-            .border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape)
+            .border(1.dp, accent.copy(alpha = 0.55f), CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(painterResource(iconRes), null, tint = Cyan, modifier = Modifier.size(15.dp))
+        Icon(painterResource(iconRes), null, tint = accent, modifier = Modifier.size(15.dp))
     }
 }
 
@@ -685,8 +982,6 @@ private fun DiagnosticGauge(
                     }
                     // core icon dot
                     drawCircle(accent.copy(alpha = 0.3f), r * 0.25f, Offset(cx, cy))
-
-
                 }
                 Icon(
                     painterResource(icon), null, tint = accent,
@@ -955,63 +1250,7 @@ private fun CompactRow(id: String, percent: Float, accent: Color) {
     }
 }
 
-/* ───────── Boot + Mark VII central reactor ───────── */
-
-@Composable
-private fun BootPowerOnOverlay(progress: Float) {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(Color(0xEE01040A)),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(Modifier.size(220.dp)) {
-            val cx = size.width / 2f
-            val cy = size.height / 2f
-            val r = min(cx, cy) * 0.9f
-            val accent = Orange
-            // Expanding rings based on progress
-            for (i in 1..4) {
-                val t = (progress * 4f - (i - 1)).coerceIn(0f, 1f)
-                if (t > 0f) {
-                    drawCircle(
-                        accent.copy(alpha = 0.15f + 0.4f * (1f - t)),
-                        r * (0.2f + t * 0.7f),
-                        Offset(cx, cy),
-                        style = Stroke(width = 2.5f)
-                    )
-                }
-            }
-            drawCircle(
-                Brush.radialGradient(
-                    listOf(OrangeCore, Orange, Orange.copy(alpha = 0.2f)),
-                    center = Offset(cx, cy),
-                    radius = r * 0.2f * progress.coerceAtLeast(0.15f)
-                ),
-                r * 0.18f * progress.coerceAtLeast(0.2f),
-                Offset(cx, cy)
-            )
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(Modifier.height(200.dp))
-            Text(
-                "J.A.R.V.I.S. BOOT SEQUENCE",
-                color = OrangeBright,
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                "${(progress * 100).toInt()}%",
-                color = OrangeSoft,
-                fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace
-            )
-        }
-    }
-}
+/* ───────── Mark VII central reactor ───────── */
 
 @Composable
 private fun MarkViiReactor(
@@ -1056,29 +1295,6 @@ private fun MarkViiReactor(
             ),
             label = "pulse"
         )
-        // Listening / speaking ripple expand 0→1 loop
-        val ripple by infinite.animateFloat(
-            0f, 1f,
-            infiniteRepeatable(
-                tween(
-                    when (state) {
-                        HudState.LISTENING -> 1200
-                        HudState.SPEAKING -> 1600
-                        HudState.THINKING, HudState.EXECUTING -> 2000
-                        else -> 3000
-                    },
-                    easing = LinearEasing
-                ),
-                RepeatMode.Restart
-            ),
-            label = "ripple"
-        )
-        // Boot-style ring draw progress (used when idle settles)
-        val bootRing by infinite.animateFloat(
-            0.7f, 1f,
-            infiniteRepeatable(tween(4000, easing = LinearEasing), RepeatMode.Reverse),
-            label = "bootRing"
-        )
         // Abstract energy core – orange (user requested)
         val accent = when (state) {
             HudState.THINKING, HudState.EXECUTING -> OrangeBright
@@ -1094,120 +1310,117 @@ private fun MarkViiReactor(
             val cy = size.height / 2f
             val r = min(cx, cy) * 0.92f
 
-            // Deep glow bloom
-            drawCircle(accent.copy(alpha = 0.05f + 0.04f * pulse), r * 1.40f, Offset(cx, cy))
-            drawCircle(accent.copy(alpha = 0.09f), r * 1.22f, Offset(cx, cy))
-            drawCircle(accent.copy(alpha = 0.14f), r * 1.08f, Offset(cx, cy))
+            // Outer glow
+            drawCircle(accent.copy(alpha = 0.05f + 0.05f * pulse), r * 1.35f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.08f), r * 1.18f, Offset(cx, cy))
 
-            // Dense outer energy field (radial strands)
-            rotate(slow * 0.18f, Offset(cx, cy)) {
-                for (i in 0 until 90) {
-                    val a = Math.toRadians(i * 4.0)
-                    val jitter = ((i * 17) % 10) / 10f
-                    val inner = r * (0.78f + 0.08f * jitter)
-                    val outer = r * (0.92f + 0.08f * ((i * 13) % 7) / 7f)
-                    val major = i % 5 == 0
+            // Dense outer particle field (reference style)
+            rotate(slow * 0.15f, Offset(cx, cy)) {
+                for (i in 0 until 120) {
+                    val a = Math.toRadians(i * 3.0 + slow * 0.1)
+                    val dist = r * (0.82f + 0.14f * ((i * 17) % 10) / 10f)
+                    val len = r * (0.03f + 0.06f * ((i * 13) % 7) / 7f)
+                    val x1 = cx + (dist * cos(a)).toFloat()
+                    val y1 = cy + (dist * sin(a)).toFloat()
+                    val x2 = cx + ((dist + len) * cos(a)).toFloat()
+                    val y2 = cy + ((dist + len) * sin(a)).toFloat()
                     drawLine(
-                        accent.copy(alpha = if (major) 0.75f else 0.22f + 0.15f * jitter),
-                        Offset(cx + (inner * cos(a)).toFloat(), cy + (inner * sin(a)).toFloat()),
-                        Offset(cx + (outer * cos(a)).toFloat(), cy + (outer * sin(a)).toFloat()),
-                        strokeWidth = if (major) 2.0f else 0.9f,
+                        accent.copy(alpha = 0.15f + 0.45f * ((i % 5) / 4f)),
+                        Offset(x1, y1), Offset(x2, y2),
+                        strokeWidth = if (i % 5 == 0) 1.8f else 0.8f,
                         cap = StrokeCap.Round
                     )
                 }
             }
 
-            // Multiple elliptical-style orbits
-            for (o in 0 until 6) {
-                val frac = 0.30f + o * 0.10f
-                val speed = if (o % 2 == 0) med * (0.35f + o * 0.1f) else -med * (0.4f + o * 0.08f)
+            // Multiple tilted orbital ellipses (simulated by rotated circles + arcs)
+            for (orbit in 0 until 5) {
+                val orbitR = r * (0.35f + orbit * 0.11f)
+                val speed = if (orbit % 2 == 0) med * (0.4f + orbit * 0.15f) else -med * (0.5f + orbit * 0.12f)
                 rotate(speed, Offset(cx, cy)) {
                     drawCircle(
-                        accent.copy(alpha = 0.30f + o * 0.05f),
-                        r * frac, Offset(cx, cy),
+                        accent.copy(alpha = 0.25f + orbit * 0.06f),
+                        orbitR, Offset(cx, cy),
                         style = Stroke(
-                            width = r * (0.008f + (6 - o) * 0.0015f),
-                            pathEffect = if (o % 2 == 1)
-                                PathEffect.dashPathEffect(floatArrayOf(9f, 6f), 0f)
+                            width = r * (0.006f + orbit * 0.001f),
+                            pathEffect = if (orbit % 2 == 1)
+                                PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
                             else null
                         )
                     )
-                    val nodes = 6 + o * 2
+                    // Nodes on orbit
+                    val nodes = 4 + orbit
                     for (n in 0 until nodes) {
-                        val a = Math.toRadians(n * 360.0 / nodes + o * 8.0)
+                        val a = Math.toRadians(n * 360.0 / nodes)
                         drawCircle(
-                            accent.copy(alpha = 0.80f),
-                            r * (0.010f + (o % 3) * 0.003f),
-                            Offset(cx + (r * frac * cos(a)).toFloat(), cy + (r * frac * sin(a)).toFloat())
+                            accent.copy(alpha = 0.7f),
+                            r * 0.012f,
+                            Offset(cx + (orbitR * cos(a)).toFloat(), cy + (orbitR * sin(a)).toFloat())
                         )
                     }
                 }
             }
 
             // Chaotic inner energy strands
-            rotate(fast * 0.55f, Offset(cx, cy)) {
-                for (i in 0 until 20) {
-                    val a0 = Math.toRadians(i * 18.0 + fast * 0.15)
-                    val a1 = a0 + Math.toRadians(20.0 + (i % 4) * 10.0)
-                    val r0 = r * 0.10f
-                    val r1 = r * (0.26f + 0.06f * pulse)
+            rotate(fast * 0.6f, Offset(cx, cy)) {
+                for (i in 0 until 24) {
+                    val a0 = Math.toRadians(i * 15.0 + fast * 0.2)
+                    val a1 = a0 + Math.toRadians(25.0 + (i % 5) * 8.0)
+                    val r0 = r * 0.12f
+                    val r1 = r * (0.28f + 0.08f * pulse)
                     drawLine(
-                        accent.copy(alpha = 0.40f + 0.25f * pulse),
+                        accent.copy(alpha = 0.35f + 0.25f * pulse),
                         Offset(cx + (r0 * cos(a0)).toFloat(), cy + (r0 * sin(a0)).toFloat()),
                         Offset(cx + (r1 * cos(a1)).toFloat(), cy + (r1 * sin(a1)).toFloat()),
-                        strokeWidth = 1.3f,
+                        strokeWidth = 1.2f,
                         cap = StrokeCap.Round
                     )
                 }
             }
 
-            // Fast core ring
-            rotate(fast * 1.3f, Offset(cx, cy)) {
+            // Fast spinning dashed core ring
+            rotate(fast * 1.4f, Offset(cx, cy)) {
                 drawCircle(
-                    accent.copy(alpha = 0.80f),
+                    accent.copy(alpha = 0.75f),
                     r * 0.22f, Offset(cx, cy),
                     style = Stroke(
-                        width = r * 0.016f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(7f, 5f), 0f)
+                        width = r * 0.014f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f), 0f)
                     )
                 )
             }
 
-            // State ripples
-            if (state == HudState.LISTENING || state == HudState.SPEAKING || state == HudState.THINKING) {
-                for (k in 0 until 3) {
-                    val t = ((ripple + k * 0.33f) % 1f)
-                    drawCircle(
-                        accent.copy(alpha = (1f - t) * 0.5f),
-                        r * (0.22f + t * 0.75f),
-                        Offset(cx, cy),
-                        style = Stroke(width = r * 0.014f * (1f - t * 0.5f))
-                    )
-                }
+            // Counter ring
+            rotate(-fast * 0.9f, Offset(cx, cy)) {
+                drawCircle(
+                    accent.copy(alpha = 0.45f),
+                    r * 0.30f, Offset(cx, cy),
+                    style = Stroke(width = r * 0.008f)
+                )
             }
 
-            // Hot core
-            val coreR = r * 0.13f
-            drawCircle(accent.copy(alpha = 0.25f + 0.2f * pulse), coreR * 2.8f, Offset(cx, cy))
-            drawCircle(accent.copy(alpha = 0.45f), coreR * 1.8f, Offset(cx, cy))
+            // Bright core
+            val coreR = r * 0.14f
+            drawCircle(accent.copy(alpha = 0.22f * pulse), coreR * 2.6f, Offset(cx, cy))
+            drawCircle(accent.copy(alpha = 0.40f), coreR * 1.7f, Offset(cx, cy))
             drawCircle(
                 Brush.radialGradient(
-                    listOf(Color.White, coreAccent, accent, accent.copy(alpha = 0.2f)),
+                    listOf(coreAccent, accent, accent.copy(alpha = 0.2f)),
                     center = Offset(cx, cy),
-                    radius = coreR * 1.4f
+                    radius = coreR * 1.3f
                 ),
                 coreR, Offset(cx, cy)
             )
-            drawCircle(Color.White.copy(alpha = 0.98f), coreR * 0.32f, Offset(cx, cy))
+            drawCircle(Color.White.copy(alpha = 0.95f), coreR * 0.28f, Offset(cx, cy))
 
-            // Micro particles around core
-            rotate(fast * 1.7f, Offset(cx, cy)) {
-                for (i in 0 until 12) {
-                    val a = Math.toRadians(i * 30.0)
-                    val pr = coreR * (1.9f + (i % 4) * 0.35f)
+            // Micro orbiting particles
+            rotate(fast * 1.8f, Offset(cx, cy)) {
+                for (i in 0 until 10) {
+                    val a = Math.toRadians(i * 36.0)
+                    val pr = coreR * (2.0f + (i % 3) * 0.4f)
                     drawCircle(
-                        accent.copy(alpha = 0.75f),
-                        r * 0.009f,
+                        accent.copy(alpha = 0.8f),
+                        r * 0.010f,
                         Offset(cx + (pr * cos(a)).toFloat(), cy + (pr * sin(a)).toFloat())
                     )
                 }
@@ -1326,7 +1539,7 @@ private fun WaveformBar(active: Boolean) {
             .height(22.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(Color(0xFF050E16))
-            .border(0.5.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(4.dp))
+            .border(0.5.dp, NavyBlue.copy(alpha = 0.45f), RoundedCornerShape(4.dp))
     ) {
         val n = 56
         val w = size.width / n
@@ -1342,7 +1555,7 @@ private fun WaveformBar(active: Boolean) {
             }
             val x = i * w + w / 2
             drawLine(
-                (if (active) Cyan else CyanSoft).copy(alpha = 0.5f + 0.5f * (1f - dist)),
+                (if (active) NavyBlue else NavyBlueDim).copy(alpha = 0.5f + 0.5f * (1f - dist)),
                 Offset(x, size.height / 2 - h / 2),
                 Offset(x, size.height / 2 + h / 2),
                 strokeWidth = w * 0.45f,
@@ -1359,16 +1572,16 @@ private fun ResponseBar(text: String) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(PanelDim)
-            .border(1.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
+            .border(1.dp, NavyBlue.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(painterResource(R.drawable.ic_robot), null, tint = Cyan, modifier = Modifier.size(14.dp))
+        Icon(painterResource(R.drawable.ic_robot_face), null, tint = Color.Unspecified, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(6.dp))
         Column(Modifier.weight(1f)) {
             Text(
                 "▸ JARVIS RESPONSE",
-                color = CyanSoft,
+                color = AmberDim,
                 fontSize = 6.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
@@ -1376,7 +1589,7 @@ private fun ResponseBar(text: String) {
             )
             Text(
                 text,
-                color = CyanBright,
+                color = OrangeBright,
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
                 maxLines = 2,
@@ -1451,7 +1664,7 @@ private fun BottomNav(
             .background(
                 Brush.verticalGradient(listOf(Color(0xF0050E16), Color(0xF003080E)))
             )
-            .border(1.dp, Cyan.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
+            .border(1.dp, NavyBlue.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
             .padding(horizontal = 4.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -1462,15 +1675,15 @@ private fun BottomNav(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
-                    .background(Color(0x4000D9FF))
-                    .border(2.dp, Cyan, CircleShape)
+                    .background(Color(0x40FFAA00))
+                    .border(2.dp, NavyBlue, CircleShape)
                     .clickable(onClick = onMic),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painterResource(R.drawable.ic_stark_hex),
                     contentDescription = null,
-                    tint = Color.Unspecified,
+                    tint = NavyBlue,
                     modifier = Modifier.size(34.dp)
                 )
             }
@@ -1489,8 +1702,8 @@ private fun NavItem(modifier: Modifier, icon: Int, label: String, onClick: () ->
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(painterResource(icon), null, tint = Cyan, modifier = Modifier.size(18.dp))
+        Icon(painterResource(icon), null, tint = NavyBlue, modifier = Modifier.size(18.dp))
         Spacer(Modifier.height(2.dp))
-        Text(label, color = CyanSoft, fontSize = 7.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+        Text(label, color = AmberDim, fontSize = 7.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
     }
 }
