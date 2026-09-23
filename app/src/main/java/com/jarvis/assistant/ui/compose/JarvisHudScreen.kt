@@ -285,11 +285,8 @@ fun JarvisHudScreen(
                 onMore = actions.onNavMore
             )
         }
-
-        }
     }
 }
-
 /* Home core-only layout v2 */
 /* ───────── Backgrounds ───────── */
 
