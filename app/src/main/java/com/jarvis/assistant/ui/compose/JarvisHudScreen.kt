@@ -72,6 +72,9 @@ private val AmberDim = Color(0xFFB07000)
 private val NavyBlue = Color(0xFF3B6FE0)
 private val NavyBlueBright = Color(0xFF8FB4FF)
 private val NavyBlueDim = Color(0xFF1E3A8A)
+private val Teal = Color(0xFF3BA9A0)
+private val TealBright = Color(0xFFA8F0E6)
+private val TealDim = Color(0xFF1F6B66)
 private val Orange = Color(0xFFFF8C00)
 private val OrangeBright = Color(0xFFFFC866)
 private val OrangeCore = Color(0xFFFFE8B0)
@@ -144,56 +147,316 @@ fun JarvisHudScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            // ── Header ──
-            JarvisAiHeader(onSettings = actions.onSettings)
+            // ── Header: "JARVIS" centered + build tag ──
+            Box(Modifier.fillMaxWidth()) {
+                Text(
+                    "JARVIS",
+                    color = TealBright,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 3.sp,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+                Text(
+                    "v1.0 · build 31",
+                    color = TealDim,
+                    fontSize = 7.sp,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                )
+            }
 
             Spacer(Modifier.height(10.dp))
 
-            // ── Radar visual + side menu ──
-            Row(
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    if (ui.waveformActive) "LISTENING ON" else "LISTENING OFF",
+                    color = TealBright,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 1.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x1A3BA9A0))
+                        .border(1.dp, Teal.copy(alpha = 0.6f), CircleShape)
+                        .clickable(onClick = actions.onSettings),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("i", color = TealBright, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+
+            TealClockDial(
+                clock = ui.clock,
+                percent = parsePercent(ui.battery),
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                JarvisRadarVisual(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clickable { actions.onReactorTap() }
-                )
-                HomeSideMenu(
-                    modifier = Modifier
-                        .width(92.dp)
-                        .fillMaxHeight(),
-                    onArmorSuits = actions.onArmor,
-                    onSystems = actions.onSystem,
-                    onAiAssistant = actions.onChat,
-                    onSettings = actions.onSettings
-                )
+                    .fillMaxWidth()
+                    .clickable { actions.onReactorTap() }
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                WeatherCard(modifier = Modifier.weight(1f), location = ui.location, weather = ui.weather)
+                DateCard(modifier = Modifier.weight(1f))
             }
 
             Spacer(Modifier.height(8.dp))
-            OnlineStatusBar(label = ui.stateLabel, detail = ui.response)
-            Spacer(Modifier.height(8.dp))
-            WaveformBar(active = ui.waveformActive)
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.weight(1f)) { ResponseBar(ui.response) }
-                Spacer(Modifier.width(8.dp))
-                CompactTalkButton(onClick = actions.onTalk)
+
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TealPill(
+                    modifier = Modifier.weight(1f),
+                    icon = R.drawable.ic_settings,
+                    text = "SETTINGS",
+                    onClick = actions.onSettings
+                )
+                TealPill(
+                    modifier = Modifier.weight(1f),
+                    icon = R.drawable.ic_ai_spark,
+                    text = "ONLINE",
+                    onClick = actions.onChat
+                )
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x1A3BA9A0))
+                        .border(1.dp, Teal.copy(alpha = 0.6f), CircleShape)
+                        .clickable(onClick = actions.onArmor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("?", color = TealBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                }
             }
-            Spacer(Modifier.height(8.dp))
-            BottomNav(
+
+            Spacer(Modifier.height(10.dp))
+
+            IronDock(
                 onHome = actions.onNavHome,
                 onChat = actions.onNavChat,
-                onMic = actions.onNavMic,
+                onTalk = actions.onTalk,
                 onVision = actions.onNavVision,
                 onMore = actions.onNavMore
             )
         }
+    }
+}
+
+@Composable
+private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Modifier) {
+    val infinite = rememberInfiniteTransition(label = "dialSpin")
+    val dashSpin by infinite.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(20000, easing = LinearEasing)),
+        label = "dialDashSpin"
+    )
+
+    // Parse "HH:mm:ss" -> 12h display
+    val parts = clock.split(":")
+    val h24 = parts.getOrNull(0)?.toIntOrNull() ?: 0
+    val min = parts.getOrNull(1) ?: "00"
+    val sec = parts.getOrNull(2) ?: "00"
+    val ampm = if (h24 >= 12) "PM" else "AM"
+    val h12 = (h24 % 12).let { if (it == 0) 12 else it }
+
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = size.minDimension / 2f * 0.94f
+
+            // outer tick ring
+            for (i in 0 until 72) {
+                val a = Math.toRadians((i * 5).toDouble())
+                val long = i % 6 == 0
+                val inner = r * (if (long) 0.90f else 0.94f)
+                val outer = r
+                drawLine(
+                    TealDim.copy(alpha = if (long) 0.8f else 0.4f),
+                    Offset(cx + (inner * cos(a)).toFloat(), cy + (inner * sin(a)).toFloat()),
+                    Offset(cx + (outer * cos(a)).toFloat(), cy + (outer * sin(a)).toFloat()),
+                    strokeWidth = if (long) 1.6.dp.toPx() else 0.8.dp.toPx()
+                )
+            }
+
+            // dashed rotating ring
+            rotate(dashSpin, Offset(cx, cy)) {
+                drawCircle(
+                    Teal.copy(alpha = 0.55f),
+                    r * 0.82f,
+                    Offset(cx, cy),
+                    style = Stroke(width = 1.2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)))
+                )
+            }
+
+            // progress arc (battery %)
+            drawArc(
+                color = Color(0xFFFF6A00).copy(alpha = 0.85f),
+                startAngle = 150f,
+                sweepAngle = 240f * (percent.coerceIn(0f, 100f) / 100f),
+                useCenter = false,
+                topLeft = Offset(cx - r * 0.70f, cy - r * 0.70f),
+                size = Size(r * 1.4f, r * 1.4f),
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = TealDim.copy(alpha = 0.25f),
+                startAngle = 150f,
+                sweepAngle = 240f,
+                useCenter = false,
+                topLeft = Offset(cx - r * 0.70f, cy - r * 0.70f),
+                size = Size(r * 1.4f, r * 1.4f),
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+            )
+
+            // inner grid circle
+            drawCircle(TealDim.copy(alpha = 0.35f), r * 0.55f, Offset(cx, cy), style = Stroke(width = 1.dp.toPx()))
+        }
+
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                "$h12:$min",
+                color = Color(0xFFEFFFFB),
+                fontSize = 44.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
+            Spacer(Modifier.width(6.dp))
+            Column(Modifier.padding(bottom = 8.dp)) {
+                Text(ampm, color = TealBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(sec, color = TealDim, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeatherCard(modifier: Modifier = Modifier, location: String, weather: String) {
+    val temp = Regex("-?\\d+").find(weather)?.value ?: "--"
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color(0x260A1F1D))
+            .border(1.dp, Teal.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
+            .padding(10.dp)
+    ) {
+        Column {
+            Text(
+                location.ifBlank { "—" }.uppercase(),
+                color = TealBright,
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(temp, color = Color(0xFFEFFFFB), fontSize = 26.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                Text("°", color = TealDim, fontSize = 16.sp, fontFamily = FontFamily.Monospace)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DateCard(modifier: Modifier = Modifier) {
+    val cal = remember { java.util.Calendar.getInstance() }
+    val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+    val month = java.text.SimpleDateFormat("MMMM", java.util.Locale.getDefault()).format(cal.time).uppercase()
+    val year = cal.get(java.util.Calendar.YEAR)
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color(0x260A1F1D))
+            .border(1.dp, Teal.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
+            .padding(10.dp)
+    ) {
+        Column {
+            Row {
+                Text(month, color = TealBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(4.dp))
+                Text("$year", color = TealDim, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            }
+            Spacer(Modifier.height(4.dp))
+            Text("$day", color = Color(0xFFEFFFFB), fontSize = 26.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+        }
+    }
+}
+
+@Composable
+private fun TealPill(modifier: Modifier = Modifier, icon: Int, text: String, onClick: () -> Unit) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(Color(0x1A3BA9A0))
+            .border(1.dp, Teal.copy(alpha = 0.5f), RoundedCornerShape(999.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(painterResource(icon), null, tint = TealBright, modifier = Modifier.size(13.dp))
+        Spacer(Modifier.width(5.dp))
+        Text(text, color = TealBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+private fun IronDock(
+    onHome: () -> Unit,
+    onChat: () -> Unit,
+    onTalk: () -> Unit,
+    onVision: () -> Unit,
+    onMore: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0x260A1F1D))
+            .border(1.dp, Teal.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 10.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        DockIcon(R.drawable.ic_stark_hex, onHome)
+        DockIcon(R.drawable.ic_chat, onChat)
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(Color(0x33FF6A00))
+                .border(1.5.dp, Color(0xFFFF6A00), CircleShape)
+                .clickable(onClick = onTalk),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(painterResource(R.drawable.ic_mic), null, tint = Color(0xFFFF6A00), modifier = Modifier.size(22.dp))
+        }
+        DockIcon(R.drawable.ic_eye, onVision)
+        DockIcon(R.drawable.ic_shield, onMore)
+    }
+}
+
+@Composable
+private fun DockIcon(icon: Int, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(38.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(painterResource(icon), null, tint = TealBright, modifier = Modifier.size(18.dp))
     }
 }
 
