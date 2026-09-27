@@ -46,7 +46,7 @@ class ElevenLabsTtsClient(private val context: Context) {
      *  falling back to the stock male voice if none was set. */
     private val voiceId: String
         get() {
-            if (settings.getVoiceType() == "female") return FEMALE_VOICE_ID
+            // Female voice disabled — always use male/JARVIS voice
             val override = BuildConfig.ELEVENLABS_VOICE_ID.trim()
             return if (override.isNotEmpty()) override else DEFAULT_VOICE_ID
         }

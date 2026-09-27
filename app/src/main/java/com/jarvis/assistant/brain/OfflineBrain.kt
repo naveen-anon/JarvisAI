@@ -354,12 +354,8 @@ class OfflineBrain(
     private fun handleSettings(cmd: String, original: String): String? = when {
         // Voice settings
         containsAny(cmd, "change voice", "set voice") -> {
-            val voiceType = when {
-                "male" in cmd -> { settings.setVoiceType("male"); "male" }
-                "female" in cmd -> { settings.setVoiceType("female"); "female" }
-                else -> settings.getVoiceType()
-            }
-            "Voice changed to $voiceType."
+            settings.setVoiceType("male")
+            "Voice is set to male (JARVIS)."
         }
 
         containsAny(cmd, "voice speed", "speak faster", "speak slower") -> {

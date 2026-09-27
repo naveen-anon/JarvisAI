@@ -109,7 +109,6 @@ data class JarvisHudActions(
     val onBriefing: () -> Unit = {},
     val onSystem: () -> Unit = {},
     val onVision: () -> Unit = {},
-    val onArmor: () -> Unit = {},
     val onNavHome: () -> Unit = {},
     val onNavChat: () -> Unit = {},
     val onNavMic: () -> Unit = {},
@@ -233,7 +232,7 @@ fun JarvisHudScreen(
                         .clip(CircleShape)
                         .background(Color(0x1A3BA9A0))
                         .border(1.dp, Teal.copy(alpha = 0.6f), CircleShape)
-                        .clickable(onClick = actions.onArmor),
+                        .clickable(onClick = actions.onSettings),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("?", color = TealBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -704,13 +703,11 @@ private fun JarvisRadarVisual(modifier: Modifier = Modifier) {
 @Composable
 private fun HomeSideMenu(
     modifier: Modifier = Modifier,
-    onArmorSuits: () -> Unit,
     onSystems: () -> Unit,
     onAiAssistant: () -> Unit,
     onSettings: () -> Unit
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SideMenuRow(R.drawable.ic_shield, "ARMOR", "SUITS", onArmorSuits)
         SideMenuRow(R.drawable.ic_cpu, "SYSTEMS", "", onSystems)
         SideMenuRow(R.drawable.ic_ai_spark, "AI", "ASSISTANT", onAiAssistant)
         SideMenuRow(R.drawable.ic_settings, "SETTINGS", "", onSettings)
@@ -1951,14 +1948,12 @@ private fun ResponseBar(text: String) {
 private fun QuickActions(
     onBriefing: () -> Unit,
     onSystem: () -> Unit,
-    onVision: () -> Unit,
-    onArmor: () -> Unit
+    onVision: () -> Unit
 ) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         ChevronAction(Modifier.weight(1f), "BRIEF", R.drawable.ic_info, onBriefing)
         ChevronAction(Modifier.weight(1f), "SYS", R.drawable.ic_cpu, onSystem)
         ChevronAction(Modifier.weight(1f), "VISN", R.drawable.ic_eye, onVision)
-        ChevronAction(Modifier.weight(1f), "ARMOR", R.drawable.ic_shield, onArmor)
     }
 }
 

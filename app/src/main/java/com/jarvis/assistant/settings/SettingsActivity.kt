@@ -255,30 +255,8 @@ class SettingsActivity : AppCompatActivity() {
             })
         })
 
-        root.addView(sectionCard {
-            addView(sectionTitle("Voice Type"))
-            voiceTypeLabel = bodyText("Current: ${settings.getVoiceType()}")
-            addView(voiceTypeLabel)
-
-            val voiceRow = LinearLayout(this@SettingsActivity).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER
-            }
-            val icons = mapOf("male" to R.drawable.ic_person, "female" to R.drawable.ic_person)
-            fun refreshChips(current: String) {
-                voiceRow.removeAllViews()
-                listOf("male", "female").forEach { type ->
-                    voiceRow.addView(voiceTypeChip(type, icons[type] ?: R.drawable.ic_person, type == current) {
-                        settings.setVoiceType(type)
-                        voiceTypeLabel.text = "Current: $type"
-                        tts.speak("This is what my $type voice sounds like.")
-                        refreshChips(type)
-                    })
-                }
-            }
-            refreshChips(settings.getVoiceType())
-            addView(voiceRow)
-        })
+        // Voice Type selector removed — only male/JARVIS voice is used
+        settings.setVoiceType("male")
 
         root.addView(sectionCard {
             addView(sectionTitle("Voice Speed"))
