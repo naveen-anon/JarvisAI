@@ -202,6 +202,21 @@ class AssistantForegroundService : Service() {
         try { stt.stopContinuous() } catch (_: Exception) {}
         try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
+
+        // Siri-style acknowledgment before listening for the command
+        val ack = try {
+            val sm = SettingsManager(this)
+            val name = sm.getUserName().trim().lowercase()
+            when {
+                name in listOf("ma'am", "madam", "mam", "miss", "mrs", "ms") -> "Yes ma'am"
+                name.endsWith("a") || name in listOf("priya", "neha", "anjali", "riya", "shreya", "kavya") -> "Yes ma'am"
+                else -> "Yes sir"
+            }
+        } catch (_: Exception) {
+            "Yes sir"
+        }
+        try { tts.speak(ack) } catch (_: Exception) {}
+
         stt.listenOnce(
             onResult = { speech ->
                 try { stt.stopContinuous() } catch (_: Exception) {}
