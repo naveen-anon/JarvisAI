@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -270,6 +271,22 @@ private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Mo
     val h12 = (h24 % 12).let { if (it == 0) 12 else it }
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        // Ambient glow behind the dial
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = size.minDimension / 2f * 0.94f
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(Teal.copy(alpha = 0.14f), Color.Transparent),
+                    center = Offset(cx, cy),
+                    radius = r * 1.15f
+                ),
+                radius = r * 1.15f,
+                center = Offset(cx, cy)
+            )
+        }
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             val cx = size.width / 2f
             val cy = size.height / 2f
@@ -288,6 +305,9 @@ private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Mo
                     strokeWidth = if (long) 1.6.dp.toPx() else 0.8.dp.toPx()
                 )
             }
+
+            // fine hairline ring, just inside the dashed ring (extra depth layer)
+            drawCircle(TealDim.copy(alpha = 0.4f), r * 0.86f, Offset(cx, cy), style = Stroke(width = 0.7.dp.toPx()))
 
             // dashed rotating ring
             rotate(dashSpin, Offset(cx, cy)) {
@@ -319,8 +339,52 @@ private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Mo
                 style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
             )
 
-            // inner grid circle
-            drawCircle(TealDim.copy(alpha = 0.35f), r * 0.55f, Offset(cx, cy), style = Stroke(width = 1.dp.toPx()))
+            // horizontal crossing line
+            drawLine(
+                TealDim.copy(alpha = 0.30f),
+                Offset(cx - r * 0.98f, cy),
+                Offset(cx + r * 0.98f, cy),
+                strokeWidth = 0.6.dp.toPx()
+            )
+
+            // faint crosshatch grid inside the inner circle (HUD texture)
+            val gridR = r * 0.55f
+            val step = gridR * 2 / 7f
+            var gx = cx - gridR
+            while (gx <= cx + gridR) {
+                val dy = kotlin.math.sqrt((gridR * gridR - (gx - cx) * (gx - cx)).coerceAtLeast(0f))
+                drawLine(TealDim.copy(alpha = 0.14f), Offset(gx, cy - dy), Offset(gx, cy + dy), strokeWidth = 0.5.dp.toPx())
+                gx += step
+            }
+            var gy = cy - gridR
+            while (gy <= cy + gridR) {
+                val dx = kotlin.math.sqrt((gridR * gridR - (gy - cy) * (gy - cy)).coerceAtLeast(0f))
+                drawLine(TealDim.copy(alpha = 0.14f), Offset(cx - dx, gy), Offset(cx + dx, gy), strokeWidth = 0.5.dp.toPx())
+                gy += step
+            }
+
+            // inner grid circle boundary
+            drawCircle(TealDim.copy(alpha = 0.35f), gridR, Offset(cx, cy), style = Stroke(width = 1.dp.toPx()))
+
+            // top chevron markers
+            val chevY = cy - r * 1.02f
+            val chevW = r * 0.05f
+            // outline up-triangle
+            val upPath = Path().apply {
+                moveTo(cx, chevY - chevW * 0.8f)
+                lineTo(cx - chevW, chevY + chevW * 0.7f)
+                lineTo(cx + chevW, chevY + chevW * 0.7f)
+                close()
+            }
+            drawPath(upPath, color = TealBright.copy(alpha = 0.7f), style = Stroke(width = 1.dp.toPx()))
+            // filled down-triangle just below
+            val downPath = Path().apply {
+                moveTo(cx, chevY + chevW * 1.9f)
+                lineTo(cx - chevW * 0.7f, chevY + chevW * 0.9f)
+                lineTo(cx + chevW * 0.7f, chevY + chevW * 0.9f)
+                close()
+            }
+            drawPath(downPath, color = TealDim.copy(alpha = 0.85f))
         }
 
         Row(verticalAlignment = Alignment.Bottom) {
@@ -340,16 +404,44 @@ private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Mo
     }
 }
 
+/** 3D "stacked card" effect — offset translucent layers behind the main card,
+ *  matching the reference's parallax/holographic depth look. */
+@Composable
+private fun LayeredCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val shape = RoundedCornerShape(10.dp)
+    Box(modifier = modifier) {
+        Box(
+            Modifier
+                .matchParentSize()
+                .offset(x = 5.dp, y = 5.dp)
+                .clip(shape)
+                .background(Color(0x140A1F1D))
+                .border(1.dp, Teal.copy(alpha = 0.18f), shape)
+        )
+        Box(
+            Modifier
+                .matchParentSize()
+                .offset(x = 2.5.dp, y = 2.5.dp)
+                .clip(shape)
+                .background(Color(0x1D0A1F1D))
+                .border(1.dp, Teal.copy(alpha = 0.30f), shape)
+        )
+        Box(
+            Modifier
+                .clip(shape)
+                .background(Color(0x330A1F1D))
+                .border(1.dp, Teal.copy(alpha = 0.5f), shape)
+                .padding(10.dp)
+        ) {
+            content()
+        }
+    }
+}
+
 @Composable
 private fun WeatherCard(modifier: Modifier = Modifier, location: String, weather: String) {
     val temp = Regex("-?\\d+").find(weather)?.value ?: "--"
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color(0x260A1F1D))
-            .border(1.dp, Teal.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
-            .padding(10.dp)
-    ) {
+    LayeredCard(modifier = modifier) {
         Column {
             Text(
                 location.ifBlank { "—" }.uppercase(),
@@ -375,13 +467,7 @@ private fun DateCard(modifier: Modifier = Modifier) {
     val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
     val month = java.text.SimpleDateFormat("MMMM", java.util.Locale.getDefault()).format(cal.time).uppercase()
     val year = cal.get(java.util.Calendar.YEAR)
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color(0x260A1F1D))
-            .border(1.dp, Teal.copy(alpha = 0.45f), RoundedCornerShape(10.dp))
-            .padding(10.dp)
-    ) {
+    LayeredCard(modifier = modifier) {
         Column {
             Row {
                 Text(month, color = TealBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -422,10 +508,7 @@ private fun IronDock(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0x260A1F1D))
-            .border(1.dp, Teal.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-            .padding(horizontal = 10.dp, vertical = 10.dp),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
