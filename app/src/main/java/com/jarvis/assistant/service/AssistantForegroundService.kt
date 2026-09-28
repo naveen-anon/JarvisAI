@@ -402,7 +402,12 @@ class AssistantForegroundService : Service() {
         }
 
         val result = if (offlineReply == "REQUEST_BRIEFING") {
-            buildMorningBriefing() to true
+            try {
+                val b = com.jarvis.assistant.util.BriefingHelper(this).build(includeWeather = networkStatus.isOnline())
+                b.text to true
+            } catch (_: Exception) {
+                buildMorningBriefing() to true
+            }
         } else if (offlineReply != null) {
             offlineReply to false
         } else if (networkStatus.isOnline()) {

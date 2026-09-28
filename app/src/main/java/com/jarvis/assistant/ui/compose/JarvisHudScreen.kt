@@ -232,7 +232,7 @@ fun JarvisHudScreen(
                         .clip(CircleShape)
                         .background(Color(0x1A3BA9A0))
                         .border(1.dp, Teal.copy(alpha = 0.6f), CircleShape)
-                        .clickable(onClick = actions.onSettings),
+                        .clickable(onClick = actions.onBriefing),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("?", color = TealBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -525,7 +525,7 @@ private fun IronDock(
             Icon(painterResource(R.drawable.ic_mic), null, tint = Color(0xFFFF6A00), modifier = Modifier.size(22.dp))
         }
         DockIcon(R.drawable.ic_eye, onVision)
-        DockIcon(R.drawable.ic_shield, onMore)
+        DockIcon(R.drawable.ic_cpu, onMore)
     }
 }
 

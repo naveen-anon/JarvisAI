@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity(),
                         } catch (_: Exception) {}
                     },
                     onNavMore = {
-                        startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+                        startActivity(Intent(this, com.jarvis.assistant.ui.SystemCoreActivity::class.java))
                     }
                 )
             )
