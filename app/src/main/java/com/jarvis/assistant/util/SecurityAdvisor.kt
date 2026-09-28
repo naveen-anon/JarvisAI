@@ -48,6 +48,7 @@ class SecurityAdvisor(private val context: Context) {
         findings += backgroundListenPrivacy()
         findings += notificationAccess()
         findings += accessibilityJarvis()
+        findings += thirdPartyAccessibility()
         findings += dangerousPermsSelf()
         findings += screenTimeout()
 
@@ -358,4 +359,43 @@ class SecurityAdvisor(private val context: Context) {
             Finding("timeout", Severity.LOW, "Screen timeout", "Could not read timeout setting.")
         }
     }
+
+    /** Flag non-JARVIS accessibility services — high privilege third parties. */
+    private fun thirdPartyAccessibility(): Finding {
+        return try {
+            val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+            val enabled = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            val others = enabled.mapNotNull { info ->
+                val pkg = info.resolveInfo?.serviceInfo?.packageName ?: return@mapNotNull null
+                if (pkg == context.packageName) return@mapNotNull null
+                // Soft-skip common system packages
+                if (pkg.startsWith("com.android.") || pkg.startsWith("com.google.android.")) return@mapNotNull null
+                val label = try {
+                    info.resolveInfo.loadLabel(context.packageManager).toString()
+                } catch (_: Exception) {
+                    pkg
+                }
+                label to pkg
+            }
+            when {
+                others.isEmpty() -> Finding(
+                    "a11y_third", Severity.OK, "Third-party accessibility",
+                    "No third-party accessibility services enabled."
+                )
+                others.size == 1 -> Finding(
+                    "a11y_third", Severity.HIGH, "Third-party accessibility active",
+                    "Enabled: \( {others[0].first} ( \){others[0].second}). Accessibility can read the screen and drive UI.",
+                    "Disable any service you do not fully trust under Settings → Accessibility."
+                )
+                else -> Finding(
+                    "a11y_third", Severity.HIGH, "Multiple third-party accessibility services",
+                    "Enabled: ${others.joinToString { it.first }}. Each is high privilege.",
+                    "Review and remove unused accessibility services immediately."
+                )
+            }
+        } catch (_: Exception) {
+            Finding("a11y_third", Severity.LOW, "Third-party accessibility", "Could not enumerate accessibility services.")
+        }
+    }
+
 }

@@ -62,7 +62,7 @@ class JarvisWidgetProvider : AppWidgetProvider() {
 
             // Listen action
             val listenIntent = Intent(context, JarvisWidgetActionReceiver::class.java).apply {
-                action = JarvisWidgetActionReceiver.ACTION_LISTEN
+                action = JarvisWidgetActionReceiver.ACTION_START_LISTENING
             }
             val listenPi = PendingIntent.getBroadcast(
                 context, 0, listenIntent,

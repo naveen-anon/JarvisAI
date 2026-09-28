@@ -1,38 +1,37 @@
 package com.jarvis.assistant.util
 
 /**
- * Heuristic split for multi-step speech without calling the LLM.
- * Examples:
- *  - "open whatsapp then set alarm for 7"
- *  - "wifi on phir flashlight on"
- *  - "open camera and then take a note" (second may stay as reply via LLM later)
+ * Heuristic multi-step split without LLM.
+ * Supports EN + Hindi connectors and call/text business patterns.
  */
 object CommandChainSplitter {
 
     private val separators = listOf(
-        Regex("""\s+then\s+""", RegexOption.IGNORE_CASE),
         Regex("""\s+and\s+then\s+""", RegexOption.IGNORE_CASE),
+        Regex("""\s+then\s+""", RegexOption.IGNORE_CASE),
         Regex("""\s+phir\s+""", RegexOption.IGNORE_CASE),
         Regex("""\s+baad\s+mein\s+""", RegexOption.IGNORE_CASE),
         Regex("""\s+after\s+that\s+""", RegexOption.IGNORE_CASE),
-        Regex("""\s*,\s*then\s+""", RegexOption.IGNORE_CASE)
+        Regex("""\s*,\s*then\s+""", RegexOption.IGNORE_CASE),
+        // "call X and text Y" / "message A and remind me"
+        Regex("""\s+and\s+(?=call\b|text\b|message\b|sms\b|whatsapp\b|open\b|set\b|remind\b|turn\b|enable\b|disable\b)""", RegexOption.IGNORE_CASE),
+        Regex("""\s+aur\s+(?=call\b|text\b|message\b|sms\b|kholo\b|set\b|yaad\b)""", RegexOption.IGNORE_CASE)
     )
 
     fun looksLikeChain(speech: String): Boolean {
         val s = speech.trim()
-        if (s.length < 8) return false
+        if (s.length < 10) return false
         return separators.any { it.containsMatchIn(s) }
     }
 
-    /** Returns 2+ segments, or null if not a chain. */
     fun split(speech: String): List<String>? {
-        var parts = listOf(speech.trim())
+        val s = speech.trim()
         for (sep in separators) {
-            if (sep.containsMatchIn(speech)) {
-                parts = speech.split(sep).map { it.trim() }.filter { it.isNotEmpty() }
-                break
+            if (sep.containsMatchIn(s)) {
+                val parts = s.split(sep).map { it.trim() }.filter { it.isNotEmpty() }
+                if (parts.size >= 2) return parts
             }
         }
-        return if (parts.size >= 2) parts else null
+        return null
     }
 }
