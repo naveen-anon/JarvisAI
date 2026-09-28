@@ -74,7 +74,7 @@ private val NavyBlue = Color(0xFF3B6FE0)
 private val NavyBlueBright = Color(0xFF8FB4FF)
 private val NavyBlueDim = Color(0xFF1E3A8A)
 private val Teal = Color(0xFF3BA9A0)
-private val TealBright = Color(0xFFA8F0E6)
+private val CyanBright = Color(0xFFA8F0E6)
 private val TealDim = Color(0xFF1F6B66)
 private val Orange = Color(0xFFFF8C00)
 private val OrangeBright = Color(0xFFFFC866)
@@ -128,7 +128,9 @@ fun JarvisHudScreen(
         modifier = modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(listOf(BgDeep, Bg, Color(0xFF02060C)))
+                Brush.verticalGradient(
+                    listOf(Color(0xFF01040A), Color(0xFF03080E), Color(0xFF061018))
+                )
             )
     ) {
         // Soft ambient glow instead of heavy grid
@@ -153,7 +155,7 @@ fun JarvisHudScreen(
             Box(Modifier.fillMaxWidth()) {
                 Text(
                     "JARVIS",
-                    color = TealBright,
+                    color = CyanBright,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
@@ -174,7 +176,7 @@ fun JarvisHudScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     if (ui.waveformActive) "LISTENING ON" else "LISTENING OFF",
-                    color = TealBright,
+                    color = CyanBright,
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 1.sp,
@@ -184,12 +186,12 @@ fun JarvisHudScreen(
                     modifier = Modifier
                         .size(26.dp)
                         .clip(CircleShape)
-                        .background(Color(0x1A3BA9A0))
-                        .border(1.dp, Teal.copy(alpha = 0.6f), CircleShape)
+                        .background(Color(0x1A00D9FF))
+                        .border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape)
                         .clickable(onClick = actions.onSettings),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("i", color = TealBright, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text("i", color = CyanBright, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -230,12 +232,12 @@ fun JarvisHudScreen(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(Color(0x1A3BA9A0))
-                        .border(1.dp, Teal.copy(alpha = 0.6f), CircleShape)
+                        .background(Color(0x1A00D9FF))
+                        .border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape)
                         .clickable(onClick = actions.onBriefing),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("?", color = TealBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text("?", color = CyanBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -311,12 +313,33 @@ private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Mo
             // dashed rotating ring
             rotate(dashSpin, Offset(cx, cy)) {
                 drawCircle(
-                    Teal.copy(alpha = 0.55f),
+                    Cyan.copy(alpha = 0.55f),
                     r * 0.82f,
                     Offset(cx, cy),
                     style = Stroke(width = 1.2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)))
                 )
             }
+
+            // counter-rotating outer tactical ring (Stark density)
+            rotate(-dashSpin * 0.6f, Offset(cx, cy)) {
+                drawCircle(
+                    CyanDim.copy(alpha = 0.45f),
+                    r * 0.92f,
+                    Offset(cx, cy),
+                    style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3f, 10f)))
+                )
+            }
+
+            // inner core ring glow
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(Cyan.copy(alpha = 0.12f), Color.Transparent),
+                    center = Offset(cx, cy),
+                    radius = r * 0.5f
+                ),
+                radius = r * 0.48f,
+                center = Offset(cx, cy)
+            )
 
             // progress arc (battery %)
             drawArc(
@@ -375,7 +398,7 @@ private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Mo
                 lineTo(cx + chevW, chevY + chevW * 0.7f)
                 close()
             }
-            drawPath(upPath, color = TealBright.copy(alpha = 0.7f), style = Stroke(width = 1.dp.toPx()))
+            drawPath(upPath, color = CyanBright.copy(alpha = 0.7f), style = Stroke(width = 1.dp.toPx()))
             // filled down-triangle just below
             val downPath = Path().apply {
                 moveTo(cx, chevY + chevW * 1.9f)
@@ -396,7 +419,7 @@ private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Mo
             )
             Spacer(Modifier.width(6.dp))
             Column(Modifier.padding(bottom = 8.dp)) {
-                Text(ampm, color = TealBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(ampm, color = CyanBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Text(sec, color = TealDim, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
             }
         }
@@ -444,7 +467,7 @@ private fun WeatherCard(modifier: Modifier = Modifier, location: String, weather
         Column {
             Text(
                 location.ifBlank { "—" }.uppercase(),
-                color = TealBright,
+                color = CyanBright,
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
@@ -469,7 +492,7 @@ private fun DateCard(modifier: Modifier = Modifier) {
     LayeredCard(modifier = modifier) {
         Column {
             Row {
-                Text(month, color = TealBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(month, color = CyanBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.width(4.dp))
                 Text("$year", color = TealDim, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
             }
@@ -484,15 +507,15 @@ private fun TealPill(modifier: Modifier = Modifier, icon: Int, text: String, onC
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(999.dp))
-            .background(Color(0x1A3BA9A0))
+            .background(Color(0x1A00D9FF))
             .border(1.dp, Teal.copy(alpha = 0.5f), RoundedCornerShape(999.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(painterResource(icon), null, tint = TealBright, modifier = Modifier.size(13.dp))
+        Icon(painterResource(icon), null, tint = CyanBright, modifier = Modifier.size(13.dp))
         Spacer(Modifier.width(5.dp))
-        Text(text, color = TealBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text, color = CyanBright, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -538,7 +561,7 @@ private fun DockIcon(icon: Int, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(painterResource(icon), null, tint = TealBright, modifier = Modifier.size(18.dp))
+        Icon(painterResource(icon), null, tint = CyanBright, modifier = Modifier.size(18.dp))
     }
 }
 
@@ -551,7 +574,7 @@ private fun JarvisAiHeader(onSettings: () -> Unit) {
             .shadow(elevation = 8.dp, shape = shape, ambientColor = NavyBlue.copy(alpha = 0.25f), spotColor = NavyBlue.copy(alpha = 0.25f))
             .clip(shape)
             .background(
-                Brush.verticalGradient(listOf(Color(0x330A1508), Color(0x99160C04), Color(0xB30A0603)))
+                Brush.verticalGradient(listOf(Color(0x330A1825), Color(0x99160C04), Color(0xB30A0603)))
             )
             .border(
                 width = 1.dp,
@@ -722,7 +745,7 @@ private fun SideMenuRow(icon: Int, line1: String, line2: String, onClick: () -> 
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color(0x330A1508))
+            .background(Color(0x330A1825))
             .border(1.dp, NavyBlue.copy(alpha = 0.45f), shape)
             .clickable(onClick = onClick)
             .padding(vertical = 8.dp, horizontal = 6.dp),
@@ -744,7 +767,7 @@ private fun OnlineStatusBar(label: String, detail: String) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color(0x330A1508))
+            .background(Color(0x330A1825))
             .border(1.dp, NavyBlue.copy(alpha = 0.5f), shape)
             .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
@@ -774,7 +797,7 @@ private fun CompactTalkButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(Color(0x330A1508))
+            .background(Color(0x330A1825))
             .border(1.5.dp, NavyBlue, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center

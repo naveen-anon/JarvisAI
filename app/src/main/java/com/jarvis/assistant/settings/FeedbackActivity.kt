@@ -23,7 +23,7 @@ class FeedbackActivity : AppCompatActivity() {
     private var selectedRating = 0
     private lateinit var starViews: List<TextView>
 
-    private val cyan = Color.parseColor("#00E5FF")
+    private val cyan = Color.parseColor("#00D9FF")
     private val hudTextDim = Color.parseColor("#5A8A9A")
 
     override fun onCreate(savedInstanceState: Bundle?) {

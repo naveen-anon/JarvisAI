@@ -60,10 +60,10 @@ class SettingsActivity : AppCompatActivity() {
         })
     }
 
-    private val cyan = Color.parseColor("#00E5FF")
-    private val cyanDim = Color.parseColor("#0B7A94")
-    private val hudText = Color.parseColor("#B8D4E0")
-    private val hudTextDim = Color.parseColor("#5A8A9A")
+    private val cyan = Color.parseColor("#00D9FF")
+    private val cyanDim = Color.parseColor("#007A99")
+    private val hudText = Color.parseColor("#B8ECFF")
+    private val hudTextDim = Color.parseColor("#5A8A99")
     private val bg = Color.parseColor("#03080E")
 
     private fun hudButton(label: String, filled: Boolean = false, iconRes: Int? = null, onClick: () -> Unit) = Button(this).apply {
@@ -104,7 +104,7 @@ class SettingsActivity : AppCompatActivity() {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
                 setStroke(2, cyanDim)
-                setColor(Color.parseColor("#0B1520"))
+                setColor(Color.parseColor("#0A1825"))
             }
             setPadding(20, 20, 20, 20)
         })
@@ -195,8 +195,8 @@ class SettingsActivity : AppCompatActivity() {
         setPadding(16, 32, 16, 32)
         background = GradientDrawable().apply {
             cornerRadius = 28f
-            setColor(if (selected) Color.parseColor("#1F00E5FF") else Color.TRANSPARENT)
-            setStroke(3, if (selected) cyan else Color.parseColor("#16303D"))
+            setColor(if (selected) Color.parseColor("#1A00D9FF") else Color.TRANSPARENT)
+            setStroke(3, if (selected) cyan else Color.parseColor("#1A3040"))
         }
         val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         lp.marginEnd = 12

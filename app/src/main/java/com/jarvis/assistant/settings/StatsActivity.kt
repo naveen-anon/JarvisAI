@@ -26,7 +26,7 @@ import com.jarvis.assistant.util.AutoLearnEngine
  */
 class StatsActivity : AppCompatActivity() {
 
-    private val C_CYAN = Color.parseColor("#00E5FF")
+    private val C_CYAN = Color.parseColor("#00D9FF")
     private val C_TEXT = Color.parseColor("#B8ECFF")
     private val C_MUTED = Color.parseColor("#7AB8C8")
     private val C_WHITE = Color.parseColor("#F0FBFF")
@@ -41,7 +41,7 @@ class StatsActivity : AppCompatActivity() {
         val stats = AutoLearnEngine(this).getUsageStats()
 
         val root = FrameLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#020810"))
+            setBackgroundColor(Color.parseColor("#03080E"))
             addView(
                 HudOverlayView(this@StatsActivity).apply { alpha = 0.18f },
                 FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)

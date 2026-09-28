@@ -317,7 +317,7 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
 
     private fun bubbleText(text: String, isUser: Boolean) = TextView(this).apply {
         this.text = text
-        setTextColor(if (isUser) Color.parseColor("#F0FBFF") else Color.parseColor("#00E5FF"))
+        setTextColor(if (isUser) Color.parseColor("#F0FBFF") else Color.parseColor("#00D9FF"))
         textSize = 14f
         typeface = Typeface.MONOSPACE
         background = ContextCompat.getDrawable(
@@ -328,7 +328,7 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
 
     private fun saveFileButton(code: String, lang: String) = TextView(this).apply {
         text = "\uD83D\uDCBE  SAVE FILE"
-        setTextColor(Color.parseColor("#00E5FF"))
+        setTextColor(Color.parseColor("#00D9FF"))
         textSize = 11f
         typeface = Typeface.MONOSPACE
         background = ContextCompat.getDrawable(this@ChatActivity, R.drawable.glass_button_bg)
