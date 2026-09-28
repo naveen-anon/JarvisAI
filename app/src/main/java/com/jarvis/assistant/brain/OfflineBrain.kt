@@ -95,6 +95,21 @@ class OfflineBrain(
 
         // ===== HIGH_PRIORITY_ROUTER =====
         run {
+            // Advanced security advisor (defensive only)
+            if (containsAny(cmd,
+                    "security report", "security status", "cyber status", "cyber security",
+                    "am i secure", "am i safe", "is my device secure", "is my phone secure",
+                    "device security", "security check", "run security", "harden my phone",
+                    "privacy check", "security posture"
+                ) || (containsAny(cmd, "secure", "security") && containsAny(cmd, "device", "phone", "system", "report", "check", "status"))
+            ) {
+                return try {
+                    com.jarvis.assistant.util.SecurityAdvisor(context).assess().spoken
+                } catch (_: Exception) {
+                    "I could not complete the security assessment, sir."
+                }
+            }
+
             // Briefing
             if (cmd == "hey jarvis" || cmd == "hi jarvis" || cmd == "hello jarvis" ||
                 cmd == "good morning jarvis" || cmd == "good morning" ||
@@ -312,9 +327,9 @@ class OfflineBrain(
                    "I run primarily on-device, sir. Most commands require no external connection."
         }
         if (containsAny(cmd, "what can you do", "help me", "list commands") || cmd == "help") {
-            return "I can open applications, place calls, draft messages, control system settings, " +
-                   "manage volume and media, set alarms and timers, report time, date and power levels, " +
-                   "perform calculations, retain notes, and assist with general queries. " +
+            return "I can open applications, place calls, draft messages, run advanced security assessments, " +
+                   "control system settings, manage volume and media, set alarms and timers, " +
+                   "deliver status briefings, retain notes, and assist with general queries. " +
                    "Most of that works entirely offline, sir."
         }
 
