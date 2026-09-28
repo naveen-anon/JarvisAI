@@ -322,7 +322,7 @@ class SecurityAdvisor(private val context: Context) {
                 )
                 others.size == 1 -> Finding(
                     "a11y_third", Severity.HIGH, "Third-party accessibility active",
-                    "Enabled: \( {others[0].first} ( \){others[0].second}). Accessibility can read the screen and drive UI.",
+                    "Enabled: " + others[0].first + " [" + others[0].second + "]. Accessibility can read the screen and drive UI.",
                     "Disable any service you do not fully trust under Settings, Accessibility."
                 )
                 else -> {
