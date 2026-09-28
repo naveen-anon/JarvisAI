@@ -88,7 +88,8 @@
 
         <receiver
             android:name=".widget.JarvisWidgetProvider"
-            android:exported="false">
+            android:exported="true"
+            android:label="J.A.R.V.I.S">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
