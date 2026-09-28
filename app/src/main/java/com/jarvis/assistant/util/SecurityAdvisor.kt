@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.NotificationManagerCompat
@@ -21,7 +20,7 @@ class SecurityAdvisor(private val context: Context) {
 
     data class Finding(
         val id: String,
-        val severity: Severity, // CRITICAL, HIGH, MEDIUM, LOW, OK
+        val severity: Severity,
         val title: String,
         val detail: String,
         val action: String? = null
@@ -30,16 +29,15 @@ class SecurityAdvisor(private val context: Context) {
     enum class Severity { CRITICAL, HIGH, MEDIUM, LOW, OK }
 
     data class Report(
-        val score: Int,           // 0–100
-        val grade: String,        // A–F style
-        val summary: String,      // spoken primary line
-        val spoken: String,       // full voice report
+        val score: Int,
+        val grade: String,
+        val summary: String,
+        val spoken: String,
         val findings: List<Finding>
     )
 
     fun assess(): Report {
         val findings = mutableListOf<Finding>()
-
         findings += deviceLock()
         findings += adbDebug()
         findings += networkPosture()
@@ -65,8 +63,14 @@ class SecurityAdvisor(private val context: Context) {
         val high = findings.count { it.severity == Severity.HIGH }
 
         val summary = when {
-            critical > 0 -> "Security posture degraded, sir. \( critical critical issue \){if (critical > 1) "s" else ""} require attention."
-            high > 0 -> "Security is acceptable but not optimal. \( high high-priority item \){if (high > 1) "s" else ""} to harden."
+            critical > 0 -> {
+                val plural = if (critical > 1) "s" else ""
+                "Security posture degraded, sir. $critical critical issue$plural require attention."
+            }
+            high > 0 -> {
+                val plural = if (high > 1) "s" else ""
+                "Security is acceptable but not optimal. $high high-priority item$plural to harden."
+            }
             score >= 85 -> "Security posture is strong, sir. Score $score, grade $grade."
             else -> "Security score $score, grade $grade. A few improvements would tighten the perimeter."
         }
@@ -81,7 +85,9 @@ class SecurityAdvisor(private val context: Context) {
         sb.append("Overall score: $score out of 100, grade $grade. ")
 
         val problems = findings.filter {
-            it.severity == Severity.CRITICAL || it.severity == Severity.HIGH || it.severity == Severity.MEDIUM
+            it.severity == Severity.CRITICAL ||
+                it.severity == Severity.HIGH ||
+                it.severity == Severity.MEDIUM
         }.sortedBy {
             when (it.severity) {
                 Severity.CRITICAL -> 0
@@ -104,7 +110,7 @@ class SecurityAdvisor(private val context: Context) {
 
         val oks = findings.count { it.severity == Severity.OK }
         sb.append("$oks controls look healthy. ")
-        sb.append("This is a defensive assessment only — I will not attempt any intrusive access.")
+        sb.append("This is a defensive assessment only.")
         return sb.toString().trim()
     }
 
@@ -125,12 +131,10 @@ class SecurityAdvisor(private val context: Context) {
     private fun deviceLock(): Finding {
         return try {
             val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            when {
-                km.isDeviceSecure -> Finding(
-                    "lock", Severity.OK, "Device lock",
-                    "Screen lock with PIN, pattern, or biometric is configured."
-                )
-                else -> Finding(
+            if (km.isDeviceSecure) {
+                Finding("lock", Severity.OK, "Device lock", "Screen lock with PIN, pattern, or biometric is configured.")
+            } else {
+                Finding(
                     "lock", Severity.CRITICAL, "No secure device lock",
                     "This device has no secure screen lock.",
                     "Set a PIN or biometric lock under system Security settings."
@@ -147,8 +151,8 @@ class SecurityAdvisor(private val context: Context) {
             if (adb == 1) {
                 Finding(
                     "adb", Severity.HIGH, "USB debugging enabled",
-                    "ADB debugging is on — a major risk if the device is lost or connected to untrusted hosts.",
-                    "Disable Developer options → USB debugging when not actively developing."
+                    "ADB debugging is on — risky if the device is lost or connected to untrusted hosts.",
+                    "Disable Developer options, USB debugging when not developing."
                 )
             } else {
                 Finding("adb", Severity.OK, "USB debugging", "ADB debugging is off.")
@@ -171,17 +175,10 @@ class SecurityAdvisor(private val context: Context) {
             val wifi = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
             val cell = caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
             val validated = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-            val notMetered = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
 
             when {
-                wifi && validated -> Finding(
-                    "net", Severity.OK, "Network",
-                    "On Wi‑Fi with validated internet${if (notMetered) " (unmetered)" else ""}."
-                )
-                cell && validated -> Finding(
-                    "net", Severity.OK, "Network",
-                    "On mobile data with validated connectivity."
-                )
+                wifi && validated -> Finding("net", Severity.OK, "Network", "On Wi-Fi with validated internet.")
+                cell && validated -> Finding("net", Severity.OK, "Network", "On mobile data with validated connectivity.")
                 !validated -> Finding(
                     "net", Severity.MEDIUM, "Captive or unvalidated network",
                     "Network may be captive portal or untrusted.",
@@ -197,10 +194,8 @@ class SecurityAdvisor(private val context: Context) {
     private fun vpnStatus(): Finding {
         return try {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val net = cm.activeNetwork ?: return Finding(
-                "vpn", Severity.LOW, "VPN",
-                "No active network — VPN not applicable."
-            )
+            val net = cm.activeNetwork
+                ?: return Finding("vpn", Severity.LOW, "VPN", "No active network — VPN not applicable.")
             val caps = cm.getNetworkCapabilities(net)
             val vpn = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
             if (vpn) {
@@ -209,7 +204,7 @@ class SecurityAdvisor(private val context: Context) {
                 Finding(
                     "vpn", Severity.LOW, "No VPN",
                     "No system VPN transport detected.",
-                    "On public Wi‑Fi, consider a trusted VPN before sensitive work."
+                    "On public Wi-Fi, consider a trusted VPN before sensitive work."
                 )
             }
         } catch (_: Exception) {
@@ -220,7 +215,6 @@ class SecurityAdvisor(private val context: Context) {
     private fun voiceAuth(): Finding {
         return try {
             val va = VoiceAuthManager(context)
-            // enrolled / hasTemplate style API — try common method names safely
             val enrolled = try {
                 val m = va.javaClass.methods.find {
                     it.name in listOf("hasEnrollment", "isEnrolled", "hasVoiceprint", "isRegistered") &&
@@ -251,7 +245,7 @@ class SecurityAdvisor(private val context: Context) {
                 Finding(
                     "bg_listen", Severity.MEDIUM, "Background listening enabled",
                     "Continuous wake listening increases mic exposure and battery use.",
-                    "Disable background listen when in sensitive environments; use Talk or clap wake instead."
+                    "Disable background listen in sensitive environments; use Talk or clap wake instead."
                 )
             } else {
                 Finding("bg_listen", Severity.OK, "Background listening", "Continuous mic wake is off.")
@@ -296,7 +290,7 @@ class SecurityAdvisor(private val context: Context) {
                 Finding(
                     "a11y", Severity.LOW, "Accessibility off",
                     "Screen-reading and advanced automation need Accessibility enabled.",
-                    "Enable JARVIS under Settings → Accessibility only if you use those features."
+                    "Enable JARVIS under Settings, Accessibility only if you use those features."
                 )
             }
         } catch (_: Exception) {
@@ -304,63 +298,6 @@ class SecurityAdvisor(private val context: Context) {
         }
     }
 
-    private fun dangerousPermsSelf(): Finding {
-        val dangerous = listOf(
-            android.Manifest.permission.RECORD_AUDIO to "microphone",
-            android.Manifest.permission.CAMERA to "camera",
-            android.Manifest.permission.ACCESS_FINE_LOCATION to "precise location",
-            android.Manifest.permission.READ_CONTACTS to "contacts",
-            android.Manifest.permission.CALL_PHONE to "phone",
-            android.Manifest.permission.SEND_SMS to "SMS",
-            android.Manifest.permission.READ_SMS to "read SMS"
-        )
-        val granted = dangerous.filter { (perm, _) ->
-            ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
-        }.map { it.second }
-
-        return if (granted.isEmpty()) {
-            Finding(
-                "perms", Severity.MEDIUM, "Core permissions missing",
-                "JARVIS lacks several operational permissions — functionality limited, attack surface smaller."
-            )
-        } else {
-            Finding(
-                "perms", Severity.OK, "App permissions",
-                "Granted sensitive capabilities: ${granted.joinToString(", ")}. Review periodically in system App permissions."
-            )
-        }
-    }
-
-    private fun screenTimeout(): Finding {
-        return try {
-            val timeout = Settings.System.getInt(
-                context.contentResolver,
-                Settings.System.SCREEN_OFF_TIMEOUT,
-                60_000
-            )
-            val sec = timeout / 1000
-            when {
-                sec <= 0 || timeout >= 10 * 60_000 -> Finding(
-                    "timeout", Severity.MEDIUM, "Long screen timeout",
-                    "Screen timeout is very long (${sec}s) — unattended unlock risk.",
-                    "Set screen timeout to 30–60 seconds in Display settings."
-                )
-                sec > 120 -> Finding(
-                    "timeout", Severity.LOW, "Screen timeout",
-                    "Screen turns off after $sec seconds.",
-                    "Consider 60 seconds or less for tighter physical security."
-                )
-                else -> Finding(
-                    "timeout", Severity.OK, "Screen timeout",
-                    "Screen timeout is $sec seconds — reasonable."
-                )
-            }
-        } catch (_: Exception) {
-            Finding("timeout", Severity.LOW, "Screen timeout", "Could not read timeout setting.")
-        }
-    }
-
-    /** Flag non-JARVIS accessibility services — high privilege third parties. */
     private fun thirdPartyAccessibility(): Finding {
         return try {
             val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
@@ -368,8 +305,9 @@ class SecurityAdvisor(private val context: Context) {
             val others = enabled.mapNotNull { info ->
                 val pkg = info.resolveInfo?.serviceInfo?.packageName ?: return@mapNotNull null
                 if (pkg == context.packageName) return@mapNotNull null
-                // Soft-skip common system packages
-                if (pkg.startsWith("com.android.") || pkg.startsWith("com.google.android.")) return@mapNotNull null
+                if (pkg.startsWith("com.android.") || pkg.startsWith("com.google.android.")) {
+                    return@mapNotNull null
+                }
                 val label = try {
                     info.resolveInfo.loadLabel(context.packageManager).toString()
                 } catch (_: Exception) {
@@ -385,17 +323,78 @@ class SecurityAdvisor(private val context: Context) {
                 others.size == 1 -> Finding(
                     "a11y_third", Severity.HIGH, "Third-party accessibility active",
                     "Enabled: \( {others[0].first} ( \){others[0].second}). Accessibility can read the screen and drive UI.",
-                    "Disable any service you do not fully trust under Settings → Accessibility."
+                    "Disable any service you do not fully trust under Settings, Accessibility."
                 )
-                else -> Finding(
-                    "a11y_third", Severity.HIGH, "Multiple third-party accessibility services",
-                    "Enabled: ${others.joinToString { it.first }}. Each is high privilege.",
-                    "Review and remove unused accessibility services immediately."
-                )
+                else -> {
+                    val names = others.joinToString { it.first }
+                    Finding(
+                        "a11y_third", Severity.HIGH, "Multiple third-party accessibility services",
+                        "Enabled: $names. Each is high privilege.",
+                        "Review and remove unused accessibility services immediately."
+                    )
+                }
             }
         } catch (_: Exception) {
-            Finding("a11y_third", Severity.LOW, "Third-party accessibility", "Could not enumerate accessibility services.")
+            Finding(
+                "a11y_third", Severity.LOW, "Third-party accessibility",
+                "Could not enumerate accessibility services."
+            )
         }
     }
 
+    private fun dangerousPermsSelf(): Finding {
+        val dangerous = listOf(
+            android.Manifest.permission.RECORD_AUDIO to "microphone",
+            android.Manifest.permission.CAMERA to "camera",
+            android.Manifest.permission.ACCESS_FINE_LOCATION to "precise location",
+            android.Manifest.permission.READ_CONTACTS to "contacts",
+            android.Manifest.permission.CALL_PHONE to "phone",
+            android.Manifest.permission.SEND_SMS to "SMS"
+        )
+        val granted = dangerous.filter { (perm, _) ->
+            ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
+        }.map { it.second }
+
+        return if (granted.isEmpty()) {
+            Finding(
+                "perms", Severity.MEDIUM, "Core permissions missing",
+                "JARVIS lacks several operational permissions — functionality limited, attack surface smaller."
+            )
+        } else {
+            val list = granted.joinToString(", ")
+            Finding(
+                "perms", Severity.OK, "App permissions",
+                "Granted sensitive capabilities: $list. Review periodically in system App permissions."
+            )
+        }
+    }
+
+    private fun screenTimeout(): Finding {
+        return try {
+            val timeout = Settings.System.getInt(
+                context.contentResolver,
+                Settings.System.SCREEN_OFF_TIMEOUT,
+                60_000
+            )
+            val sec = timeout / 1000
+            when {
+                sec <= 0 || timeout >= 10 * 60_000 -> Finding(
+                    "timeout", Severity.MEDIUM, "Long screen timeout",
+                    "Screen timeout is very long (" + sec + "s) — unattended unlock risk.",
+                    "Set screen timeout to 30 to 60 seconds in Display settings."
+                )
+                sec > 120 -> Finding(
+                    "timeout", Severity.LOW, "Screen timeout",
+                    "Screen turns off after " + sec + " seconds.",
+                    "Consider 60 seconds or less for tighter physical security."
+                )
+                else -> Finding(
+                    "timeout", Severity.OK, "Screen timeout",
+                    "Screen timeout is " + sec + " seconds — reasonable."
+                )
+            }
+        } catch (_: Exception) {
+            Finding("timeout", Severity.LOW, "Screen timeout", "Could not read timeout setting.")
+        }
+    }
 }
