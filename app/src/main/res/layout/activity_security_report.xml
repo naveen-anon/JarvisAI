@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#03080E"
+    android:fillViewport="true">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:id="@+id/btnSecBack" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="←" android:textColor="#00D9FF"
+                android:textSize="22sp" android:padding="8dp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="SECURITY"
+                android:textColor="#00D9FF" android:textSize="15sp" android:textStyle="bold"
+                android:fontFamily="monospace" android:letterSpacing="0.1" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="@drawable/bg_glass_card"
+            android:padding="18dp" android:layout_marginTop="14dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="POSTURE SCORE" android:textColor="#5A8A99" android:textSize="10sp"
+                android:fontFamily="monospace" />
+            <TextView android:id="@+id/txtSecScore" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="—" android:textColor="#00D9FF"
+                android:textSize="40sp" android:fontFamily="monospace" android:layout_marginTop="4dp" />
+            <TextView android:id="@+id/txtSecTitle" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="—" android:textColor="#B8ECFF"
+                android:textSize="14sp" android:fontFamily="monospace" android:layout_marginTop="6dp" />
+            <TextView android:id="@+id/txtSecBody" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="…" android:textColor="#8AB4C0"
+                android:textSize="13sp" android:lineSpacingExtra="5dp" android:layout_marginTop="12dp" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/btnSecRefresh" android:layout_width="match_parent"
+            android:layout_height="48dp" android:layout_marginTop="14dp" android:gravity="center"
+            android:text="REFRESH SCAN" android:textColor="#00D9FF" android:textSize="13sp"
+            android:fontFamily="monospace" android:textStyle="bold"
+            android:background="@drawable/bg_glass_card" />
+        <TextView android:id="@+id/btnSecSpeak" android:layout_width="match_parent"
+            android:layout_height="48dp" android:layout_marginTop="10dp" android:gravity="center"
+            android:text="READ ALOUD" android:textColor="#03080E" android:textSize="13sp"
+            android:fontFamily="monospace" android:textStyle="bold"
+            android:background="@drawable/bg_jg_button" />
+    </LinearLayout>
+</ScrollView>

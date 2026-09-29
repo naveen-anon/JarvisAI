@@ -28,7 +28,7 @@ class StatsActivity : AppCompatActivity() {
 
     private val C_CYAN = Color.parseColor("#00D9FF")
     private val C_TEXT = Color.parseColor("#B8ECFF")
-    private val C_MUTED = Color.parseColor("#7AB8C8")
+    private val C_MUTED = Color.parseColor("#5A8A99")
     private val C_WHITE = Color.parseColor("#F0FBFF")
     private val C_PURPLE = Color.parseColor("#C084FC")
     private val C_GREEN = Color.parseColor("#22C55E")

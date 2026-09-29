@@ -116,8 +116,12 @@ class MainActivity : AppCompatActivity(),
                     },
                     onSecurity = {
                         try {
-                            startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
-                        } catch (_: Exception) {}
+                            startActivity(Intent(this, com.jarvis.assistant.ui.security.SecurityReportActivity::class.java))
+                        } catch (_: Exception) {
+                            try {
+                                startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+                            } catch (_: Exception) {}
+                        }
                     },
                     onStats = {
                         try {
