@@ -34,7 +34,7 @@ class BriefingActivity : AppCompatActivity() {
 
     private fun generate(andSpeak: Boolean = false) {
         val body = findViewById<TextView>(R.id.txtBriefingBody)
-        body.text = "Generating briefing…"
+        body.text = "Compiling status report, sir…"
         scope.launch {
             val result = withContext(Dispatchers.IO) {
                 try {

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#020810">
+    android:background="#03080E">
 
     <com.jarvis.assistant.ui.HudOverlayView
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
                     <ImageView
                         android:layout_width="24dp" android:layout_height="24dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_calendar" android:tint="#00E5FF" />
+                        android:src="@drawable/ic_calendar" android:tint="#00D9FF" />
                 </FrameLayout>
 
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
@@ -40,14 +40,14 @@
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="TODAY'S " android:textColor="#00E5FF" android:textSize="18sp"
+                            android:text="TODAY'S " android:textColor="#00D9FF" android:textSize="18sp"
                             android:textStyle="bold" android:fontFamily="monospace" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="BRIEFING" android:textColor="#F0FBFF" android:textSize="18sp"
                             android:textStyle="bold" android:fontFamily="monospace" />
                     </LinearLayout>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Your summary for today" android:textColor="#7AB8C8" android:textSize="11sp"
+                        android:text="Your summary for today" android:textColor="#5A8A99" android:textSize="11sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
@@ -56,9 +56,9 @@
                     android:background="@drawable/bg_jg_chip" android:padding="8dp">
                     <ImageView android:layout_width="18dp" android:layout_height="18dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_ai_spark" android:tint="#00E5FF" />
+                        android:src="@drawable/ic_ai_spark" android:tint="#00D9FF" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="AI Powered" android:textColor="#7AB8C8" android:textSize="9sp"
+                        android:text="AI Powered" android:textColor="#5A8A99" android:textSize="9sp"
                         android:fontFamily="monospace" android:layout_marginTop="4dp" />
                 </LinearLayout>
             </LinearLayout>
@@ -103,9 +103,9 @@
                         android:paddingHorizontal="10dp" android:paddingVertical="6dp"
                         android:layout_marginEnd="8dp">
                         <ImageView android:layout_width="13dp" android:layout_height="13dp"
-                            android:src="@drawable/ic_location_pin" android:tint="#7AB8C8" android:layout_marginEnd="5dp" />
+                            android:src="@drawable/ic_location_pin" android:tint="#5A8A99" android:layout_marginEnd="5dp" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="New Delhi" android:textColor="#7AB8C8" android:textSize="10sp"
+                            android:text="New Delhi" android:textColor="#5A8A99" android:textSize="10sp"
                             android:fontFamily="monospace" />
                     </LinearLayout>
 
@@ -113,9 +113,9 @@
                         android:gravity="center_vertical" android:background="@drawable/bg_jg_chip"
                         android:paddingHorizontal="10dp" android:paddingVertical="6dp">
                         <ImageView android:layout_width="13dp" android:layout_height="13dp"
-                            android:src="@drawable/ic_cloud" android:tint="#7AB8C8" android:layout_marginEnd="5dp" />
+                            android:src="@drawable/ic_cloud" android:tint="#5A8A99" android:layout_marginEnd="5dp" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="Clouds" android:textColor="#7AB8C8" android:textSize="10sp"
+                            android:text="Clouds" android:textColor="#5A8A99" android:textSize="10sp"
                             android:fontFamily="monospace" />
                     </LinearLayout>
                 </LinearLayout>
@@ -140,7 +140,7 @@
                     <TextView android:id="@+id/txtPendingTasks" android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="0" android:textColor="#F0FBFF" android:textSize="22sp" android:fontFamily="monospace" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="tasks / reminders" android:textColor="#7AB8C8" android:textSize="9sp"
+                        android:text="tasks / reminders" android:textColor="#5A8A99" android:textSize="9sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
 
@@ -159,7 +159,7 @@
                     <TextView android:id="@+id/txtBriefingScore" android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="—" android:textColor="#F0FBFF" android:textSize="22sp" android:fontFamily="monospace" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="system health" android:textColor="#7AB8C8" android:textSize="9sp"
+                        android:text="system health" android:textColor="#5A8A99" android:textSize="9sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
             </LinearLayout>
