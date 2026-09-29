@@ -48,7 +48,7 @@ class SystemCoreActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtStoragePct).text = "$stor%"
 
         findViewById<TextView>(R.id.txtNetworkStatus).text = networkLabel()
-        findViewById<TextView>(R.id.txtEnvironment).text = "Local"
+        findViewById<TextView>(R.id.txtEnvironment).text = "Device"
         findViewById<TextView>(R.id.txtActiveTasks).text = "0"
     }
 

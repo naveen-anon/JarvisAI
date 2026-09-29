@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#020810"
+    android:background="#03080E"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,13 +18,13 @@
             android:gravity="center_vertical">
             <TextView android:id="@+id/btnCoreBack"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="←" android:textColor="#00E5FF" android:textSize="22sp"
+                android:text="←" android:textColor="#00D9FF" android:textSize="22sp"
                 android:padding="8dp" />
             <TextView
                 android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="SYSTEM CORE"
-                android:textColor="#00E5FF" android:textSize="14sp"
+                android:textColor="#00D9FF" android:textSize="14sp"
                 android:textStyle="bold" android:fontFamily="monospace"
                 android:letterSpacing="0.08" />
         </LinearLayout>
@@ -38,7 +38,7 @@
             android:layout_marginTop="12dp">
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="BATTERY" android:textColor="#6A9AAB" android:textSize="10sp" android:fontFamily="monospace" />
+                android:text="BATTERY" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
                 <ProgressBar android:id="@+id/barBattery" style="?android:attr/progressBarStyleHorizontal"
@@ -46,11 +46,11 @@
                     android:max="100" android:progress="60"
                     android:progressDrawable="@drawable/progress_cyan" />
                 <TextView android:id="@+id/txtBatteryPct" android:layout_width="48dp" android:layout_height="wrap_content"
-                    android:gravity="end" android:text="60%" android:textColor="#00E5FF" android:textSize="12sp" android:fontFamily="monospace" />
+                    android:gravity="end" android:text="60%" android:textColor="#00D9FF" android:textSize="12sp" android:fontFamily="monospace" />
             </LinearLayout>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="MEMORY" android:textColor="#6A9AAB" android:textSize="10sp" android:fontFamily="monospace"
+                android:text="MEMORY" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
                 android:layout_marginTop="14dp" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
@@ -63,7 +63,7 @@
             </LinearLayout>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="STORAGE" android:textColor="#6A9AAB" android:textSize="10sp" android:fontFamily="monospace"
+                android:text="STORAGE" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
                 android:layout_marginTop="14dp" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
@@ -76,10 +76,10 @@
             </LinearLayout>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="NETWORK" android:textColor="#6A9AAB" android:textSize="10sp" android:fontFamily="monospace"
+                android:text="NETWORK" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
                 android:layout_marginTop="14dp" />
             <TextView android:id="@+id/txtNetworkStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="WI-FI" android:textColor="#00E5FF" android:textSize="13sp" android:fontFamily="monospace"
+                android:text="WI-FI" android:textColor="#00D9FF" android:textSize="13sp" android:fontFamily="monospace"
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
@@ -93,7 +93,7 @@
                 android:orientation="vertical" android:background="@drawable/bg_glass_card"
                 android:padding="12dp" android:layout_marginEnd="6dp" android:gravity="center">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="ENVIRONMENT" android:textColor="#6A9AAB" android:textSize="9sp" android:fontFamily="monospace" />
+                    android:text="ENVIRONMENT" android:textColor="#5A8A99" android:textSize="9sp" android:fontFamily="monospace" />
                 <TextView android:id="@+id/txtEnvironment" android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="—" android:textColor="#E8F9FF" android:textSize="16sp" android:fontFamily="monospace"
                     android:layout_marginTop="8dp" />
@@ -103,9 +103,9 @@
                 android:orientation="vertical" android:background="@drawable/bg_glass_card"
                 android:padding="12dp" android:layout_marginStart="6dp" android:gravity="center">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="ACTIVE TASKS" android:textColor="#6A9AAB" android:textSize="9sp" android:fontFamily="monospace" />
+                    android:text="ACTIVE TASKS" android:textColor="#5A8A99" android:textSize="9sp" android:fontFamily="monospace" />
                 <TextView android:id="@+id/txtActiveTasks" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="0" android:textColor="#00E5FF" android:textSize="22sp" android:fontFamily="monospace"
+                    android:text="0" android:textColor="#00D9FF" android:textSize="22sp" android:fontFamily="monospace"
                     android:layout_marginTop="8dp" />
             </LinearLayout>
         </LinearLayout>
@@ -116,6 +116,6 @@
             android:background="@drawable/bg_talk_button"
             android:gravity="center"
             android:text="OPEN BRIEFING"
-            android:textColor="#00E5FF" android:textSize="13sp" android:fontFamily="monospace" />
+            android:textColor="#00D9FF" android:textSize="13sp" android:fontFamily="monospace" />
     </LinearLayout>
 </ScrollView>
