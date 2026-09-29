@@ -50,6 +50,10 @@ class SystemCoreActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtNetworkStatus).text = networkLabel()
         findViewById<TextView>(R.id.txtEnvironment).text = "Device"
         findViewById<TextView>(R.id.txtActiveTasks).text = "0"
+        try {
+            findViewById<TextView>(R.id.txtNeuralStatus).text =
+                if (bat < 20) "POWER SAVE · conserve cycles" else "STANDBY · offline brain ready"
+        } catch (_: Exception) {}
     }
 
     private fun batteryPct(): Int {

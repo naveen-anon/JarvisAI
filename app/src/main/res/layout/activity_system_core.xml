@@ -9,26 +9,131 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="18dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
-            <TextView android:id="@+id/btnCoreBack"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="←" android:textColor="#00D9FF" android:textSize="22sp"
+            <TextView
+                android:id="@+id/btnCoreBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="←"
+                android:textColor="#00D9FF"
+                android:textSize="22sp"
                 android:padding="8dp" />
             <TextView
-                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="SYSTEM CORE"
-                android:textColor="#00D9FF" android:textSize="14sp"
-                android:textStyle="bold" android:fontFamily="monospace"
-                android:letterSpacing="0.08" />
+                android:textColor="#00D9FF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.12" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LIVE"
+                android:textColor="#22C55E"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:textStyle="bold" />
         </LinearLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Battery, memory, network, tasks."
+            android:textColor="#5A8A99"
+            android:textSize="11sp"
+            android:fontFamily="monospace" />
+
+        <!-- Telemetry card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_glass_card"
+            android:padding="18dp"
+            android:layout_marginTop="14dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="BATTERY" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
+                <ProgressBar android:id="@+id/barBattery" style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp" android:layout_height="12dp" android:layout_weight="1"
+                    android:max="100" android:progress="60" android:progressDrawable="@drawable/progress_cyan" />
+                <TextView android:id="@+id/txtBatteryPct" android:layout_width="52dp" android:layout_height="wrap_content"
+                    android:gravity="end" android:text="—" android:textColor="#00D9FF" android:textSize="13sp" android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="MEMORY" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
+                android:layout_marginTop="16dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
+                <ProgressBar android:id="@+id/barMemory" style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp" android:layout_height="12dp" android:layout_weight="1"
+                    android:max="100" android:progress="50" android:progressDrawable="@drawable/progress_purple" />
+                <TextView android:id="@+id/txtMemoryPct" android:layout_width="52dp" android:layout_height="wrap_content"
+                    android:gravity="end" android:text="—" android:textColor="#B388FF" android:textSize="13sp" android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="STORAGE" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
+                android:layout_marginTop="16dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
+                <ProgressBar android:id="@+id/barStorage" style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp" android:layout_height="12dp" android:layout_weight="1"
+                    android:max="100" android:progress="30" android:progressDrawable="@drawable/progress_amber" />
+                <TextView android:id="@+id/txtStoragePct" android:layout_width="52dp" android:layout_height="wrap_content"
+                    android:gravity="end" android:text="—" android:textColor="#FFB020" android:textSize="13sp" android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="NETWORK" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
+                android:layout_marginTop="16dp" />
+            <TextView android:id="@+id/txtNetworkStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#00D9FF" android:textSize="14sp" android:fontFamily="monospace"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Status row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="110dp" android:layout_weight="1"
+                android:orientation="vertical" android:background="@drawable/bg_glass_card"
+                android:padding="14dp" android:layout_marginEnd="6dp" android:gravity="center">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="ENVIRONMENT" android:textColor="#5A8A99" android:textSize="9sp" android:fontFamily="monospace" />
+                <TextView android:id="@+id/txtEnvironment" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Device" android:textColor="#E8F9FF" android:textSize="18sp" android:fontFamily="monospace"
+                    android:layout_marginTop="10dp" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="110dp" android:layout_weight="1"
+                android:orientation="vertical" android:background="@drawable/bg_glass_card"
+                android:padding="14dp" android:layout_marginStart="6dp" android:gravity="center">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="ACTIVE TASKS" android:textColor="#5A8A99" android:textSize="9sp" android:fontFamily="monospace" />
+                <TextView android:id="@+id/txtActiveTasks" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="0" android:textColor="#00D9FF" android:textSize="28sp" android:fontFamily="monospace"
+                    android:layout_marginTop="6dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Neural / posture strip -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,86 +141,26 @@
             android:background="@drawable/bg_glass_card"
             android:padding="16dp"
             android:layout_marginTop="12dp">
-
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="BATTERY" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
-                <ProgressBar android:id="@+id/barBattery" style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="0dp" android:layout_height="10dp" android:layout_weight="1"
-                    android:max="100" android:progress="60"
-                    android:progressDrawable="@drawable/progress_cyan" />
-                <TextView android:id="@+id/txtBatteryPct" android:layout_width="48dp" android:layout_height="wrap_content"
-                    android:gravity="end" android:text="60%" android:textColor="#00D9FF" android:textSize="12sp" android:fontFamily="monospace" />
-            </LinearLayout>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="MEMORY" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
-                android:layout_marginTop="14dp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
-                <ProgressBar android:id="@+id/barMemory" style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="0dp" android:layout_height="10dp" android:layout_weight="1"
-                    android:max="100" android:progress="50"
-                    android:progressDrawable="@drawable/progress_purple" />
-                <TextView android:id="@+id/txtMemoryPct" android:layout_width="48dp" android:layout_height="wrap_content"
-                    android:gravity="end" android:text="50%" android:textColor="#B388FF" android:textSize="12sp" android:fontFamily="monospace" />
-            </LinearLayout>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="STORAGE" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
-                android:layout_marginTop="14dp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
-                <ProgressBar android:id="@+id/barStorage" style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="0dp" android:layout_height="10dp" android:layout_weight="1"
-                    android:max="100" android:progress="30"
-                    android:progressDrawable="@drawable/progress_amber" />
-                <TextView android:id="@+id/txtStoragePct" android:layout_width="48dp" android:layout_height="wrap_content"
-                    android:gravity="end" android:text="30%" android:textColor="#FFB020" android:textSize="12sp" android:fontFamily="monospace" />
-            </LinearLayout>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="NETWORK" android:textColor="#5A8A99" android:textSize="10sp" android:fontFamily="monospace"
-                android:layout_marginTop="14dp" />
-            <TextView android:id="@+id/txtNetworkStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="WI-FI" android:textColor="#00D9FF" android:textSize="13sp" android:fontFamily="monospace"
-                android:layout_marginTop="4dp" />
+                android:text="NEURAL ACTIVITY" android:textColor="#5A8A99" android:textSize="9sp" android:fontFamily="monospace" />
+            <TextView android:id="@+id/txtNeuralStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="STANDBY · offline brain ready"
+                android:textColor="#B8ECFF" android:textSize="12sp" android:fontFamily="monospace" />
         </LinearLayout>
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/btnCoreBriefing"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp">
-
-            <LinearLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_weight="1"
-                android:orientation="vertical" android:background="@drawable/bg_glass_card"
-                android:padding="12dp" android:layout_marginEnd="6dp" android:gravity="center">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="ENVIRONMENT" android:textColor="#5A8A99" android:textSize="9sp" android:fontFamily="monospace" />
-                <TextView android:id="@+id/txtEnvironment" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="—" android:textColor="#E8F9FF" android:textSize="16sp" android:fontFamily="monospace"
-                    android:layout_marginTop="8dp" />
-            </LinearLayout>
-
-            <LinearLayout android:layout_width="0dp" android:layout_height="100dp" android:layout_weight="1"
-                android:orientation="vertical" android:background="@drawable/bg_glass_card"
-                android:padding="12dp" android:layout_marginStart="6dp" android:gravity="center">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="ACTIVE TASKS" android:textColor="#5A8A99" android:textSize="9sp" android:fontFamily="monospace" />
-                <TextView android:id="@+id/txtActiveTasks" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="0" android:textColor="#00D9FF" android:textSize="22sp" android:fontFamily="monospace"
-                    android:layout_marginTop="8dp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <TextView android:id="@+id/btnCoreBriefing"
-            android:layout_width="match_parent" android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_talk_button"
+            android:layout_height="52dp"
+            android:layout_marginTop="18dp"
             android:gravity="center"
             android:text="OPEN BRIEFING"
-            android:textColor="#00D9FF" android:textSize="13sp" android:fontFamily="monospace" />
+            android:textColor="#00D9FF"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold"
+            android:background="@drawable/bg_jg_button"
+            android:textAllCaps="false" />
     </LinearLayout>
 </ScrollView>

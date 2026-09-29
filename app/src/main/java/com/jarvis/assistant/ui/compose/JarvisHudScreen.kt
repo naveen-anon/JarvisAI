@@ -162,8 +162,9 @@ fun JarvisHudScreen(
             }
             CompanionCard(
                 greeting = "$hello.",
-                body = ui.response.ifBlank {
-                    "I can brief you, run commands, and keep systems tight."
+                body = when {
+                    ui.response.isNotBlank() && ui.response != "Online." -> ui.response
+                    else -> "Privacy-first presence. I can brief you, run commands, and keep systems tight."
                 },
                 online = true
             )
@@ -323,41 +324,57 @@ private fun HubReactor(
     )
     Box(
         modifier
-            .size(160.dp)
+            .size(180.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Canvas(Modifier.fillMaxSize()) {
             val cx = size.width / 2f
             val cy = size.height / 2f
-            val r = size.minDimension / 2f * 0.9f
+            val r = size.minDimension / 2f * 0.92f
+            // ambient bloom
             drawCircle(
                 brush = Brush.radialGradient(
-                    listOf(Cyan.copy(alpha = 0.2f * pulse), Color.Transparent),
-                    Offset(cx, cy), r * 1.1f
+                    listOf(Cyan.copy(alpha = 0.28f * pulse), Cyan.copy(alpha = 0.06f), Color.Transparent),
+                    Offset(cx, cy), r * 1.15f
                 ),
-                radius = r * pulse,
+                radius = r * 1.05f * pulse,
                 center = Offset(cx, cy)
             )
+            // outer tick ring
+            for (i in 0 until 60) {
+                val a = Math.toRadians((i * 6).toDouble())
+                val outer = r * 0.98f
+                val inner = if (i % 5 == 0) r * 0.88f else r * 0.93f
+                val alpha = if (i % 5 == 0) 0.55f else 0.22f
+                drawLine(
+                    Cyan.copy(alpha = alpha),
+                    Offset(cx + (inner * kotlin.math.cos(a)).toFloat(), cy + (inner * kotlin.math.sin(a)).toFloat()),
+                    Offset(cx + (outer * kotlin.math.cos(a)).toFloat(), cy + (outer * kotlin.math.sin(a)).toFloat()),
+                    strokeWidth = if (i % 5 == 0) 2.dp.toPx() else 1.dp.toPx()
+                )
+            }
             rotate(spin, Offset(cx, cy)) {
                 drawCircle(
-                    Cyan.copy(alpha = 0.55f), r * 0.85f, Offset(cx, cy),
+                    Cyan.copy(alpha = 0.65f), r * 0.78f, Offset(cx, cy),
                     style = Stroke(
-                        width = 1.5.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f))
+                        width = 2.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 10f))
                     )
                 )
             }
-            rotate(-spin * 0.7f, Offset(cx, cy)) {
+            rotate(-spin * 0.65f, Offset(cx, cy)) {
                 drawCircle(
-                    CyanDim.copy(alpha = 0.5f), r * 0.7f, Offset(cx, cy),
+                    CyanDim.copy(alpha = 0.55f), r * 0.62f, Offset(cx, cy),
                     style = Stroke(
-                        width = 1.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 10f))
+                        width = 1.2.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 12f))
                     )
                 )
             }
-            drawCircle(Cyan.copy(alpha = 0.9f), r * 0.12f * pulse, Offset(cx, cy))
+            drawCircle(Cyan.copy(alpha = 0.15f), r * 0.28f, Offset(cx, cy))
+            drawCircle(Cyan.copy(alpha = 0.95f), r * 0.11f * pulse, Offset(cx, cy))
+            drawCircle(CyanBright.copy(alpha = 0.9f), r * 0.045f, Offset(cx, cy))
         }
     }
 }
@@ -373,10 +390,10 @@ private fun ModuleTile(
     Column(
         modifier
             .clip(shape)
-            .background(Panel.copy(alpha = 0.9f))
-            .border(1.dp, Cyan.copy(alpha = 0.28f), shape)
+            .background(Panel.copy(alpha = 0.94f))
+            .border(1.dp, Cyan.copy(alpha = 0.4f), shape)
             .clickable(onClick = onClick)
-            .padding(12.dp)
+            .padding(horizontal = 14.dp, vertical = 14.dp)
     ) {
         Text(
             title,
