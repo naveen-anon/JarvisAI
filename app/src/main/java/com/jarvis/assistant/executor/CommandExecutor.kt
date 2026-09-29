@@ -93,23 +93,69 @@ class CommandExecutor(private val context: Context) {
 
     private fun openApp(appName: String?): String {
         if (appName.isNullOrBlank()) return "Which application should I open, sir?"
+        val q = appName.trim().lowercase()
         val pm = context.packageManager
-        val apps = pm.getInstalledApplications(0)
 
-        val match = apps.firstOrNull {
-            pm.getApplicationLabel(it).toString().equals(appName, ignoreCase = true)
-        } ?: apps.firstOrNull {
-            pm.getApplicationLabel(it).toString().contains(appName, ignoreCase = true)
+        val aliases = linkedMapOf(
+            "whatsapp business" to listOf("com.whatsapp.w4b"),
+            "wa business" to listOf("com.whatsapp.w4b"),
+            "business whatsapp" to listOf("com.whatsapp.w4b"),
+            "whatsapp" to listOf("com.whatsapp"),
+            "telegram" to listOf("org.telegram.messenger", "org.telegram.messenger.web"),
+            "chrome" to listOf("com.android.chrome"),
+            "youtube" to listOf("com.google.android.youtube"),
+            "gmail" to listOf("com.google.android.gm"),
+            "maps" to listOf("com.google.android.apps.maps"),
+            "google maps" to listOf("com.google.android.apps.maps"),
+            "settings" to listOf("com.android.settings"),
+            "clock" to listOf(
+                "com.google.android.deskclock",
+                "com.android.deskclock",
+                "com.sec.android.app.clockpackage",
+                "com.oneplus.deskclock",
+                "com.coloros.alarmclock",
+                "com.miui.clock"
+            ),
+            "grok" to listOf("ai.x.grok", "com.x.grok", "com.x.ai", "ai.x.android", "com.twitter.android"),
+            "x ai" to listOf("ai.x.grok", "com.x.grok", "com.x.ai"),
+            "instagram" to listOf("com.instagram.android"),
+            "spotify" to listOf("com.spotify.music"),
+            "paytm" to listOf("net.one97.paytm"),
+            "phonepe" to listOf("com.phonepe.app"),
+            "gpay" to listOf("com.google.android.apps.nbu.paisa.user"),
+            "google pay" to listOf("com.google.android.apps.nbu.paisa.user")
+        )
+
+        for ((key, packages) in aliases) {
+            if (q == key || (key.length >= 5 && q.contains(key))) {
+                for (pkg in packages) {
+                    val launch = pm.getLaunchIntentForPackage(pkg)
+                    if (launch != null) {
+                        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(launch)
+                        return "Opening $appName."
+                    }
+                }
+            }
         }
 
-        return if (match != null) {
+        val apps = pm.getInstalledApplications(0)
+        val labeled = apps.map { app -> pm.getApplicationLabel(app).toString() to app }
+        val exact = labeled.firstOrNull { it.first.equals(appName.trim(), ignoreCase = true) }
+        val contains = labeled
+            .filter { it.first.contains(appName.trim(), ignoreCase = true) }
+            .maxByOrNull { it.first.length }
+        val match = exact?.second ?: contains?.second
+        if (match != null) {
             val launchIntent = pm.getLaunchIntentForPackage(match.packageName)
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(launchIntent)
-                "Opening $appName"
-            } else "Can't launch $appName"
-        } else "I couldn't find $appName installed."
+                return "Opening ${pm.getApplicationLabel(match)}."
+            }
+            return "Can't launch $appName."
+        }
+        return "I couldn't find $appName installed."
     }
 
     // Requires CALL_PHONE permission granted at runtime.
@@ -235,23 +281,46 @@ class CommandExecutor(private val context: Context) {
 
     /** Deep-links into the default Clock app to create an alarm — no special permission needed. */
     private fun setAlarm(target: String?): String {
-        val (hour, minute) = parseHourMinute(target) ?: return "What time should the alarm be?"
+        val (hour, minute) = parseHourMinute(target) ?: return "What time should the alarm be, sir?"
         val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
             putExtra(AlarmClock.EXTRA_HOUR, hour)
             putExtra(AlarmClock.EXTRA_MINUTES, minute)
-            putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+            putExtra(AlarmClock.EXTRA_SKIP_UI, false)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+        val h12 = if (hour % 12 == 0) 12 else hour % 12
+        val ampm = if (hour < 12) "AM" else "PM"
+        val display = "\( h12: \){minute.toString().padStart(2, '0')} $ampm"
         return try {
-            context.startActivity(intent)
-            val display = String.format("%02d:%02d", hour, minute)
-            "Alarm set for $display"
-        } catch (e: Exception) {
-            "I couldn't find a clock app to set the alarm."
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(intent)
+                "Alarm set for $display."
+            } else {
+                val clocks = listOf(
+                    "com.google.android.deskclock",
+                    "com.android.deskclock",
+                    "com.sec.android.app.clockpackage",
+                    "com.oneplus.deskclock",
+                    "com.coloros.alarmclock",
+                    "com.miui.clock",
+                    "com.huawei.deskclock"
+                )
+                for (pkg in clocks) {
+                    val launch = context.packageManager.getLaunchIntentForPackage(pkg)
+                    if (launch != null) {
+                        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(launch)
+                        return "Opening clock. Please confirm the alarm for $display."
+                    }
+                }
+                "I couldn't find a clock app. Install Google Clock, or set the alarm manually."
+            }
+        } catch (_: Exception) {
+            "I couldn't set the alarm on this device."
         }
     }
 
-    /** Deep-links into the default Clock app to start a timer. */
+
     private fun setTimer(target: String?): String {
         val seconds = target?.toIntOrNull() ?: return "How long should the timer be?"
         val intent = Intent(AlarmClock.ACTION_SET_TIMER).apply {
