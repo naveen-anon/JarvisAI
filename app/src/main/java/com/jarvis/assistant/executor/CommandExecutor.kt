@@ -290,7 +290,7 @@ class CommandExecutor(private val context: Context) {
         }
         val h12 = if (hour % 12 == 0) 12 else hour % 12
         val ampm = if (hour < 12) "AM" else "PM"
-        val display = "\( h12: \){minute.toString().padStart(2, '0')} $ampm"
+        val display = "( h12: ){minute.toString().padStart(2, '0')} $ampm"
         return try {
             if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(intent)
