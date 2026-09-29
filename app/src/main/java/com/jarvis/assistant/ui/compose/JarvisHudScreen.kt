@@ -149,110 +149,247 @@ fun JarvisHudScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // ── Header: "JARVIS" centered + build tag ──
-            Box(Modifier.fillMaxWidth()) {
-                Text(
-                    "JARVIS",
-                    color = CyanBright,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    letterSpacing = 3.sp,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-                Text(
-                    "v1.0 · build 31",
-                    color = TealDim,
-                    fontSize = 7.sp,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.align(Alignment.TopEnd)
-                )
+            HubHeader(subtitle = ui.stateLabel.ifBlank { "STANDING BY" })
+            Spacer(Modifier.height(12.dp))
+
+            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            val hello = when {
+                hour < 12 -> "Good morning"
+                hour < 17 -> "Good afternoon"
+                else -> "Good evening"
             }
-
-            Spacer(Modifier.height(10.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    if (ui.waveformActive) "LISTENING ON" else "LISTENING OFF",
-                    color = CyanBright,
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.weight(1f)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x1A00D9FF))
-                        .border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape)
-                        .clickable(onClick = actions.onSettings),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("i", color = CyanBright, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            Spacer(Modifier.height(6.dp))
-
-            TealClockDial(
-                clock = ui.clock,
-                percent = parsePercent(ui.battery),
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .clickable { actions.onReactorTap() }
+            CompanionCard(
+                greeting = "$hello.",
+                body = ui.response.ifBlank {
+                    "I can brief you, run commands, and keep systems tight."
+                },
+                online = true
             )
 
-            Spacer(Modifier.height(10.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                WeatherCard(modifier = Modifier.weight(1f), location = ui.location, weather = ui.weather)
-                DateCard(modifier = Modifier.weight(1f))
+            Spacer(Modifier.height(8.dp))
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                HubReactor(
+                    active = ui.waveformActive,
+                    onClick = actions.onTalk
+                )
             }
 
             Spacer(Modifier.height(8.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TealPill(
-                    modifier = Modifier.weight(1f),
-                    icon = R.drawable.ic_settings,
-                    text = "SETTINGS",
-                    onClick = actions.onSettings
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ModuleTile(
+                    "TODAY'S BRIEFING", "Summary for today.",
+                    onClick = actions.onBriefing,
+                    modifier = Modifier.weight(1f)
                 )
-                TealPill(
-                    modifier = Modifier.weight(1f),
-                    icon = R.drawable.ic_ai_spark,
-                    text = "ONLINE",
-                    onClick = actions.onChat
+                ModuleTile(
+                    "SYSTEM CORE", "Battery, network, status.",
+                    onClick = actions.onSystem,
+                    modifier = Modifier.weight(1f)
                 )
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x1A00D9FF))
-                        .border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape)
-                        .clickable(onClick = actions.onBriefing),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("?", color = CyanBright, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ModuleTile(
+                    "VOICE / CHAT", "Speak or type.",
+                    onClick = actions.onChat,
+                    modifier = Modifier.weight(1f)
+                )
+                ModuleTile(
+                    "VISION", "Camera intelligence.",
+                    onClick = actions.onVision,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ModuleTile(
+                    "SETTINGS", "Voice, memory, prefs.",
+                    onClick = actions.onSettings,
+                    modifier = Modifier.weight(1f)
+                )
+                ModuleTile(
+                    "LISTEN", "Start listening now.",
+                    onClick = actions.onTalk,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
-            Spacer(Modifier.height(10.dp))
-
-            IronDock(
-                onHome = actions.onNavHome,
-                onChat = actions.onNavChat,
-                onTalk = actions.onTalk,
-                onVision = actions.onNavVision,
-                onMore = actions.onNavMore
+            Spacer(Modifier.weight(1f))
+            Text(
+                "Tap reactor or Listen · Hey Jarvis",
+                color = CyanDim,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
     }
 }
+
+
+
+/* ───────── JARVIS_HOME_HUB_V2 helpers ───────── */
+
+@Composable
+private fun HubHeader(subtitle: String) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            "J.A.R.V.I.S",
+            color = Cyan,
+            fontSize = 18.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp
+        )
+        Text(
+            subtitle,
+            color = CyanSoft,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace
+        )
+    }
+}
+
+@Composable
+private fun CompanionCard(
+    greeting: String,
+    body: String,
+    online: Boolean
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Panel.copy(alpha = 0.92f))
+            .border(1.dp, Cyan.copy(alpha = 0.35f), shape)
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(if (online) Cyan else Color.Gray)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                if (online) "COMPANION ONLINE" else "OFFLINE MODE",
+                color = Cyan,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            greeting,
+            color = CyanBright,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            body,
+            color = CyanSoft,
+            fontSize = 13.sp,
+            lineHeight = 18.sp
+        )
+    }
+}
+
+@Composable
+private fun HubReactor(
+    active: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val infinite = rememberInfiniteTransition(label = "hubReactor")
+    val spin by infinite.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(if (active) 4000 else 16000, easing = LinearEasing)),
+        label = "spin"
+    )
+    val pulse by infinite.animateFloat(
+        0.92f, 1.08f,
+        infiniteRepeatable(tween(1200), RepeatMode.Reverse),
+        label = "pulse"
+    )
+    Box(
+        modifier
+            .size(160.dp)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(Modifier.fillMaxSize()) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = size.minDimension / 2f * 0.9f
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(Cyan.copy(alpha = 0.2f * pulse), Color.Transparent),
+                    Offset(cx, cy), r * 1.1f
+                ),
+                radius = r * pulse,
+                center = Offset(cx, cy)
+            )
+            rotate(spin, Offset(cx, cy)) {
+                drawCircle(
+                    Cyan.copy(alpha = 0.55f), r * 0.85f, Offset(cx, cy),
+                    style = Stroke(
+                        width = 1.5.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f))
+                    )
+                )
+            }
+            rotate(-spin * 0.7f, Offset(cx, cy)) {
+                drawCircle(
+                    CyanDim.copy(alpha = 0.5f), r * 0.7f, Offset(cx, cy),
+                    style = Stroke(
+                        width = 1.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 10f))
+                    )
+                )
+            }
+            drawCircle(Cyan.copy(alpha = 0.9f), r * 0.12f * pulse, Offset(cx, cy))
+        }
+    }
+}
+
+@Composable
+private fun ModuleTile(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        modifier
+            .clip(shape)
+            .background(Panel.copy(alpha = 0.9f))
+            .border(1.dp, Cyan.copy(alpha = 0.28f), shape)
+            .clickable(onClick = onClick)
+            .padding(12.dp)
+    ) {
+        Text(
+            title,
+            color = CyanBright,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(subtitle, color = CyanSoft, fontSize = 10.sp, maxLines = 2)
+    }
+}
+
 
 @Composable
 private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Modifier) {
