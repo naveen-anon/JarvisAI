@@ -311,73 +311,148 @@ private fun HubReactor(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val infinite = rememberInfiniteTransition(label = "hubReactor")
+    val infinite = rememberInfiniteTransition(label = "arcReactor")
     val spin by infinite.animateFloat(
         0f, 360f,
-        infiniteRepeatable(tween(if (active) 4000 else 16000, easing = LinearEasing)),
+        infiniteRepeatable(tween(if (active) 3500 else 14000, easing = LinearEasing)),
         label = "spin"
     )
+    val spin2 by infinite.animateFloat(
+        360f, 0f,
+        infiniteRepeatable(tween(if (active) 5000 else 18000, easing = LinearEasing)),
+        label = "spin2"
+    )
     val pulse by infinite.animateFloat(
-        0.92f, 1.08f,
-        infiniteRepeatable(tween(1200), RepeatMode.Reverse),
+        0.88f, 1.12f,
+        infiniteRepeatable(tween(900), RepeatMode.Reverse),
         label = "pulse"
     )
     Box(
         modifier
-            .size(180.dp)
+            .size(200.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Canvas(Modifier.fillMaxSize()) {
             val cx = size.width / 2f
             val cy = size.height / 2f
-            val r = size.minDimension / 2f * 0.92f
-            // ambient bloom
+            val r = size.minDimension / 2f * 0.94f
+
+            // Outer bloom
             drawCircle(
                 brush = Brush.radialGradient(
-                    listOf(Cyan.copy(alpha = 0.28f * pulse), Cyan.copy(alpha = 0.06f), Color.Transparent),
-                    Offset(cx, cy), r * 1.15f
+                    listOf(
+                        Cyan.copy(alpha = 0.35f * pulse),
+                        Cyan.copy(alpha = 0.08f),
+                        Color.Transparent
+                    ),
+                    Offset(cx, cy), r * 1.2f
                 ),
-                radius = r * 1.05f * pulse,
+                radius = r * 1.1f * pulse,
                 center = Offset(cx, cy)
             )
-            // outer tick ring
-            for (i in 0 until 60) {
-                val a = Math.toRadians((i * 6).toDouble())
-                val outer = r * 0.98f
-                val inner = if (i % 5 == 0) r * 0.88f else r * 0.93f
-                val alpha = if (i % 5 == 0) 0.55f else 0.22f
+
+            // Outer thick ring
+            drawCircle(
+                CyanBright.copy(alpha = 0.35f),
+                r * 0.98f,
+                Offset(cx, cy),
+                style = Stroke(width = 3.dp.toPx())
+            )
+            drawCircle(
+                Cyan.copy(alpha = 0.7f),
+                r * 0.95f,
+                Offset(cx, cy),
+                style = Stroke(width = 1.5.dp.toPx())
+            )
+
+            // Segment LEDs on outer ring
+            for (i in 0 until 36) {
+                val a = Math.toRadians((i * 10).toDouble() + spin.toDouble() * 0.15)
+                val ro = r * 0.92f
+                val ri = r * 0.84f
+                val bright = if (i % 3 == 0) 0.95f else 0.35f
                 drawLine(
-                    Cyan.copy(alpha = alpha),
-                    Offset(cx + (inner * kotlin.math.cos(a)).toFloat(), cy + (inner * kotlin.math.sin(a)).toFloat()),
-                    Offset(cx + (outer * kotlin.math.cos(a)).toFloat(), cy + (outer * kotlin.math.sin(a)).toFloat()),
-                    strokeWidth = if (i % 5 == 0) 2.dp.toPx() else 1.dp.toPx()
+                    CyanBright.copy(alpha = bright),
+                    Offset(cx + (ri * kotlin.math.cos(a)).toFloat(), cy + (ri * kotlin.math.sin(a)).toFloat()),
+                    Offset(cx + (ro * kotlin.math.cos(a)).toFloat(), cy + (ro * kotlin.math.sin(a)).toFloat()),
+                    strokeWidth = 2.5.dp.toPx()
                 )
             }
+
+            // Mid rotating dashed ring
             rotate(spin, Offset(cx, cy)) {
                 drawCircle(
-                    Cyan.copy(alpha = 0.65f), r * 0.78f, Offset(cx, cy),
+                    Cyan.copy(alpha = 0.75f),
+                    r * 0.72f,
+                    Offset(cx, cy),
                     style = Stroke(
                         width = 2.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 10f))
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(16f, 10f))
                     )
                 )
             }
-            rotate(-spin * 0.65f, Offset(cx, cy)) {
+            rotate(spin2, Offset(cx, cy)) {
                 drawCircle(
-                    CyanDim.copy(alpha = 0.55f), r * 0.62f, Offset(cx, cy),
+                    CyanDim.copy(alpha = 0.6f),
+                    r * 0.60f,
+                    Offset(cx, cy),
                     style = Stroke(
-                        width = 1.2.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 12f))
+                        width = 1.5.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 12f))
                     )
                 )
             }
-            drawCircle(Cyan.copy(alpha = 0.15f), r * 0.28f, Offset(cx, cy))
-            drawCircle(Cyan.copy(alpha = 0.95f), r * 0.11f * pulse, Offset(cx, cy))
-            drawCircle(CyanBright.copy(alpha = 0.9f), r * 0.045f, Offset(cx, cy))
+
+            // Inner structural ring
+            drawCircle(Cyan.copy(alpha = 0.4f), r * 0.48f, Offset(cx, cy), style = Stroke(2.dp.toPx()))
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(Cyan.copy(alpha = 0.25f), Color.Transparent),
+                    Offset(cx, cy), r * 0.45f
+                ),
+                radius = r * 0.45f,
+                center = Offset(cx, cy)
+            )
+
+            // Triangle core (arc reactor)
+            val triR = r * 0.28f * pulse
+            val path = Path()
+            for (i in 0 until 3) {
+                val a = Math.toRadians((-90 + i * 120).toDouble())
+                val x = cx + (triR * kotlin.math.cos(a)).toFloat()
+                val y = cy + (triR * kotlin.math.sin(a)).toFloat()
+                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+            }
+            path.close()
+            drawPath(
+                path,
+                brush = Brush.radialGradient(
+                    listOf(CyanCore.copy(alpha = 0.95f), Cyan.copy(alpha = 0.55f), CyanDim.copy(alpha = 0.3f)),
+                    Offset(cx, cy), triR * 1.2f
+                )
+            )
+            drawPath(path, CyanBright.copy(alpha = 0.95f), style = Stroke(width = 2.5.dp.toPx()))
+
+            // Inner triangle outline
+            val triR2 = triR * 0.55f
+            val path2 = Path()
+            for (i in 0 until 3) {
+                val a = Math.toRadians((-90 + i * 120).toDouble())
+                val x = cx + (triR2 * kotlin.math.cos(a)).toFloat()
+                val y = cy + (triR2 * kotlin.math.sin(a)).toFloat()
+                if (i == 0) path2.moveTo(x, y) else path2.lineTo(x, y)
+            }
+            path2.close()
+            drawPath(path2, CyanBright.copy(alpha = 0.8f), style = Stroke(width = 1.5.dp.toPx()))
+
+            // Core dot
+            drawCircle(Color.White.copy(alpha = 0.9f), r * 0.04f * pulse, Offset(cx, cy))
+            drawCircle(CyanBright, r * 0.025f, Offset(cx, cy))
         }
     }
 }
+
 
 @Composable
 private fun ModuleTile(
