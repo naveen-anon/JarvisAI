@@ -114,6 +114,20 @@ class MainActivity : AppCompatActivity(),
                             startActivity(Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))
                         }
                     },
+                    onSecurity = {
+                        try {
+                            startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+                        } catch (_: Exception) {}
+                    },
+                    onStats = {
+                        try {
+                            startActivity(Intent(this, com.jarvis.assistant.settings.StatsActivity::class.java))
+                        } catch (_: Exception) {
+                            try {
+                                startActivity(Intent(this, com.jarvis.assistant.settings.SettingsActivity::class.java))
+                            } catch (_: Exception) {}
+                        }
+                    },
                     onNavHome = { },
                     onNavChat = {
                         startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))

@@ -109,6 +109,8 @@ data class JarvisHudActions(
     val onBriefing: () -> Unit = {},
     val onSystem: () -> Unit = {},
     val onVision: () -> Unit = {},
+    val onSecurity: () -> Unit = {},
+    val onStats: () -> Unit = {},
     val onNavHome: () -> Unit = {},
     val onNavChat: () -> Unit = {},
     val onNavMic: () -> Unit = {},
@@ -200,6 +202,19 @@ fun JarvisHudScreen(
                 ModuleTile(
                     "VISION", "Camera intelligence.",
                     onClick = actions.onVision,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ModuleTile(
+                    "SECURITY", "Device posture report.",
+                    onClick = actions.onSecurity,
+                    modifier = Modifier.weight(1f)
+                )
+                ModuleTile(
+                    "STATS", "Usage and health.",
+                    onClick = actions.onStats,
                     modifier = Modifier.weight(1f)
                 )
             }
