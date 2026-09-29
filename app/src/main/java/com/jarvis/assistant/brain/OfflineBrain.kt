@@ -326,6 +326,38 @@ class OfflineBrain(
             return "I am J.A.R.V.I.S. — Just A Rather Very Intelligent System. " +
                    "I run primarily on-device, sir. Most commands require no external connection."
         }
+        
+        if (containsAny(cmd, "what do you see", "what's in front", "whats in front", "describe scene", "analyze scene", "scan scene")) {
+            return try {
+                val i = android.content.Intent(context, com.jarvis.assistant.vision.VisionActivity::class.java).apply {
+                    putExtra(com.jarvis.assistant.vision.VisionActivity.EXTRA_MODE, "scene")
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(i)
+                "Scanning the scene, sir."
+            } catch (_: Exception) { "Couldn't open vision, sir." }
+        }
+        if (containsAny(cmd, "read text", "read the text", "ocr", "scan text")) {
+            return try {
+                val i = android.content.Intent(context, com.jarvis.assistant.vision.VisionActivity::class.java).apply {
+                    putExtra(com.jarvis.assistant.vision.VisionActivity.EXTRA_MODE, "ocr")
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(i)
+                "Reading text, sir."
+            } catch (_: Exception) { "Couldn't open text recognition." }
+        }
+        if (containsAny(cmd, "detect faces", "how many faces", "face detection")) {
+            return try {
+                val i = android.content.Intent(context, com.jarvis.assistant.vision.VisionActivity::class.java).apply {
+                    putExtra(com.jarvis.assistant.vision.VisionActivity.EXTRA_MODE, "faces")
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(i)
+                "Scanning for faces, sir."
+            } catch (_: Exception) { "Couldn't open face detection." }
+        }
+
         if (containsAny(cmd, "what can you do", "help me", "list commands") || cmd == "help") {
             return "I can open applications, place calls, draft messages, run advanced security assessments, " +
                    "control system settings, manage volume and media, set alarms and timers, " +

@@ -62,7 +62,7 @@ class VisionActivity : AppCompatActivity() {
         btnFaces.setOnClickListener { selectMode("faces"); runAnalysis("faces") }
         findViewById<TextView>(R.id.btnCapture).setOnClickListener { runAnalysis(currentMode) }
 
-        currentMode = intent.getStringExtra(EXTRA_MODE)?.lowercase() ?: "ocr"
+        currentMode = intent.getStringExtra(EXTRA_MODE)?.lowercase() ?: "scene"
         selectMode(currentMode)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -80,7 +80,7 @@ class VisionActivity : AppCompatActivity() {
 
     private fun selectMode(mode: String) {
         currentMode = mode
-        val active = 0xFF00E5FF.toInt()
+        val active = 0xFF00D9FF.toInt()
         val idle = 0xFF5C8A94.toInt()
         btnOcr.setTextColor(if (mode == "ocr") active else idle)
         btnObjects.setTextColor(if (mode == "objects") active else idle)
@@ -134,10 +134,29 @@ class VisionActivity : AppCompatActivity() {
                                 "ocr" -> TextRecognitionHelper.recognize(inputImage)
                                 "objects" -> ObjectDetectionHelper.detect(inputImage)
                                 "faces" -> FaceDetectionHelper.detect(inputImage)
+                                "scene" -> {
+                                    val ocr = try { TextRecognitionHelper.recognize(inputImage) } catch (_: Exception) { "" }
+                                    val objs = try { ObjectDetectionHelper.detect(inputImage) } catch (_: Exception) { "" }
+                                    val faces = try { FaceDetectionHelper.detect(inputImage) } catch (_: Exception) { "" }
+                                    buildString {
+                                        append("Scene analysis. ")
+                                        if (objs.isNotBlank() && !objs.contains("No ", ignoreCase = true))
+                                            append(objs.trim()).append(" ")
+                                        if (faces.isNotBlank() && !faces.contains("No ", ignoreCase = true))
+                                            append(faces.trim()).append(" ")
+                                        if (ocr.isNotBlank() && ocr.length > 3 && !ocr.contains("No text", ignoreCase = true))
+                                            append("Visible text: ").append(ocr.take(280).trim())
+                                        if (length <= "Scene analysis. ".length)
+                                            append("I don't see clear text, objects, or faces in this frame, sir.")
+                                    }.trim()
+                                }
                                 else -> "Unknown vision mode."
                             }
+                            val spoken = result.replace(Regex("\\s+"), " ").trim().let {
+                                if (it.length > 400) it.take(400) + "…" else it
+                            }
                             resultText.text = result
-                            tts.speak(result)
+                            tts.speak(spoken)
                         } catch (e: Exception) {
                             resultText.text = "Analysis failed: ${e.message}"
                         } finally {
