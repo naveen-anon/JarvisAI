@@ -102,7 +102,9 @@ class CommandExecutor(private val context: Context) {
             "business whatsapp" to listOf("com.whatsapp.w4b"),
             "whatsapp" to listOf("com.whatsapp"),
             "telegram" to listOf("org.telegram.messenger", "org.telegram.messenger.web"),
-            "chrome" to listOf("com.android.chrome"),
+            "chrome" to listOf("com.android.chrome", "com.chrome.beta", "com.chrome.dev", "com.sec.android.app.sbrowser", "com.opera.browser", "org.mozilla.firefox", "com.android.browser"),
+            "google chrome" to listOf("com.android.chrome", "com.chrome.beta"),
+            "browser" to listOf("com.android.chrome", "com.sec.android.app.sbrowser", "com.android.browser"),
             "youtube" to listOf("com.google.android.youtube"),
             "gmail" to listOf("com.google.android.gm"),
             "maps" to listOf("com.google.android.apps.maps"),
@@ -127,7 +129,7 @@ class CommandExecutor(private val context: Context) {
         )
 
         for ((key, packages) in aliases) {
-            if (q == key || (key.length >= 5 && q.contains(key))) {
+            if (q == key || q == key.replace(" ", "") || (key.length >= 4 && q.contains(key))) {
                 for (pkg in packages) {
                     val launch = pm.getLaunchIntentForPackage(pkg)
                     if (launch != null) {
@@ -137,6 +139,18 @@ class CommandExecutor(private val context: Context) {
                     }
                 }
             }
+        }
+
+        // Browser fallback if Chrome package missing / restricted
+        if (q.contains("chrome") || q.contains("browser")) {
+            try {
+                val view = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.google.com")).apply {
+                    addCategory(Intent.CATEGORY_BROWSABLE)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(view)
+                return "Opening browser."
+            } catch (_: Exception) {}
         }
 
         val apps = pm.getInstalledApplications(0)
