@@ -1,5 +1,9 @@
 package com.jarvis.assistant.accessibility
 
+import android.content.Intent
+import com.jarvis.assistant.security.AppLockManager
+import com.jarvis.assistant.security.LockScreenActivity
+
 import android.accessibilityservice.AccessibilityService
 import android.os.Handler
 import android.os.Looper
@@ -9,13 +13,37 @@ import android.util.Log
 
 class JarvisAccessibilityService : AccessibilityService() {
 
+    private val appLockManager by lazy { AppLockManager(this) }
+
+
     private val handler = Handler(Looper.getMainLooper())
 
     private val sendButtonHints = listOf(
         "send", "भेजें", "com.whatsapp:id/send", "org.telegram.messenger:id/chat_send_button"
     )
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+
+        // Jarvis app-lock: PIN gate over locked packages
+        try {
+            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
+                event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            ) {
+                val pkg = event.packageName?.toString()
+                if (!pkg.isNullOrBlank()
+                    && pkg != packageName
+                    && appLockManager.isLocked(pkg)
+                    && !appLockManager.isSessionUnlocked(pkg)
+                ) {
+                    val i = Intent(this, LockScreenActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        putExtra(LockScreenActivity.EXTRA_PACKAGE, pkg)
+                    }
+                    startActivity(i)
+                }
+            }
+        } catch (_: Exception) {}
+}
     override fun onInterrupt() {}
 
     fun getScreenText(): String {
