@@ -23,13 +23,14 @@ class JarvisAccessibilityService : AccessibilityService() {
     )
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        val ev = event ?: return
 
         // Jarvis app-lock: PIN gate over locked packages
         try {
-            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
-                event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            if (ev.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
+                ev.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             ) {
-                val pkg = event.packageName?.toString()
+                val pkg = ev.packageName?.toString()
                 if (!pkg.isNullOrBlank()
                     && pkg != packageName
                     && appLockManager.isLocked(pkg)
@@ -43,7 +44,7 @@ class JarvisAccessibilityService : AccessibilityService() {
                 }
             }
         } catch (_: Exception) {}
-}
+
     override fun onInterrupt() {}
 
     fun getScreenText(): String {
