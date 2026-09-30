@@ -356,26 +356,7 @@ class SettingsActivity : AppCompatActivity() {
             )
             addView(pinStatus)
             addView(hudButton("SET / CHANGE APP PIN") {
-                val input = hudEditText("")
-                input.hint = "4+ digit PIN"
-                input.inputType = android.text.InputType.TYPE_CLASS_NUMBER or
-                    android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
-                val dialog = android.app.AlertDialog.Builder(this@SettingsActivity)
-                    .setTitle("Jarvis App PIN")
-                    .setMessage("Enter a PIN (min 4 digits). This is NOT your phone lock PIN.")
-                    .setView(input)
-                    .setPositiveButton("SAVE") { _, _ ->
-                        val pin = input.text.toString().trim()
-                        if (pin.length < 4) {
-                            toast("PIN must be at least 4 digits.")
-                        } else {
-                            AppLockManager(this@SettingsActivity).setPin(pin)
-                            pinStatus.text = "PIN is set."
-                            toast("App PIN saved.")
-                        }
-                    }
-                    .setNegativeButton("CANCEL", null)
-                    .show()
+                showJarvisPinDialog(pinStatus)
             })
             addView(hudButton("CLEAR APP PIN") {
                 val prefs = getSharedPreferences("jarvis_app_lock", MODE_PRIVATE)
@@ -443,4 +424,66 @@ class SettingsActivity : AppCompatActivity() {
         tts.shutdown()
         super.onDestroy()
     }
+
+    private fun showJarvisPinDialog(pinStatus: TextView) {
+        val density = resources.displayMetrics.density
+        fun dp(v: Int) = (v * density).toInt()
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(8), dp(20), dp(4))
+            setBackgroundColor(Color.parseColor("#03080E"))
+        }
+
+        val title = TextView(this).apply {
+            text = "JARVIS APP PIN"
+            setTextColor(Color.parseColor("#00D9FF"))
+            textSize = 15f
+            typeface = android.graphics.Typeface.MONOSPACE
+            setPadding(0, 0, 0, dp(6))
+        }
+        val sub = TextView(this).apply {
+            text = "Min 4 digits. Not your phone lock PIN."
+            setTextColor(Color.parseColor("#5A8A99"))
+            textSize = 12f
+            setPadding(0, 0, 0, dp(12))
+        }
+        val input = hudEditText("").apply {
+            hint = "••••"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or
+                android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            setHintTextColor(Color.parseColor("#5A8A99"))
+            setTextColor(Color.parseColor("#E8F9FF"))
+            setBackgroundColor(Color.parseColor("#0A1825"))
+            setPadding(dp(14), dp(12), dp(14), dp(12))
+        }
+        container.addView(title)
+        container.addView(sub)
+        container.addView(input)
+
+        val dlg = android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog)
+            .setView(container)
+            .setPositiveButton("SAVE") { _, _ ->
+                val pin = input.text.toString().trim()
+                if (pin.length < 4) toast("PIN must be at least 4 digits.")
+                else {
+                    AppLockManager(this).setPin(pin)
+                    pinStatus.text = "PIN is set."
+                    toast("App PIN saved.")
+                }
+            }
+            .setNegativeButton("CANCEL", null)
+            .create()
+
+        dlg.setOnShowListener {
+            dlg.window?.setBackgroundDrawable(
+                android.graphics.drawable.ColorDrawable(Color.parseColor("#0A1825"))
+            )
+            dlg.getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.parseColor("#00D9FF"))
+            dlg.getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.parseColor("#5A8A99"))
+        }
+        dlg.show()
+    }
+
+
 }
