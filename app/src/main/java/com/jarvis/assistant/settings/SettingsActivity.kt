@@ -1,5 +1,7 @@
 package com.jarvis.assistant.settings
 
+import com.jarvis.assistant.security.AppLockManager
+
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -342,6 +344,46 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         root.addView(sectionCard {
+            
+            addView(sectionTitle("Jarvis App PIN", R.drawable.ic_lock))
+            addView(bodyText(
+                "PIN protects apps you lock by voice (\"lock WhatsApp\"). " +
+                "Stored as a hash only — not your phone lock screen PIN."
+            ))
+            val pinStatus = bodyText(
+                if (AppLockManager(this@SettingsActivity).hasPin()) "PIN is set."
+                else "No PIN set yet — lock commands need a PIN first."
+            )
+            addView(pinStatus)
+            addView(hudButton("SET / CHANGE APP PIN") {
+                val input = hudEditText("")
+                input.hint = "4+ digit PIN"
+                input.inputType = android.text.InputType.TYPE_CLASS_NUMBER or
+                    android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+                val dialog = android.app.AlertDialog.Builder(this@SettingsActivity)
+                    .setTitle("Jarvis App PIN")
+                    .setMessage("Enter a PIN (min 4 digits). This is NOT your phone lock PIN.")
+                    .setView(input)
+                    .setPositiveButton("SAVE") { _, _ ->
+                        val pin = input.text.toString().trim()
+                        if (pin.length < 4) {
+                            toast("PIN must be at least 4 digits.")
+                        } else {
+                            AppLockManager(this@SettingsActivity).setPin(pin)
+                            pinStatus.text = "PIN is set."
+                            toast("App PIN saved.")
+                        }
+                    }
+                    .setNegativeButton("CANCEL", null)
+                    .show()
+            })
+            addView(hudButton("CLEAR APP PIN") {
+                val prefs = getSharedPreferences("jarvis_app_lock", MODE_PRIVATE)
+                prefs.edit().remove("pin_hash").apply()
+                pinStatus.text = "No PIN set yet — lock commands need a PIN first."
+                toast("App PIN cleared.")
+            })
+
             addView(sectionTitle("Lock Screen", R.drawable.ic_lock))
             addView(bodyText(
                 "Android no longer allows regular apps to set or change your device's lock " +
