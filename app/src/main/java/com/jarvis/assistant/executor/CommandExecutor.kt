@@ -50,6 +50,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.WEB_SEARCH -> webSearch(cmd.target)
             ActionType.LOCK_APP -> lockApp(cmd.target)
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
+            ActionType.UNLOCK_PHONE -> unlockPhone()
             ActionType.SET_PIN -> setPin(cmd.target)
             ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
             ActionType.TELEGRAM_MESSAGE -> telegramMessage(cmd.target, cmd.message)
@@ -476,6 +477,26 @@ class CommandExecutor(private val context: Context) {
         val packageName = resolvePackageName(appName) ?: return "I couldn't find $appName installed."
         lockManager.lockApp(packageName)
         return "$appName is now locked, sir. Your PIN will be required to open it."
+    }
+
+
+    /**
+     * Best-effort unlock: wake screen + request keyguard dismiss.
+     * Cannot bypass PIN/pattern/biometric — Android forbids that.
+     * Opens MainActivity and asks system to dismiss keyguard (user may still need biometric/PIN).
+     */
+    private fun unlockPhone(): String {
+        return try {
+            val intent = Intent(context, com.jarvis.assistant.MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                putExtra(com.jarvis.assistant.security.UnlockHelper.EXTRA_TRIGGER_UNLOCK, true)
+            }
+            context.startActivity(intent)
+            // Also try to turn screen on via activity flags handled in MainActivity/UnlockHelper
+            "Bringing Jarvis forward. Confirm with your fingerprint or PIN if the system asks, sir."
+        } catch (e: Exception) {
+            "I couldn't start the unlock flow: ${e.message}"
+        }
     }
 
     private fun unlockApp(appName: String?): String {
