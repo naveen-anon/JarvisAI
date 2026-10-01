@@ -83,7 +83,7 @@ class LockScreenActivity : AppCompatActivity() {
                 val entered = pinInput.text.toString()
                 if (lockManager.checkPin(entered)) {
                     targetPackage?.let { lockManager.markSessionUnlocked(it) }
-                    finish()
+                    pinInput.postDelayed({ finish() }, 200)
                 } else {
                     error.text = "Incorrect PIN"
                     pinInput.text.clear()

@@ -27,8 +27,7 @@ class JarvisAccessibilityService : AccessibilityService() {
 
         // Jarvis app-lock: PIN gate over locked packages
         try {
-            if (ev.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
-                ev.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            if (ev.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             ) {
                 val pkg = ev.packageName?.toString()
                 if (!pkg.isNullOrBlank()
