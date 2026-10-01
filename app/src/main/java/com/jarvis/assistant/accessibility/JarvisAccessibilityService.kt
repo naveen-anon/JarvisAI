@@ -44,6 +44,7 @@ class JarvisAccessibilityService : AccessibilityService() {
                 }
             }
         } catch (_: Exception) {}
+    }
 
     override fun onInterrupt() {}
 
