@@ -157,7 +157,7 @@ class AssistantForegroundService : Service() {
                             if (com.jarvis.assistant.util.SettingsManager(this).getBackgroundListen()) {
                                 startWakeWordListening()
                             }
-                        }, 4_000L)
+                        }, 2_500L)
                     }
                 },
                 onError = { msg ->
@@ -178,15 +178,38 @@ class AssistantForegroundService : Service() {
      * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
      */
     private fun startSttWakeFallback() {
-        // IMPORTANT: Continuous Google STT wake is permanently disabled.
-        // It holds the mic open, drains battery, and causes "mic auto on" reports.
-        // Without Porcupine key: use clap (if enabled), notification Listen, or Talk button.
-        android.util.Log.i(
-            "JarvisService",
-            "STT continuous wake disabled. Use clap, notification Listen, or Talk button."
-        )
+        val sm = com.jarvis.assistant.util.SettingsManager(this)
+        if (!sm.getSttContinuousWake()) {
+            android.util.Log.i(
+                "JarvisService",
+                "STT continuous wake off. Enable in Settings, or use Porcupine / clap / Talk."
+            )
+            try { stt.stopContinuous() } catch (_: Exception) {}
+            return
+        }
+        android.util.Log.i("JarvisService", "STT continuous wake active (higher battery)")
         try { stt.stopContinuous() } catch (_: Exception) {}
-        try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+        stt.listenContinuous { trailing ->
+            mainHandler.post {
+                try { stt.stopContinuous() } catch (_: Exception) {}
+                startListeningCycle()
+                if (trailing.isNotBlank()) {
+                    // "hey jarvis what time is it" → trailing may already be the command
+                    mainHandler.postDelayed({
+                        if (trailing.length > 2) handleUserSpeech(trailing)
+                    }, 600L)
+                }
+                mainHandler.postDelayed({
+                    if (SettingsManager(this).getBackgroundListen() &&
+                        SettingsManager(this).getSttContinuousWake()
+                    ) {
+                        startSttWakeFallback()
+                    } else if (SettingsManager(this).getBackgroundListen()) {
+                        startWakeWordListening()
+                    }
+                }, 2_500L)
+            }
+        }
     }
 
 

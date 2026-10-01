@@ -51,7 +51,7 @@ class PorcupineWakeWord(private val context: Context) {
             manager = PorcupineManager.Builder()
                 .setAccessKey(accessKey)
                 .setKeyword(Porcupine.BuiltInKeyword.JARVIS)
-                .setSensitivity(0.65f)
+                .setSensitivity(0.55f)
                 .setErrorCallback(errorCallback)
                 .build(context, wakeCallback)
             manager?.start()

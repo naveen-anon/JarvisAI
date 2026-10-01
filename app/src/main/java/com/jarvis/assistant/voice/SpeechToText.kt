@@ -19,11 +19,11 @@ class SpeechToText(private val context: Context) {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val wakeWords = listOf(
+        "hey jarvis", "ok jarvis", "okay jarvis", "hi jarvis",
+        "hello jarvis", "hey jarwis", "jarvis ji",
         "jarvis", "jarwis", "jaarvis", "jarviz", "jarves", "jarvus",
         "jervis", "jarvish",
-        "जार्विस", "जारविस", "जर्विस",
-        "hey jarvis", "ok jarvis", "okay jarvis", "hi jarvis",
-        "hello jarvis", "jarvis ji"
+        "जार्विस", "जारविस", "जर्विस", "हे जार्विस"
     )
 
     fun listenOnce(onResult: (String) -> Unit, onError: () -> Unit) {
@@ -84,7 +84,7 @@ class SpeechToText(private val context: Context) {
         onFired: () -> Unit
     ) {
         val now = System.currentTimeMillis()
-        if (now - lastWakeMs < 1800) return
+        if (now - lastWakeMs < 900) return
         val match = findWakeWord(heard) ?: return
         lastWakeMs = now
         onFired()
