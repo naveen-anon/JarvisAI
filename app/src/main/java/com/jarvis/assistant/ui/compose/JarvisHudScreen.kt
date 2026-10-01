@@ -199,24 +199,24 @@ fun JarvisHudScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // Hero: status + reactor (glass)
+
+            // ══════ REFERENCE DASHBOARD ══════
             Row(
                 Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(18.dp))
-                    .background(Brush.verticalGradient(listOf(Color(0xEE0A1828), Color(0xCC050E18))))
-                    .border(1.4.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
-                    .padding(14.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(Brush.verticalGradient(listOf(Color(0xF00B1C2C), Color(0xE006101C))))
+                    .border(1.5.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
+                    .padding(12.dp)
             ) {
-                Column(Modifier.weight(1f)) {
+                Column(Modifier.weight(1.15f)) {
                     val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
                     val hello = when {
                         hour < 12 -> "GOOD MORNING"
                         hour < 17 -> "GOOD AFTERNOON"
                         else -> "GOOD EVENING"
                     }
-                    Text(hello + ",", color = CyanDim, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                    Text("$hello,", color = CyanDim, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                     Text(
                         "NAVEEN",
                         color = CyanBright,
@@ -224,143 +224,117 @@ fun JarvisHudScreen(
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
                     )
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(8.dp))
                     DashStatus("Battery", ui.battery.replace("BATT:", "").trim().ifBlank { "—" })
                     DashStatus("Network", ui.network.ifBlank { "—" })
                     DashStatus("Status", ui.stateLabel.ifBlank { "Idle" })
-                    Spacer(Modifier.height(8.dp))
+                    DashStatus("RAM", ui.ram.replace("RAM:", "").trim().ifBlank { "—" })
+                    Spacer(Modifier.height(6.dp))
                     Text(
-                        ui.response.ifBlank { "How can I assist you today?" }.let {
-                            if (it.length > 72) it.take(72) + "…" else it
-                        },
+                        "How can I assist you today?",
                         color = CyanSoft,
                         fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
-                        maxLines = 3
+                        fontFamily = FontFamily.Monospace
                     )
                 }
-                HubReactor(
-                    active = ui.waveformActive,
-                    onClick = actions.onTalk
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    HubReactor(active = ui.waveformActive, onClick = actions.onTalk)
+                    Text("JARVIS", color = CyanBright, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text("AI CORE", color = CyanDim, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                }
             }
 
             Spacer(Modifier.height(10.dp))
 
-            // Briefing strip
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Panel.copy(alpha = 0.95f))
-                    .border(1.dp, Cyan.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Brush.horizontalGradient(listOf(Color(0xFF0A1A28), Color(0xFF071420))))
+                    .border(1.3.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
                     .clickable { actions.onBriefing() }
                     .padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(Modifier.weight(1f)) {
+                    Text("TODAY'S BRIEFING", color = CyanBright, fontSize = 13.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     Text(
-                        "TODAY'S BRIEFING",
-                        color = CyanBright,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Text(
-                        "Status, weather, schedule.",
+                        ui.response.take(40).ifBlank { "No urgent tasks. Have a great day!" },
                         color = CyanDim,
                         fontSize = 10.sp,
-                        fontFamily = FontFamily.Monospace
+                        fontFamily = FontFamily.Monospace,
+                        maxLines = 1
                     )
                 }
                 Text("›", color = Cyan, fontSize = 22.sp)
             }
 
-            Spacer(Modifier.height(10.dp))
-
+            Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DashTile("VOICE / CHAT", "Speak or type", Modifier.weight(1f), actions.onChat)
+                DashTile("VOICE / CHAT", "Speak or type to Jarvis", Modifier.weight(1f), actions.onChat)
                 DashTile("VISION", "Camera intelligence", Modifier.weight(1f), actions.onVision)
             }
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DashTile("SYSTEM", "Battery, network", Modifier.weight(1f), actions.onSystem)
-                DashTile("SECURITY", "Device posture", Modifier.weight(1f), actions.onSecurity)
+                DashTile("SYSTEM", "Battery, network, status", Modifier.weight(1f), actions.onSystem)
+                DashTile("SECURITY", "Device protection & safety", Modifier.weight(1f), actions.onSecurity)
             }
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DashTile("STATS", "Usage & health", Modifier.weight(1f), actions.onStats)
-                DashTile("SETTINGS", "Voice, memory", Modifier.weight(1f), actions.onSettings)
+                DashTile("MEMORY", "Learn & remember", Modifier.weight(1f), actions.onStats)
+                DashTile("AUTOMATION", "Smart actions & workflows", Modifier.weight(1f), actions.onSettings)
             }
 
-            Spacer(Modifier.height(10.dp))
-
+            Spacer(Modifier.height(8.dp))
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Panel.copy(alpha = 0.9f))
-                    .border(1.dp, Cyan.copy(alpha = 0.28f), RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF071018))
+                    .border(1.2.dp, Cyan.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
                     .padding(12.dp)
             ) {
-                Text(
-                    "JARVIS ACTIVITY",
-                    color = CyanBright,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "• ${ui.stateLabel.ifBlank { "Standing by" }}",
-                    color = CyanSoft,
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace
-                )
-                Text(
-                    "• ${ui.response.take(52).ifBlank { "Online." }}",
-                    color = CyanDim,
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
-                    maxLines = 2
-                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("JARVIS ACTIVITY", color = CyanBright, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    Text("Live Logs", color = CyanDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                }
+                Spacer(Modifier.height(8.dp))
+                Text("• ${ui.stateLabel.ifBlank { "Standing by" }}", color = CyanSoft, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text("• ${ui.response.take(48).ifBlank { "Online." }}", color = CyanDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace, maxLines = 2)
+                Text("• Network ${ui.network.ifBlank { "—" }} · ${ui.battery}", color = CyanDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
 
             Spacer(Modifier.weight(1f))
 
-            // Ask bar
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Panel)
-                    .border(1.dp, Cyan.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                    .padding(horizontal = 6.dp, vertical = 5.dp),
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(Color(0xFF071018))
+                    .border(1.4.dp, Cyan.copy(alpha = 0.7f), RoundedCornerShape(28.dp))
+                    .padding(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    Modifier.size(42.dp).clip(CircleShape).border(1.dp, Cyan.copy(alpha = 0.55f), CircleShape).clickable { actions.onChat() },
+                    contentAlignment = Alignment.Center
+                ) { Text("+", color = CyanBright, fontSize = 22.sp, fontWeight = FontWeight.Bold) }
                 Text(
                     "Ask JARVIS…",
                     color = CyanDim,
                     fontSize = 13.sp,
                     fontFamily = FontFamily.Monospace,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { actions.onChat() }
-                        .padding(horizontal = 14.dp, vertical = 12.dp)
+                    modifier = Modifier.weight(1f).clickable { actions.onChat() }.padding(horizontal = 12.dp)
                 )
                 Box(
-                    Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(Cyan.copy(alpha = 0.18f))
-                        .border(1.dp, Cyan, CircleShape)
-                        .clickable { actions.onTalk() },
+                    Modifier.size(46.dp).clip(CircleShape).background(Cyan.copy(alpha = 0.12f)).border(1.3.dp, Cyan, CircleShape).clickable { actions.onTalk() },
                     contentAlignment = Alignment.Center
-                ) {
-                    Text("MIC", color = CyanBright, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                }
+                ) { Text("MIC", color = CyanBright, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace) }
             }
-        }
+
     }
 }
 
@@ -380,20 +354,20 @@ private fun DashTile(title: String, subtitle: String, modifier: Modifier = Modif
     val shape = RoundedCornerShape(16.dp)
     Row(
         modifier
-            .height(70.dp)
+            .height(68.dp)
             .clip(shape)
-            .background(Brush.verticalGradient(listOf(Color(0xFF0A1A28), Color(0xFF061018))))
-            .border(1.2.dp, Cyan.copy(alpha = 0.55f), shape)
+            .background(Brush.verticalGradient(listOf(Color(0xFF0C1E30), Color(0xFF071018))))
+            .border(1.25.dp, Cyan.copy(alpha = 0.6f), shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
             Text(title, color = CyanBright, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            Spacer(Modifier.height(3.dp))
-            Text(subtitle, color = CyanDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
+            Spacer(Modifier.height(2.dp))
+            Text(subtitle, color = CyanDim, fontSize = 9.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
         }
-        Text("›", color = Cyan.copy(alpha = 0.85f), fontSize = 20.sp)
+        Text("›", color = Cyan, fontSize = 20.sp)
     }
 }
 
