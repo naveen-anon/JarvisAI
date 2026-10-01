@@ -199,8 +199,16 @@ fun JarvisHudScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // Hero: status + reactor
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            // Hero: status + reactor (glass)
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Brush.verticalGradient(listOf(Color(0xEE0A1828), Color(0xCC050E18))))
+                    .border(1.4.dp, Cyan.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Column(Modifier.weight(1f)) {
                     val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
                     val hello = when {
@@ -210,9 +218,9 @@ fun JarvisHudScreen(
                     }
                     Text(hello + ",", color = CyanDim, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                     Text(
-                        "COMMANDER",
+                        "NAVEEN",
                         color = CyanBright,
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
                     )
@@ -369,17 +377,23 @@ private fun DashStatus(label: String, value: String) {
 
 @Composable
 private fun DashTile(title: String, subtitle: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Column(
+    val shape = RoundedCornerShape(16.dp)
+    Row(
         modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Panel.copy(alpha = 0.95f))
-            .border(1.dp, Cyan.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+            .height(70.dp)
+            .clip(shape)
+            .background(Brush.verticalGradient(listOf(Color(0xFF0A1A28), Color(0xFF061018))))
+            .border(1.2.dp, Cyan.copy(alpha = 0.55f), shape)
             .clickable(onClick = onClick)
-            .padding(14.dp)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, color = CyanBright, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-        Spacer(Modifier.height(4.dp))
-        Text(subtitle, color = CyanDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Column(Modifier.weight(1f)) {
+            Text(title, color = CyanBright, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            Spacer(Modifier.height(3.dp))
+            Text(subtitle, color = CyanDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
+        }
+        Text("›", color = Cyan.copy(alpha = 0.85f), fontSize = 20.sp)
     }
 }
 
