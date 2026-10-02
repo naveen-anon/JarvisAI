@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -251,24 +252,52 @@ fun JarvisHudScreen(
 @Composable
 private fun HubHeader(subtitle: String) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            "J.A.R.V.I.S",
-            color = Cyan,
-            fontSize = 18.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp
-        )
-        Text(
-            subtitle,
-            color = CyanSoft,
-            fontSize = 10.sp,
-            fontFamily = FontFamily.Monospace
-        )
+        Column {
+            Text(
+                "J.A.R.V.I.S",
+                color = CyanBright,
+                fontSize = 20.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            )
+            Text(
+                "Artificial Intelligence Assistant",
+                color = CyanDim,
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF22C55E))
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    "ONLINE",
+                    color = Color(0xFF22C55E),
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Text(
+                subtitle,
+                color = Cyan,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        }
     }
 }
 
@@ -278,13 +307,17 @@ private fun CompanionCard(
     body: String,
     online: Boolean
 ) {
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(18.dp)
     Column(
         Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Panel.copy(alpha = 0.92f))
-            .border(1.dp, Cyan.copy(alpha = 0.35f), shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xF00C1E30), Color(0xE0071018))
+                )
+            )
+            .border(1.3.dp, Cyan.copy(alpha = 0.5f), shape)
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -292,12 +325,12 @@ private fun CompanionCard(
                 Modifier
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(if (online) Cyan else Color.Gray)
+                    .background(if (online) Color(0xFF22C55E) else Color.Gray)
             )
             Spacer(Modifier.width(8.dp))
             Text(
                 if (online) "COMPANION ONLINE" else "OFFLINE MODE",
-                color = Cyan,
+                color = if (online) Color(0xFF22C55E) else CyanDim,
                 fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
@@ -308,7 +341,8 @@ private fun CompanionCard(
             greeting,
             color = CyanBright,
             fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace
         )
         Spacer(Modifier.height(6.dp))
         Text(
@@ -471,24 +505,42 @@ private fun ModuleTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(16.dp)
     Column(
         modifier
+            .heightIn(min = 72.dp)
             .clip(shape)
-            .background(Panel.copy(alpha = 0.94f))
-            .border(1.dp, Cyan.copy(alpha = 0.4f), shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF0C1E30), Color(0xFF071018))
+                )
+            )
+            .border(1.25.dp, Cyan.copy(alpha = 0.55f), shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 14.dp)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
-        Text(
-            title,
-            color = CyanBright,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace
-        )
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                title,
+                color = CyanBright,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
+            Text("›", color = Cyan.copy(alpha = 0.8f), fontSize = 18.sp)
+        }
         Spacer(Modifier.height(4.dp))
-        Text(subtitle, color = CyanSoft, fontSize = 10.sp, maxLines = 2)
+        Text(
+            subtitle,
+            color = CyanDim,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+            maxLines = 2
+        )
     }
 }
 
