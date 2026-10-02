@@ -45,6 +45,39 @@ class OfflineBrain(
         // Add to conversation history
         conversationContext.addMessage(text, isUserInput = true)
 
+
+        // In-app voice / video calls
+        if (containsAny(cmd, "video call", "video calling", "video call karo", "video call on")) {
+            val app = when {
+                "whatsapp" in cmd -> "whatsapp"
+                "telegram" in cmd -> "telegram"
+                "instagram" in cmd || "insta" in cmd -> "instagram"
+                "facebook" in cmd || "messenger" in cmd -> "messenger"
+                "discord" in cmd -> "discord"
+                "signal" in cmd -> "signal"
+                "snapchat" in cmd || "snap" in cmd -> "snapchat"
+                else -> null
+            }
+            if (app != null) {
+                return executor.execute(com.jarvis.assistant.model.AssistantCommand("app_call", app, "video"))
+            }
+        }
+        if (containsAny(cmd, "voice call", "audio call", "whatsapp call", "telegram call",
+                "instagram call", "discord call", "messenger call", "call on whatsapp",
+                "whatsapp pe call", "telegram pe call", "insta pe call", "facebook pe call")) {
+            val app = when {
+                "whatsapp" in cmd -> "whatsapp"
+                "telegram" in cmd -> "telegram"
+                "instagram" in cmd || "insta" in cmd -> "instagram"
+                "facebook" in cmd || "messenger" in cmd -> "messenger"
+                "discord" in cmd -> "discord"
+                "signal" in cmd -> "signal"
+                "snap" in cmd -> "snapchat"
+                else -> "whatsapp"
+            }
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("app_call", app, "voice"))
+        }
+
         if (containsAny(cmd, "focus mode on", "enable focus", "do not disturb on", "dnd on", "enable dnd")) {
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("focus_mode", "on"))
         }

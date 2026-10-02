@@ -38,6 +38,7 @@ class CommandExecutor(private val context: Context) {
 
         return when (ActionType.fromKey(cmd.action)) {
             ActionType.OPEN_APP -> openApp(cmd.target)
+            ActionType.APP_CALL -> appCall(cmd.target, cmd.message)
             ActionType.CALL -> callContact(cmd.target)
             ActionType.SEND_SMS -> sendSms(cmd.target, cmd.message)
             ActionType.TOGGLE_SETTING -> toggleSetting(cmd.target)
@@ -90,6 +91,38 @@ class CommandExecutor(private val context: Context) {
             ActionType.PC_CONNECT -> "PC connect is handled by the assistant service, not here."
             ActionType.UNKNOWN -> "I didn't understand that command."
         }
+    }
+
+
+    private fun appCall(app: String?, kind: String?): String {
+        if (app.isNullOrBlank()) return "Which app should I use for the call, sir?"
+        val a = app.trim().lowercase()
+        val video = (kind ?: "voice").lowercase().contains("video")
+        val pm = context.packageManager
+        val packages = when {
+            "whatsapp" in a -> listOf("com.whatsapp", "com.whatsapp.w4b")
+            "telegram" in a -> listOf("org.telegram.messenger", "org.telegram.messenger.web")
+            "instagram" in a || "insta" in a -> listOf("com.instagram.android")
+            "facebook" in a || "messenger" in a || a == "fb" ->
+                listOf("com.facebook.orca", "com.facebook.mlite", "com.facebook.katana")
+            "discord" in a -> listOf("com.discord")
+            "signal" in a -> listOf("org.thoughtcrime.securesms")
+            "snap" in a -> listOf("com.snapchat.android")
+            else -> emptyList()
+        }
+        if (packages.isEmpty()) return openApp(app)
+        val label = a.replaceFirstChar { it.uppercase() }
+        for (pkg in packages) {
+            val launch = pm.getLaunchIntentForPackage(pkg) ?: continue
+            launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            try {
+                com.jarvis.assistant.security.AppLockManager(context).markSessionUnlocked(pkg)
+            } catch (_: Exception) {}
+            context.startActivity(launch)
+            val mode = if (video) "video call" else "voice call"
+            return "Opening $label for a $mode. Select the contact in the app, sir."
+        }
+        return "$label does not appear to be installed, sir."
     }
 
     private fun openApp(appName: String?): String {

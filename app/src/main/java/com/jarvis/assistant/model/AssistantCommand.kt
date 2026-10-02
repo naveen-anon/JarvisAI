@@ -32,6 +32,7 @@ enum class ActionType(val key: String) {
     UNLOCK_PHONE("unlock_phone"),
     SET_PIN("set_pin"),
     PC_CONNECT("pc_connect"),
+    APP_CALL("app_call"),
     WHATSAPP_MESSAGE("whatsapp_message"),
     TELEGRAM_MESSAGE("telegram_message"),
     SET_REMINDER("set_reminder"),
