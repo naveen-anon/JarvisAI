@@ -242,6 +242,44 @@ class OfflineBrain(
             }
         }
 
+        // Offline identity / connectivity (keep these off the cloud path)
+        if (containsAny(cmd, "who are you", "what are you", "introduce yourself") ||
+            (cmd == "jarvis" || cmd == "hey jarvis")) {
+            return "I am JARVIS — offline-first on this device. Local control first; cloud only when needed, sir."
+        }
+        if (containsAny(cmd, "are you online", "are you offline", "offline mode", "cloud mode")) {
+            val online = try {
+                com.jarvis.assistant.util.NetworkStatusManager(context).isOnline()
+            } catch (_: Exception) { false }
+            return if (online)
+                "Network is available. I still run device commands offline-first, sir."
+            else
+                "We are offline. Briefing, security, memory, and device control still work, sir."
+        }
+        if (containsAny(cmd, "network status", "internet status", "wifi status", "am i connected") ||
+            (containsAny(cmd, "network") && containsAny(cmd, "status", "check"))) {
+            return try {
+                val online = com.jarvis.assistant.util.NetworkStatusManager(context).isOnline()
+                if (online) "You are connected, sir." else "No active network connection, sir."
+            } catch (_: Exception) {
+                "Unable to read network status, sir."
+            }
+        }
+        if (containsAny(cmd, "how much ram", "ram usage", "memory usage", "storage left", "free storage", "disk space")) {
+            return try {
+                val am = context.getSystemService(android.content.Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                val mi = android.app.ActivityManager.MemoryInfo()
+                am.getMemoryInfo(mi)
+                val usedPct = if (mi.totalMem > 0L)
+                    ((mi.totalMem - mi.availMem) * 100L / mi.totalMem).toInt() else 0
+                val st = android.os.StatFs(android.os.Environment.getDataDirectory().path)
+                val freeGb = st.availableBytes / (1024.0 * 1024.0 * 1024.0)
+                "Memory roughly $usedPct percent in use. About ${"%.1f".format(freeGb)} GB storage free, sir."
+            } catch (_: Exception) {
+                "Could not read memory or storage, sir."
+            }
+        }
+
         // Math
         solveMath(cmd)?.let { return it }
 
@@ -358,11 +396,11 @@ class OfflineBrain(
             } catch (_: Exception) { "Couldn't open face detection." }
         }
 
-        if (containsAny(cmd, "what can you do", "help me", "list commands") || cmd == "help") {
-            return "I can open applications, place calls, draft messages, run advanced security assessments, " +
-                   "control system settings, manage volume and media, set alarms and timers, " +
-                   "deliver status briefings, retain notes, and assist with general queries. " +
-                   "Most of that works entirely offline, sir."
+        if (containsAny(cmd, "what can you do", "help me", "list commands", "your capabilities") || cmd == "help") {
+            return "Offline, sir: apps, calls, messages, volume and media, Wi-Fi Bluetooth flashlight, " +
+                   "alarms timers reminders, clipboard, notifications, calendar, security report, " +
+                   "briefing, screen read and analyze, vision, app lock, notes and memory, " +
+                   "time date battery, and calculations. Cloud is only for harder questions when online."
         }
 
         // Auto-learn: proactively surface a learned habit before falling back to generic suggestions
