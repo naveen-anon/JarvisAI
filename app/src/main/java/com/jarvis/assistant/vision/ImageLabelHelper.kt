@@ -18,13 +18,14 @@ object ImageLabelHelper {
                     return@addOnSuccessListener
                 }
                 val top = labels.sortedByDescending { it.confidence }.take(6)
-                val line = top.joinToString(", ") {
-                    "\( {it.text} ( \){(it.confidence * 100).toInt()}%)"
+                val line = top.joinToString(", ") { lab ->
+                    val pct = (lab.confidence * 100).toInt()
+                    lab.text + " (" + pct + "%)"
                 }
-                cont.resume("Scene labels: $line.")
+                cont.resume("Scene labels: " + line + ".")
             }
             .addOnFailureListener { e ->
-                cont.resume("Image labeling failed: ${e.message}")
+                cont.resume("Image labeling failed: " + (e.message ?: "unknown"))
             }
     }
 }
