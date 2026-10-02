@@ -87,6 +87,8 @@ dependencies {
     implementation("com.google.mlkit:text-recognition:16.0.0")
     implementation("com.google.mlkit:object-detection:17.0.1")
     implementation("com.google.mlkit:face-detection:16.1.6")
+    implementation("com.google.mlkit:image-labeling:17.0.9")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
 
     // Jetpack Compose (used by com.jarvis.ai armor suit UI)
     val composeBom = platform("androidx.compose:compose-bom:2024.06.00")

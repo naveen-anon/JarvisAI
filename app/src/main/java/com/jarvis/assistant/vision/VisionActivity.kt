@@ -134,20 +134,28 @@ class VisionActivity : AppCompatActivity() {
                                 "ocr" -> TextRecognitionHelper.recognize(inputImage)
                                 "objects" -> ObjectDetectionHelper.detect(inputImage)
                                 "faces" -> FaceDetectionHelper.detect(inputImage)
-                                "scene" -> {
+                                "labels" -> ImageLabelHelper.label(inputImage)
+                                "barcode" -> BarcodeHelper.scan(inputImage)
+                                "scene", "full" -> {
                                     val ocr = try { TextRecognitionHelper.recognize(inputImage) } catch (_: Exception) { "" }
                                     val objs = try { ObjectDetectionHelper.detect(inputImage) } catch (_: Exception) { "" }
                                     val faces = try { FaceDetectionHelper.detect(inputImage) } catch (_: Exception) { "" }
+                                    val labels = try { ImageLabelHelper.label(inputImage) } catch (_: Exception) { "" }
+                                    val codes = try { BarcodeHelper.scan(inputImage) } catch (_: Exception) { "" }
                                     buildString {
                                         append("Scene analysis. ")
-                                        if (objs.isNotBlank() && !objs.contains("No ", ignoreCase = true))
+                                        if (labels.isNotBlank() && !labels.contains("don't recognize", ignoreCase = true))
+                                            append(labels.trim()).append(" ")
+                                        if (objs.isNotBlank() && !objs.contains("don't recognize", ignoreCase = true))
                                             append(objs.trim()).append(" ")
-                                        if (faces.isNotBlank() && !faces.contains("No ", ignoreCase = true))
+                                        if (faces.isNotBlank() && !faces.contains("No ", ignoreCase = true) && !faces.contains("0 face", ignoreCase = true))
                                             append(faces.trim()).append(" ")
+                                        if (codes.isNotBlank() && !codes.startsWith("No barcode"))
+                                            append(codes.trim()).append(" ")
                                         if (ocr.isNotBlank() && ocr.length > 3 && !ocr.contains("No text", ignoreCase = true))
                                             append("Visible text: ").append(ocr.take(280).trim())
                                         if (length <= "Scene analysis. ".length)
-                                            append("I don't see clear text, objects, or faces in this frame, sir.")
+                                            append("I don't see clear labels, objects, faces, codes, or text in this frame, sir.")
                                     }.trim()
                                 }
                                 else -> "Unknown vision mode."
