@@ -53,6 +53,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
             ActionType.UNLOCK_PHONE -> unlockPhone()
             ActionType.SET_PIN -> setPin(cmd.target)
+            ActionType.WHATSAPP_CALL -> whatsappCall(cmd.target, cmd.message?.contains("video") == true)
             ActionType.WHATSAPP_MESSAGE -> whatsappMessage(cmd.target, cmd.message)
             ActionType.TELEGRAM_MESSAGE -> telegramMessage(cmd.target, cmd.message)
             ActionType.SCREENSHOT -> runScreenshotAnalyze()
@@ -123,6 +124,37 @@ class CommandExecutor(private val context: Context) {
             return "Opening $label for a $mode. Select the contact in the app, sir."
         }
         return "$label does not appear to be installed, sir."
+    }
+
+
+    private fun whatsappCall(name: String?, video: Boolean): String {
+        if (name.isNullOrBlank()) return "Whom should I call on WhatsApp, sir?"
+        val number = lookupContactNumber(name)
+            ?: return "I couldn't find a number for $name, sir."
+        val digits = number.filter { it.isDigit() }
+        if (digits.length < 8) return "Number for $name looks invalid, sir."
+        val phone = if (digits.length == 10) "91$digits" else digits
+        return try {
+            val uri = android.net.Uri.parse("https://wa.me/$phone")
+            val i = Intent(Intent.ACTION_VIEW, uri).apply {
+                setPackage("com.whatsapp")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            if (i.resolveActivity(context.packageManager) == null) {
+                i.setPackage("com.whatsapp.w4b")
+            }
+            if (i.resolveActivity(context.packageManager) == null) {
+                i.setPackage(null)
+            }
+            try {
+                com.jarvis.assistant.security.AppLockManager(context).markSessionUnlocked("com.whatsapp")
+                com.jarvis.assistant.security.AppLockManager(context).markSessionUnlocked("com.whatsapp.w4b")
+            } catch (_: Exception) {}
+            context.startActivity(i)
+            "Opening WhatsApp with $name."
+        } catch (_: Exception) {
+            "Couldn't open WhatsApp for $name."
+        }
     }
 
     private fun openApp(appName: String?): String {

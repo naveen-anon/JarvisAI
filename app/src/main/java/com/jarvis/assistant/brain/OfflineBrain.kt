@@ -90,6 +90,13 @@ class OfflineBrain(
                 "Couldn't start security watch: ${e.message}"
             }
         }
+
+        Regex("""(?:call|phone)\s+(.+?)\s+on\s+whatsapp""").find(cmd)?.let { m ->
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("whatsapp_call", m.groupValues[1].trim(), "voice"))
+        }
+        Regex("""whatsapp\s+(?:pe|par)?\s*(.+?)\s*(?:ko\s+)?(?:call|phone)""").find(cmd)?.let { m ->
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("whatsapp_call", m.groupValues[1].trim(), "voice"))
+        }
         if (containsAny(cmd, "focus mode on", "enable focus", "do not disturb on", "dnd on", "enable dnd")) {
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("focus_mode", "on"))
         }

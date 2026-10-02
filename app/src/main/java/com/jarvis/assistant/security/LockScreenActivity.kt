@@ -62,7 +62,14 @@ class LockScreenActivity : AppCompatActivity() {
         }
 
         val pinInput = EditText(this).apply {
-            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            inputType = when (lockManager.getLockType()) {
+                AppLockManager.LockType.PASSWORD ->
+                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                AppLockManager.LockType.PATTERN ->
+                    InputType.TYPE_CLASS_TEXT
+                else ->
+                    InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            }
             setTextColor(0xFFE8F9FF.toInt())
             gravity = Gravity.CENTER
             textSize = 22f
@@ -81,7 +88,7 @@ class LockScreenActivity : AppCompatActivity() {
             setTextColor(0xFF03080E.toInt())
             setOnClickListener {
                 val entered = pinInput.text.toString()
-                if (lockManager.checkPin(entered)) {
+                if (lockManager.checkCredential(entered)) {
                     targetPackage?.let { lockManager.markSessionUnlocked(it) }
                     pinInput.postDelayed({ finish() }, 200)
                 } else {

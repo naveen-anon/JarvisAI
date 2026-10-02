@@ -3,14 +3,12 @@ package com.jarvis.assistant.security
 import android.content.Context
 import java.security.MessageDigest
 
-/**
- * App lock by voice. PIN hashed in prefs.
- * Session unlock is also in prefs so AccessibilityService + LockScreenActivity share state.
- */
 class AppLockManager(context: Context) {
 
     private val prefs =
         context.applicationContext.getSharedPreferences("jarvis_app_lock", Context.MODE_PRIVATE)
+
+    enum class LockType { PIN, PASSWORD, PATTERN }
 
     fun lockApp(packageName: String) {
         val locked = getLockedPackages().toMutableSet()
@@ -42,37 +40,48 @@ class AppLockManager(context: Context) {
         prefs.edit().remove(sessionKey(packageName)).apply()
     }
 
-    fun clearSessionUnlocks() {
-        val ed = prefs.edit()
-        prefs.all.keys.filter { it.startsWith(KEY_SESSION_PREFIX) }.forEach { ed.remove(it) }
-        ed.apply()
-    }
-
     fun getLockedPackages(): Set<String> =
         prefs.getStringSet(KEY_LOCKED, emptySet())?.toSet() ?: emptySet()
 
-    fun hasPin(): Boolean = prefs.getString(KEY_PIN_HASH, null) != null
-
-    fun setPin(pin: String) {
-        prefs.edit().putString(KEY_PIN_HASH, hash(pin)).apply()
+    fun getLockType(): LockType {
+        val raw = prefs.getString(KEY_LOCK_TYPE, "PIN") ?: "PIN"
+        return runCatching { LockType.valueOf(raw) }.getOrDefault(LockType.PIN)
     }
 
-    fun checkPin(pin: String): Boolean {
-        val stored = prefs.getString(KEY_PIN_HASH, null) ?: return false
-        return stored == hash(pin)
+    fun hasCredential(): Boolean = prefs.getString(KEY_CRED_HASH, null) != null
+    fun hasPin(): Boolean = hasCredential()
+
+    fun setCredential(type: LockType, secret: String) {
+        prefs.edit()
+            .putString(KEY_LOCK_TYPE, type.name)
+            .putString(KEY_CRED_HASH, hash(secret.trim()))
+            .apply()
+    }
+
+    fun setPin(pin: String) = setCredential(LockType.PIN, pin)
+
+    fun checkCredential(secret: String): Boolean {
+        val stored = prefs.getString(KEY_CRED_HASH, null) ?: return false
+        return stored == hash(secret.trim())
+    }
+
+    fun checkPin(pin: String): Boolean = checkCredential(pin)
+
+    fun clearCredential() {
+        prefs.edit().remove(KEY_CRED_HASH).remove(KEY_LOCK_TYPE).apply()
     }
 
     private fun sessionKey(packageName: String) = KEY_SESSION_PREFIX + packageName
 
     private fun hash(input: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-            .digest(input.toByteArray(Charsets.UTF_8))
-        return digest.joinToString("") { "%02x".format(it) }
+        val d = MessageDigest.getInstance("SHA-256").digest(input.toByteArray(Charsets.UTF_8))
+        return d.joinToString("") { "%02x".format(it) }
     }
 
     companion object {
         private const val KEY_LOCKED = "locked_packages"
-        private const val KEY_PIN_HASH = "pin_hash"
+        private const val KEY_CRED_HASH = "pin_hash"
+        private const val KEY_LOCK_TYPE = "lock_type"
         private const val KEY_SESSION_PREFIX = "session_until_"
     }
 }

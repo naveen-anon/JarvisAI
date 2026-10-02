@@ -345,7 +345,7 @@ class SettingsActivity : AppCompatActivity() {
 
         root.addView(sectionCard {
             
-            addView(sectionTitle("Jarvis App PIN", R.drawable.ic_lock))
+            addView(sectionTitle("Jarvis App Lock", R.drawable.ic_lock))
             addView(bodyText(
                 "PIN protects apps you lock by voice (\"lock WhatsApp\"). " +
                 "Stored as a hash only — not your phone lock screen PIN."
@@ -355,6 +355,44 @@ class SettingsActivity : AppCompatActivity() {
                 else "No PIN set yet — lock commands need a PIN first."
             )
             addView(pinStatus)
+            addView(hudButton("SET PASSWORD") {
+                val input = EditText(this).apply {
+                    inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    hint = "Password (min 4)"
+                    setPadding(40, 30, 40, 30)
+                }
+                android.app.AlertDialog.Builder(this)
+                    .setTitle("Jarvis App Password")
+                    .setView(input)
+                    .setPositiveButton("Save") { _, _ ->
+                        val s = input.text.toString()
+                        if (s.length >= 4) {
+                            AppLockManager(this).setCredential(AppLockManager.LockType.PASSWORD, s)
+                            toast("Password saved.")
+                        } else toast("Min 4 characters.")
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            })
+            addView(hudButton("SET PATTERN PATH") {
+                val input = EditText(this).apply {
+                    hint = "0-1-2-5-8"
+                    setPadding(40, 30, 40, 30)
+                }
+                android.app.AlertDialog.Builder(this)
+                    .setTitle("Pattern (dots 0-8)")
+                    .setMessage("3x3 grid: 0 1 2 / 3 4 5 / 6 7 8. Example unlock-L: 0-3-6-7-8")
+                    .setView(input)
+                    .setPositiveButton("Save") { _, _ ->
+                        val s = input.text.toString().trim()
+                        if (s.length >= 5 && s.contains("-")) {
+                            AppLockManager(this).setCredential(AppLockManager.LockType.PATTERN, s)
+                            toast("Pattern saved.")
+                        } else toast("Use form like 0-1-2-5-8")
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            })
             addView(hudButton("SET / CHANGE APP PIN") {
                 showJarvisPinDialog(pinStatus)
             })
