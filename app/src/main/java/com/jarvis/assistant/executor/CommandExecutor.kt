@@ -136,6 +136,9 @@ class CommandExecutor(private val context: Context) {
                     if (launch != null) {
                         launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(launch)
+                        try {
+                            com.jarvis.assistant.security.AppLockManager(context).markSessionUnlocked(pkg)
+                        } catch (_: Exception) {}
                         return "Opening $appName."
                     }
                 }
@@ -166,6 +169,9 @@ class CommandExecutor(private val context: Context) {
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(launchIntent)
+                try {
+                    com.jarvis.assistant.security.AppLockManager(context).markSessionUnlocked(match.packageName)
+                } catch (_: Exception) {}
                 return "Opening ${pm.getApplicationLabel(match)}."
             }
             return "Can't launch $appName."
