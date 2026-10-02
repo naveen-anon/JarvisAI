@@ -356,18 +356,19 @@ class SettingsActivity : AppCompatActivity() {
             )
             addView(pinStatus)
             addView(hudButton("SET PASSWORD") {
-                val input = EditText(this).apply {
+                val act = this@SettingsActivity
+                val input = EditText(act).apply {
                     inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
                     hint = "Password (min 4)"
                     setPadding(40, 30, 40, 30)
                 }
-                android.app.AlertDialog.Builder(this)
+                android.app.AlertDialog.Builder(act)
                     .setTitle("Jarvis App Password")
                     .setView(input)
                     .setPositiveButton("Save") { _, _ ->
                         val s = input.text.toString()
                         if (s.length >= 4) {
-                            AppLockManager(this).setCredential(AppLockManager.LockType.PASSWORD, s)
+                            AppLockManager(act).setCredential(AppLockManager.LockType.PASSWORD, s)
                             toast("Password saved.")
                         } else toast("Min 4 characters.")
                     }
@@ -375,18 +376,19 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
             })
             addView(hudButton("SET PATTERN PATH") {
-                val input = EditText(this).apply {
+                val act = this@SettingsActivity
+                val input = EditText(act).apply {
                     hint = "0-1-2-5-8"
                     setPadding(40, 30, 40, 30)
                 }
-                android.app.AlertDialog.Builder(this)
+                android.app.AlertDialog.Builder(act)
                     .setTitle("Pattern (dots 0-8)")
                     .setMessage("3x3 grid: 0 1 2 / 3 4 5 / 6 7 8. Example unlock-L: 0-3-6-7-8")
                     .setView(input)
                     .setPositiveButton("Save") { _, _ ->
                         val s = input.text.toString().trim()
                         if (s.length >= 5 && s.contains("-")) {
-                            AppLockManager(this).setCredential(AppLockManager.LockType.PATTERN, s)
+                            AppLockManager(act).setCredential(AppLockManager.LockType.PATTERN, s)
                             toast("Pattern saved.")
                         } else toast("Use form like 0-1-2-5-8")
                     }
