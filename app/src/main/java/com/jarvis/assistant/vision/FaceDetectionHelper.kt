@@ -21,6 +21,13 @@ object FaceDetectionHelper {
         .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
         .build()
 
+    suspend fun countFaces(image: InputImage): Int = suspendCancellableCoroutine { cont ->
+        val detector = FaceDetection.getClient(options)
+        detector.process(image)
+            .addOnSuccessListener { faces -> cont.resume(faces.size) }
+            .addOnFailureListener { cont.resume(0) }
+    }
+
     suspend fun detect(image: InputImage): String = suspendCancellableCoroutine { cont ->
         val detector = FaceDetection.getClient(options)
         detector.process(image)

@@ -78,6 +78,18 @@ class OfflineBrain(
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("app_call", app, "voice"))
         }
 
+
+        if (containsAny(cmd, "security watch", "guard mode", "start watch", "watch mode on",
+                "presence detection", "arm security", "security camera")) {
+            return try {
+                val i = android.content.Intent(context, com.jarvis.assistant.vision.PresenceWatchActivity::class.java)
+                i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(i)
+                "Security watch armed. I'll alert on face presence, sir."
+            } catch (e: Exception) {
+                "Couldn't start security watch: ${e.message}"
+            }
+        }
         if (containsAny(cmd, "focus mode on", "enable focus", "do not disturb on", "dnd on", "enable dnd")) {
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("focus_mode", "on"))
         }
