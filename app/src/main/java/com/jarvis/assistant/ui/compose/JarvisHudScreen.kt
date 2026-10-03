@@ -85,6 +85,12 @@ private val Bg = Color(0xFF03080E)
 private val BgDeep = Color(0xFF01040A)
 private val Panel = Color(0xFF0A1825)
 private val PanelDim = Color(0xFF050E16)
+
+// Liquid glass
+private val GlassFillTop = Color(0xCC0C1A28)
+private val GlassFillBot = Color(0x99050810)
+private val GlassStroke = Color(0x66FFFFFF)
+private val GlassStrokeCyan = Color(0x8800D9FF)
 private val GridLine = Color(0xFF1A3040)
 
 /* ───────── State ───────── */
@@ -492,44 +498,56 @@ private fun ModuleTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(16.dp)
-    Column(
+    val shape = RoundedCornerShape(22.dp)
+    Box(
         modifier
             .heightIn(min = 72.dp)
             .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF0C1E30), Color(0xFF071018))
-                )
-            )
-            .border(1.25.dp, Cyan.copy(alpha = 0.55f), shape)
+            .background(Brush.verticalGradient(listOf(GlassFillTop, GlassFillBot)))
+            .border(1.2.dp, GlassStrokeCyan.copy(alpha = 0.55f), shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
+        // Specular top
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(22.dp)
+                .align(Alignment.TopCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0x44FFFFFF), Color.Transparent)
+                    )
+                )
+        )
         Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                title,
-                color = CyanBright,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
-            )
-            Text("›", color = Cyan.copy(alpha = 0.8f), fontSize = 18.sp)
+            Column(Modifier.weight(1f)) {
+                Text(
+                    title,
+                    color = CyanBright,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    maxLines = 1
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    subtitle,
+                    color = CyanSoft,
+                    fontSize = 10.sp,
+                    maxLines = 2,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+            Text("›", color = Cyan, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            subtitle,
-            color = CyanDim,
-            fontSize = 10.sp,
-            fontFamily = FontFamily.Monospace,
-            maxLines = 2
-        )
     }
 }
+
 
 
 @Composable
