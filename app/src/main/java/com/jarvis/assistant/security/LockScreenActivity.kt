@@ -1,9 +1,11 @@
 package com.jarvis.assistant.security
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.InputType
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Button
@@ -12,12 +14,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
-/**
- * Full-screen PIN prompt shown over a locked app. Launched by JarvisAccessibilityService
- * as soon as it sees a locked package come to the foreground. On success, the target
- * package is marked session-unlocked and this activity finishes, revealing the app
- * underneath. On cancel, the user is sent back to the home screen instead of the locked app.
- */
 class LockScreenActivity : AppCompatActivity() {
 
     private lateinit var lockManager: AppLockManager
@@ -29,40 +25,62 @@ class LockScreenActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
         )
-
         lockManager = AppLockManager(this)
         targetPackage = intent.getStringExtra(EXTRA_PACKAGE)
-
         setContentView(buildUi())
     }
 
-    // Built in code rather than XML so this single-purpose screen has zero layout/resource
-    // dependencies — it has to work reliably even if something else in the app is broken.
+    private fun dp(v: Int): Int =
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, v.toFloat(), resources.displayMetrics
+        ).toInt()
+
     private fun buildUi(): LinearLayout {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
+            gravity = Gravity.CENTER_HORIZONTAL
             setBackgroundColor(0xFF03080E.toInt())
-            setPadding(48, 48, 48, 48)
+            setPadding(dp(28), dp(48), dp(28), dp(28))
+        }
+
+        val brand = TextView(this).apply {
+            text = "J.A.R.V.I.S"
+            setTextColor(0xFF00D9FF.toInt())
+            textSize = 14f
+            typeface = Typeface.MONOSPACE
+            gravity = Gravity.CENTER
+            letterSpacing = 0.12f
         }
 
         val title = TextView(this).apply {
-            text = "🔒 Jarvis App Lock"
-            setTextColor(0xFF00D4FF.toInt())
-            textSize = 20f
+            text = "APP LOCK"
+            setTextColor(0xFFF0FBFF.toInt())
+            textSize = 22f
+            typeface = Typeface.MONOSPACE
             gravity = Gravity.CENTER
+            setPadding(0, dp(8), 0, 0)
+            setTypeface(typeface, Typeface.BOLD)
         }
 
+        val lockType = try { lockManager.getLockType() } catch (_: Exception) {
+            AppLockManager.LockType.PIN
+        }
+        val hint = when (lockType) {
+            AppLockManager.LockType.PASSWORD -> "Enter password to continue"
+            AppLockManager.LockType.PATTERN -> "Enter pattern path (e.g. 0-1-2-5-8)"
+            else -> "Enter PIN to continue"
+        }
         val subtitle = TextView(this).apply {
-            text = "Enter PIN to continue"
-            setTextColor(0xFF5C8A94.toInt())
-            textSize = 14f
+            text = hint
+            setTextColor(0xFF5A8A99.toInt())
+            textSize = 13f
+            typeface = Typeface.MONOSPACE
             gravity = Gravity.CENTER
-            setPadding(0, 16, 0, 32)
+            setPadding(0, dp(10), 0, dp(28))
         }
 
         val pinInput = EditText(this).apply {
-            inputType = when (lockManager.getLockType()) {
+            inputType = when (lockType) {
                 AppLockManager.LockType.PASSWORD ->
                     InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
                 AppLockManager.LockType.PATTERN ->
@@ -70,29 +88,57 @@ class LockScreenActivity : AppCompatActivity() {
                 else ->
                     InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
             }
-            setTextColor(0xFFE8F9FF.toInt())
+            setTextColor(0xFFE8FBFF.toInt())
+            setHintTextColor(0xFF5A8A99.toInt())
+            hint = when (lockType) {
+                AppLockManager.LockType.PASSWORD -> "Password"
+                AppLockManager.LockType.PATTERN -> "0-1-2-5-8"
+                else -> "••••"
+            }
             gravity = Gravity.CENTER
-            textSize = 22f
+            textSize = 20f
+            typeface = Typeface.MONOSPACE
+            background = GradientDrawable().apply {
+                cornerRadius = dp(16).toFloat()
+                setColor(0xCC0A1825.toInt())
+                setStroke(dp(1), 0x8800D9FF.toInt())
+            }
+            setPadding(dp(16), dp(14), dp(16), dp(14))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
         }
 
         val error = TextView(this).apply {
-            setTextColor(0xFFFF3B30.toInt())
+            setTextColor(0xFFFF6B6B.toInt())
             textSize = 12f
+            typeface = Typeface.MONOSPACE
             gravity = Gravity.CENTER
-            setPadding(0, 12, 0, 0)
+            setPadding(0, dp(12), 0, dp(8))
         }
 
         val unlockBtn = Button(this).apply {
             text = "UNLOCK"
             background = glassButtonDrawable(filled = true)
             setTextColor(0xFF03080E.toInt())
+            typeface = Typeface.MONOSPACE
+            isAllCaps = false
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(48)
+            ).apply { topMargin = dp(12) }
             setOnClickListener {
                 val entered = pinInput.text.toString()
                 if (lockManager.checkCredential(entered)) {
                     targetPackage?.let { lockManager.markSessionUnlocked(it) }
-                    pinInput.postDelayed({ finish() }, 200)
+                    pinInput.postDelayed({ finish() }, 150)
                 } else {
-                    error.text = "Incorrect PIN"
+                    error.text = when (lockType) {
+                        AppLockManager.LockType.PASSWORD -> "Incorrect password"
+                        AppLockManager.LockType.PATTERN -> "Incorrect pattern"
+                        else -> "Incorrect PIN"
+                    }
                     pinInput.text.clear()
                 }
             }
@@ -101,10 +147,17 @@ class LockScreenActivity : AppCompatActivity() {
         val cancelBtn = Button(this).apply {
             text = "GO HOME"
             background = glassButtonDrawable(filled = false)
-            setTextColor(0xFF00D4FF.toInt())
+            setTextColor(0xFF00D9FF.toInt())
+            typeface = Typeface.MONOSPACE
+            isAllCaps = false
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(48)
+            ).apply { topMargin = dp(10) }
             setOnClickListener { goHome() }
         }
 
+        root.addView(brand)
         root.addView(title)
         root.addView(subtitle)
         root.addView(pinInput)
@@ -114,31 +167,29 @@ class LockScreenActivity : AppCompatActivity() {
         return root
     }
 
-    /** Built in code, not as an XML resource — keeps this screen's "must always render even
-     *  if something else broke" guarantee intact while still matching the app's glass look. */
     private fun glassButtonDrawable(filled: Boolean) = GradientDrawable().apply {
-        cornerRadius = 24f
+        cornerRadius = dp(24).toFloat()
         if (filled) {
-            colors = intArrayOf(0xFF00E5FF.toInt(), 0xFF00A8CC.toInt())
+            colors = intArrayOf(0xFF00D9FF.toInt(), 0xFF0099B8.toInt())
             orientation = GradientDrawable.Orientation.TOP_BOTTOM
         } else {
-            setColor(0x26122230)
-            setStroke(3, 0x8000E5FF.toInt())
+            setColor(0xCC0A1825.toInt())
+            setStroke(dp(1), 0x8800D9FF.toInt())
         }
     }
 
     private fun goHome() {
-        val homeIntent = Intent(Intent.ACTION_MAIN).apply {
-            addCategory(Intent.CATEGORY_HOME)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        startActivity(homeIntent)
+        startActivity(
+            Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_HOME)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        )
         finish()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        // Block back-button dismissal — leaving this screen without the PIN should
-        // send the user home, not straight into the locked app underneath.
         goHome()
     }
 
