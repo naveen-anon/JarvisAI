@@ -60,6 +60,12 @@ class VisionActivity : AppCompatActivity() {
         btnOcr.setOnClickListener { selectMode("ocr"); runAnalysis("ocr") }
         btnObjects.setOnClickListener { selectMode("objects"); runAnalysis("objects") }
         btnFaces.setOnClickListener { selectMode("faces"); runAnalysis("faces") }
+        findViewById<TextView>(R.id.btnModeLabels).setOnClickListener {
+            selectMode("labels"); runAnalysis("labels")
+        }
+        findViewById<TextView>(R.id.btnModeBarcode).setOnClickListener {
+            selectMode("barcode"); runAnalysis("barcode")
+        }
         findViewById<TextView>(R.id.btnCapture).setOnClickListener { runAnalysis(currentMode) }
 
         currentMode = intent.getStringExtra(EXTRA_MODE)?.lowercase() ?: "scene"
@@ -81,10 +87,16 @@ class VisionActivity : AppCompatActivity() {
     private fun selectMode(mode: String) {
         currentMode = mode
         val active = 0xFF00D9FF.toInt()
-        val idle = 0xFF5C8A94.toInt()
+        val idle = 0xFF5A8A99.toInt()
         btnOcr.setTextColor(if (mode == "ocr") active else idle)
         btnObjects.setTextColor(if (mode == "objects") active else idle)
         btnFaces.setTextColor(if (mode == "faces") active else idle)
+        try {
+            findViewById<TextView>(R.id.btnModeLabels)
+                .setTextColor(if (mode == "labels" || mode == "scene") active else idle)
+            findViewById<TextView>(R.id.btnModeBarcode)
+                .setTextColor(if (mode == "barcode") active else idle)
+        } catch (_: Exception) {}
     }
 
     private fun startCamera() {

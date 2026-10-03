@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#020810">
+    android:background="#03080E">
 
     <TextView
         android:id="@+id/txtVisionTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="VISUAL SCANNER"
-        android:textColor="#00E5FF"
+        android:text="VISION · SCANNER"
+        android:textColor="#00D9FF"
         android:textSize="14sp"
         android:textStyle="bold"
         android:fontFamily="monospace"
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="← CLOSE"
-        android:textColor="#00E5FF"
+        android:textColor="#00D9FF"
         android:textSize="12sp"
         android:fontFamily="monospace"
         android:padding="14dp"
@@ -73,7 +73,7 @@
             android:background="@drawable/bg_quick_chip"
             android:gravity="center"
             android:text="Text"
-            android:textColor="#00E5FF"
+            android:textColor="#00D9FF"
             android:textSize="12sp"
             android:fontFamily="monospace" />
         <TextView
@@ -85,7 +85,7 @@
             android:background="@drawable/bg_quick_chip"
             android:gravity="center"
             android:text="Object"
-            android:textColor="#5C8A94"
+            android:textColor="#5A8A99"
             android:textSize="12sp"
             android:fontFamily="monospace" />
         <TextView
@@ -93,11 +93,35 @@
             android:layout_width="0dp"
             android:layout_height="44dp"
             android:layout_weight="1"
+            android:layout_marginEnd="6dp"
             android:background="@drawable/bg_quick_chip"
             android:gravity="center"
             android:text="Faces"
-            android:textColor="#5C8A94"
-            android:textSize="12sp"
+            android:textColor="#5A8A99"
+            android:textSize="11sp"
+            android:fontFamily="monospace" />
+        <TextView
+            android:id="@+id/btnModeLabels"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_quick_chip"
+            android:gravity="center"
+            android:text="Scene"
+            android:textColor="#5A8A99"
+            android:textSize="11sp"
+            android:fontFamily="monospace" />
+        <TextView
+            android:id="@+id/btnModeBarcode"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_quick_chip"
+            android:gravity="center"
+            android:text="QR"
+            android:textColor="#5A8A99"
+            android:textSize="11sp"
             android:fontFamily="monospace" />
     </LinearLayout>
 
@@ -109,7 +133,7 @@
         android:background="@drawable/bg_capture_ring"
         android:gravity="center"
         android:text="◉"
-        android:textColor="#00E5FF"
+        android:textColor="#00D9FF"
         android:textSize="22sp"
         app:layout_constraintBottom_toTopOf="@id/resultScroll"
         app:layout_constraintStart_toStartOf="parent"
@@ -120,7 +144,7 @@
         android:layout_width="0dp"
         android:layout_height="100dp"
         android:layout_margin="10dp"
-        android:background="#0A1520"
+        android:background="#0A1825"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
