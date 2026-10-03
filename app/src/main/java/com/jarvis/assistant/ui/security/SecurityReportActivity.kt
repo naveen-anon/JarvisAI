@@ -53,7 +53,6 @@ class SecurityReportActivity : AppCompatActivity() {
             score.text = "${report.score}"
             body.text = formatBody(report)
             lastSpoken = report.spoken
-            // no auto-speak on open
         }
     }
 
@@ -65,31 +64,16 @@ class SecurityReportActivity : AppCompatActivity() {
         }
         val sb = StringBuilder()
         sb.append("Security posture is ").append(posture).append(", sir.\n\n")
-
-        val problems = report.findings.filter {
-            it.severity != SecurityAdvisor.Severity.OK
-        }
+        val problems = report.findings.filter { it.severity != SecurityAdvisor.Severity.OK }
         if (problems.isEmpty()) {
             sb.append("No priority issues. All checked controls look healthy.")
         } else {
             sb.append("Priority findings:\n")
             problems.forEachIndexed { i, f ->
                 sb.append(i + 1).append(". ").append(f.title).append('\n')
-                if (f.detail.isNotBlank()) {
-                    sb.append("   ").append(f.detail).append('\n')
-                }
-                val advice = try {
-                    // optional 5th param / field
-                    val m = f.javaClass.methods.find { it.name == "getAdvice" || it.name == "getRecommendation" }
-                    (m?.invoke(f) as? String)?.takeIf { it.isNotBlank() }
-                        ?: f.javaClass.fields.find { it.name == "advice" || it.name == "recommendation" }
-                            ?.get(f) as? String
-                } catch (_: Exception) {
-                    null
-                }
-                if (!advice.isNullOrBlank()) {
-                    sb.append("   → ").append(advice).append('\n')
-                }
+                if (f.detail.isNotBlank()) sb.append("   ").append(f.detail).append('\n')
+                val act = f.action
+                if (!act.isNullOrBlank()) sb.append("   → ").append(act).append('\n')
                 sb.append('\n')
             }
         }
@@ -100,9 +84,6 @@ class SecurityReportActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        try {
-            tts?.shutdown()
-        } catch (_: Exception) {
-        }
+        try { tts?.shutdown() } catch (_: Exception) {}
     }
 }
