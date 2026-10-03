@@ -550,6 +550,7 @@ private fun ModuleTile(
 
 
 
+
 @Composable
 private fun TealClockDial(clock: String, percent: Float, modifier: Modifier = Modifier) {
     val infinite = rememberInfiniteTransition(label = "dialSpin")
