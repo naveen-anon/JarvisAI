@@ -264,16 +264,56 @@ class CommandExecutor(private val context: Context) {
     }
 
     private fun lookupContactNumber(name: String): String? {
+        val q = name.trim()
+        if (q.isEmpty()) return null
         val resolver = context.contentResolver
         val uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
-        val projection = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
-        val selection = "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME} LIKE ?"
-        resolver.query(uri, projection, selection, arrayOf("%$name%"), null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                return cursor.getString(0)
+        val projection = arrayOf(
+            ContactsContract.CommonDataKinds.Phone.NUMBER,
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+        )
+        return try {
+            // 1) SQL LIKE (case usually insensitive on Android)
+            resolver.query(
+                uri, projection,
+                "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME} LIKE ?",
+                arrayOf("%$q%"),
+                null
+            )?.use { c ->
+                if (c.moveToFirst()) return@use c.getString(0)
             }
+
+            // 2) Scan all phones — exact / startsWith / contains / token match
+            resolver.query(uri, projection, null, null, null)?.use { c ->
+                val numIdx = c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                val nameIdx = c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+                if (numIdx < 0 || nameIdx < 0) return null
+                val ql = q.lowercase()
+                var exact: String? = null
+                var starts: String? = null
+                var contains: String? = null
+                var tokenHit: String? = null
+                while (c.moveToNext()) {
+                    val display = c.getString(nameIdx)?.trim() ?: continue
+                    val number = c.getString(numIdx) ?: continue
+                    val d = display.lowercase()
+                    when {
+                        d == ql -> { exact = number; break }
+                        starts == null && (d.startsWith(ql) || ql.startsWith(d)) -> starts = number
+                        contains == null && (d.contains(ql) || ql.contains(d)) -> contains = number
+                    }
+                    val tokens = ql.split(Regex("\\s+")).filter { it.length >= 2 }
+                    if (tokenHit == null && tokens.isNotEmpty() && tokens.all { d.contains(it) }) {
+                        tokenHit = number
+                    }
+                }
+                exact ?: starts ?: tokenHit ?: contains
+            }
+        } catch (_: SecurityException) {
+            null
+        } catch (_: Exception) {
+            null
         }
-        return null
     }
 
     /**
