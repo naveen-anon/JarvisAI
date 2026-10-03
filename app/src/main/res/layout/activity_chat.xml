@@ -25,7 +25,7 @@
             <View
                 android:layout_width="3dp"
                 android:layout_height="18dp"
-                android:background="#00E5FF"
+                android:background="#00D9FF"
                 android:layout_marginEnd="8dp" />
 
             <TextView
@@ -70,7 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="← CLOSE"
-                android:textColor="#00E5FF"
+                android:textColor="#00D9FF"
                 android:textSize="12sp"
                 android:fontFamily="monospace"
                 android:background="@drawable/glass_button_bg"
@@ -129,7 +129,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="✕"
-                android:textColor="#00E5FF"
+                android:textColor="#00D9FF"
                 android:textSize="14sp"
                 android:padding="4dp" />
         </LinearLayout>

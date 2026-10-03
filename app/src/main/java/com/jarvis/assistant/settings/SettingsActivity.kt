@@ -362,7 +362,7 @@ class SettingsActivity : AppCompatActivity() {
                     hint = "Password (min 4)"
                     setPadding(40, 30, 40, 30)
                 }
-                android.app.AlertDialog.Builder(act)
+                android.app.AlertDialog.Builder(act, android.R.style.Theme_DeviceDefault_Dialog_Alert)
                     .setTitle("Jarvis App Password")
                     .setView(input)
                     .setPositiveButton("Save") { _, _ ->
@@ -381,7 +381,7 @@ class SettingsActivity : AppCompatActivity() {
                     hint = "0-1-2-5-8"
                     setPadding(40, 30, 40, 30)
                 }
-                android.app.AlertDialog.Builder(act)
+                android.app.AlertDialog.Builder(act, android.R.style.Theme_DeviceDefault_Dialog_Alert)
                     .setTitle("Pattern (dots 0-8)")
                     .setMessage("3x3 grid: 0 1 2 / 3 4 5 / 6 7 8. Example unlock-L: 0-3-6-7-8")
                     .setView(input)
@@ -501,7 +501,7 @@ class SettingsActivity : AppCompatActivity() {
         container.addView(sub)
         container.addView(input)
 
-        val dlg = android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog)
+        val dlg = android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
             .setView(container)
             .setPositiveButton("SAVE") { _, _ ->
                 val pin = input.text.toString().trim()
