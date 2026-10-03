@@ -47,6 +47,7 @@ class AssistantForegroundService : Service() {
 
     private lateinit var stt: SpeechToText
     private lateinit var clapDetector: com.jarvis.assistant.voice.ClapDetector
+    private var callAnnouncer: com.jarvis.assistant.util.IncomingCallAnnouncer? = null
     private lateinit var tts: TextToSpeechHelper
     private lateinit var executor: CommandExecutor
     private lateinit var gemini: GeminiClient
@@ -102,6 +103,8 @@ class AssistantForegroundService : Service() {
             android.util.Log.i("JarvisService", "Clap wake disabled — mic not held at boot")
         }
         tts = TextToSpeechHelper(this)
+        callAnnouncer = com.jarvis.assistant.util.IncomingCallAnnouncer(this) { tts }
+        try { callAnnouncer?.start() } catch (_: Exception) {}
         executor = CommandExecutor(this)
         gemini = GeminiClient(BuildConfig.GEMINI_API_KEY)
         networkStatus = NetworkStatusManager(this)
@@ -638,6 +641,7 @@ class AssistantForegroundService : Service() {
     override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onDestroy() {
+        try { callAnnouncer?.stop() } catch (_: Exception) {}
         mainHandler.removeCallbacksAndMessages(null)
         proactive?.stop()
         proactive = null
