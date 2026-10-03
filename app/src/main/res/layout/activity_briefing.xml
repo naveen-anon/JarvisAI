@@ -37,15 +37,11 @@
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1" android:orientation="vertical"
                     android:paddingStart="12dp">
-                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="TODAY'S " android:textColor="#00D9FF" android:textSize="18sp"
-                            android:textStyle="bold" android:fontFamily="monospace" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="BRIEFING" android:textColor="#F0FBFF" android:textSize="18sp"
-                            android:textStyle="bold" android:fontFamily="monospace" />
-                    </LinearLayout>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="TODAY'S BRIEFING"
+                        android:textColor="#00D9FF" android:textSize="16sp"
+                        android:textStyle="bold" android:fontFamily="monospace"
+                        android:maxLines="1" android:ellipsize="end" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Your summary for today" android:textColor="#5A8A99" android:textSize="11sp"
                         android:fontFamily="monospace" />
