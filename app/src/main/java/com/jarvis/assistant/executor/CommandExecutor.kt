@@ -273,21 +273,20 @@ class CommandExecutor(private val context: Context) {
             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
         )
         return try {
-            // 1) SQL LIKE (case usually insensitive on Android)
-            resolver.query(
+            val likeHit = resolver.query(
                 uri, projection,
                 "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME} LIKE ?",
                 arrayOf("%$q%"),
                 null
             )?.use { c ->
-                if (c.moveToFirst()) return@use c.getString(0)
+                if (c.moveToFirst()) c.getString(0) else null
             }
+            if (!likeHit.isNullOrBlank()) return likeHit
 
-            // 2) Scan all phones — exact / startsWith / contains / token match
             resolver.query(uri, projection, null, null, null)?.use { c ->
                 val numIdx = c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
                 val nameIdx = c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
-                if (numIdx < 0 || nameIdx < 0) return null
+                if (numIdx < 0 || nameIdx < 0) return@use null
                 val ql = q.lowercase()
                 var exact: String? = null
                 var starts: String? = null
