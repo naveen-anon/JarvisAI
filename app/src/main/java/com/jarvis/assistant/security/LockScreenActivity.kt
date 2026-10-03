@@ -47,7 +47,7 @@ class LockScreenActivity : AppCompatActivity() {
             text = "J.A.R.V.I.S"
             setTextColor(0xFF00D9FF.toInt())
             textSize = 14f
-            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE)
             gravity = Gravity.CENTER
             letterSpacing = 0.12f
         }
@@ -56,7 +56,7 @@ class LockScreenActivity : AppCompatActivity() {
             text = "APP LOCK"
             setTextColor(0xFFF0FBFF.toInt())
             textSize = 22f
-            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE)
             gravity = Gravity.CENTER
             setPadding(0, dp(8), 0, 0)
             setTypeface(typeface, Typeface.BOLD)
@@ -74,7 +74,7 @@ class LockScreenActivity : AppCompatActivity() {
             text = hint
             setTextColor(0xFF5A8A99.toInt())
             textSize = 13f
-            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE)
             gravity = Gravity.CENTER
             setPadding(0, dp(10), 0, dp(28))
         }
@@ -90,14 +90,16 @@ class LockScreenActivity : AppCompatActivity() {
             }
             setTextColor(0xFFE8FBFF.toInt())
             setHintTextColor(0xFF5A8A99.toInt())
-            hint = when (lockType) {
-                AppLockManager.LockType.PASSWORD -> "Password"
-                AppLockManager.LockType.PATTERN -> "0-1-2-5-8"
-                else -> "••••"
-            }
+            setHint(
+                when (lockType) {
+                    AppLockManager.LockType.PASSWORD -> "Password"
+                    AppLockManager.LockType.PATTERN -> "0-1-2-5-8"
+                    else -> "••••"
+                }
+            )
             gravity = Gravity.CENTER
             textSize = 20f
-            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE)
             background = GradientDrawable().apply {
                 cornerRadius = dp(16).toFloat()
                 setColor(0xCC0A1825.toInt())
@@ -113,7 +115,7 @@ class LockScreenActivity : AppCompatActivity() {
         val error = TextView(this).apply {
             setTextColor(0xFFFF6B6B.toInt())
             textSize = 12f
-            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE)
             gravity = Gravity.CENTER
             setPadding(0, dp(12), 0, dp(8))
         }
@@ -122,7 +124,7 @@ class LockScreenActivity : AppCompatActivity() {
             text = "UNLOCK"
             background = glassButtonDrawable(filled = true)
             setTextColor(0xFF03080E.toInt())
-            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE)
             isAllCaps = false
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -139,7 +141,7 @@ class LockScreenActivity : AppCompatActivity() {
                         AppLockManager.LockType.PATTERN -> "Incorrect pattern"
                         else -> "Incorrect PIN"
                     }
-                    pinInput.text.clear()
+                    pinInput.setText("")
                 }
             }
         }
@@ -148,7 +150,7 @@ class LockScreenActivity : AppCompatActivity() {
             text = "GO HOME"
             background = glassButtonDrawable(filled = false)
             setTextColor(0xFF00D9FF.toInt())
-            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE)
             isAllCaps = false
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
