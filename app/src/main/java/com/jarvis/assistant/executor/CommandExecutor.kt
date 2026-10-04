@@ -194,8 +194,13 @@ class CommandExecutor(private val context: Context) {
             "google pay" to listOf("com.google.android.apps.nbu.paisa.user")
         )
 
-        for ((key, packages) in aliases) {
-            if (q == key || q == key.replace(" ", "") || (key.length >= 4 && q.contains(key))) {
+        for ((key, packages) in aliases.entries.sortedByDescending { it.key.length }.map { it.key to it.value }) {
+            if (
+                q == key ||
+                q == key.replace(" ", "") ||
+                (key.contains(" ") && (q == key || q.contains(key))) ||
+                (!key.contains(" ") && q == key)
+            ) {
                 for (pkg in packages) {
                     val launch = pm.getLaunchIntentForPackage(pkg)
                     if (launch != null) {

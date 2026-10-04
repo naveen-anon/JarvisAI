@@ -747,6 +747,7 @@ class OfflineBrain(
         containsAny(cmd, "open gallery", "open photos", "gallery kholo") -> AssistantCommand("open_app", "Gallery")
         containsAny(cmd, "open chrome", "open browser", "browser kholo") -> AssistantCommand("open_app", "Chrome")
         containsAny(cmd, "open youtube", "youtube kholo") -> AssistantCommand("open_app", "YouTube")
+        containsAny(cmd, "open whatsapp business", "whatsapp business kholo", "wa business", "business whatsapp") -> AssistantCommand("open_app", "WhatsApp Business")
         containsAny(cmd, "open whatsapp", "whatsapp kholo") -> AssistantCommand("open_app", "WhatsApp")
         containsAny(cmd, "open telegram", "telegram kholo") -> AssistantCommand("open_app", "Telegram")
         containsAny(cmd, "open settings", "settings kholo") -> AssistantCommand("open_app", "Settings")
