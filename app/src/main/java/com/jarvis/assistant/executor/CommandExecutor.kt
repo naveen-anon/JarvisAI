@@ -49,6 +49,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.OPEN_VISION -> openVision(cmd.target)
             ActionType.SHOW_ARMOR -> showArmor(cmd.target)
             ActionType.WEB_SEARCH -> webSearch(cmd.target)
+            ActionType.PLAY_MEDIA -> playOnYoutube(cmd.target)
             ActionType.LOCK_APP -> lockApp(cmd.target)
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
             ActionType.UNLOCK_PHONE -> unlockPhone()
@@ -509,6 +510,36 @@ class CommandExecutor(private val context: Context) {
         )).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
         context.startActivity(intent)
         return "Searching for $query"
+    }
+
+
+    private fun playOnYoutube(query: String?): String {
+        if (query.isNullOrBlank()) return "What should I play, sir?"
+        val q = query.trim()
+        val pm = context.packageManager
+        return try {
+            val search = Intent(Intent.ACTION_SEARCH).apply {
+                setPackage("com.google.android.youtube")
+                putExtra("query", q)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            if (search.resolveActivity(pm) != null) {
+                context.startActivity(search)
+                return "Searching YouTube for $q."
+            }
+            val view = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.youtube.com/results?search_query=" + Uri.encode(q))
+            ).apply {
+                setPackage("com.google.android.youtube")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            if (view.resolveActivity(pm) == null) view.setPackage(null)
+            context.startActivity(view)
+            "Opening YouTube for $q."
+        } catch (_: Exception) {
+            "Couldn't open YouTube, sir."
+        }
     }
 
     /** Phase 5 — "App lock by voice". Requires a PIN to already be set (see setPin). */

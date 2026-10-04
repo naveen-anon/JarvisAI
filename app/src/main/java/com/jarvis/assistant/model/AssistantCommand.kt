@@ -27,6 +27,7 @@ enum class ActionType(val key: String) {
     SET_TIMER("set_timer"),
     OPEN_VISION("open_vision"),
     WEB_SEARCH("web_search"),
+    PLAY_MEDIA("play_media"),
     LOCK_APP("lock_app"),
     UNLOCK_APP("unlock_app"),
     UNLOCK_PHONE("unlock_phone"),

@@ -773,7 +773,7 @@ class OfflineBrain(
             AssistantCommand("set_volume", "max")
 
         // Music control (English + Hindi)
-        containsAny(cmd, "play music", "play song", "gaana chalao", "resume music") ->
+        containsAny(cmd, "resume music", "resume song", "continue music") ->
             AssistantCommand("media_control", "play")
         containsAny(cmd, "pause music", "pause song", "gaana roko", "gaana ruko") ->
             AssistantCommand("media_control", "pause")
@@ -783,6 +783,27 @@ class OfflineBrain(
             AssistantCommand("media_control", "previous")
         containsAny(cmd, "stop music", "gaana band karo") ->
             AssistantCommand("media_control", "stop")
+        // Named track → YouTube search (hands-free)
+        containsAny(cmd, "play on youtube", "youtube pe", "youtube par") -> {
+            val q = original
+                .replace(Regex("(?i)play on youtube|youtube pe|youtube par"), "")
+                .replace(Regex("(?i)\b(chalao|chala|karo)\b"), "")
+                .trim()
+            AssistantCommand("play_media", q.ifBlank { null })
+        }
+        containsAny(cmd, "play music", "play song", "gaana chalao", "gana chalao") ||
+            (cmd.startsWith("play ") && "store" !in cmd) -> {
+            val q = when {
+                cmd.startsWith("play song") -> original.substringAfter("play song").trim()
+                cmd.startsWith("play music") -> original.substringAfter("play music").trim()
+                "gaana chalao" in cmd || "gana chalao" in cmd ->
+                    original.replace(Regex("(?i)gaana? chalao?"), "").trim()
+                cmd.startsWith("play ") -> original.substringAfter("play ").trim()
+                else -> ""
+            }.removePrefix("the ").trim()
+            if (q.isBlank()) AssistantCommand("media_control", "play")
+            else AssistantCommand("play_media", q)
+        }
 
         // Alarm — "set alarm for 7:30" / "alarm laga do 7 baje"
         containsAny(cmd, "set alarm", "wake me up", "alarm laga", "alarm set karo") ->
@@ -829,8 +850,16 @@ class OfflineBrain(
 
 
         // Phase 5 — Web search
-        cmd.startsWith("search for ") || cmd.startsWith("google ") || cmd.startsWith("search ") ->
-            AssistantCommand("web_search", original.substringAfter(" ").trim())
+        containsAny(cmd, "search for", "search the web", "web search", "search online") ||
+            cmd.startsWith("search for ") || cmd.startsWith("google ") || cmd.startsWith("search ") -> {
+            val q = when {
+                "search for" in cmd -> original.substringAfter("search for").trim()
+                cmd.startsWith("google ") -> original.substringAfter("google ").trim()
+                cmd.startsWith("search ") -> original.substringAfter("search ").trim()
+                else -> original.substringAfter(" ").trim()
+            }.trim()
+            AssistantCommand("web_search", q.ifBlank { null })
+        }
 
         // Phase 5 — App lock by voice
         cmd.startsWith("set my pin to ") || cmd.startsWith("set pin to ") ->
