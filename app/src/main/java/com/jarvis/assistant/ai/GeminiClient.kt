@@ -24,7 +24,7 @@ class GeminiClient(private val apiKey: String) {
         no prose, no markdown fences, matching this exact schema:
 
         {
-          "action": "open_app | call | send_sms | toggle_setting | set_volume | media_control | set_alarm | set_timer | open_vision | web_search | lock_app | unlock_app | set_pin | read_screen | whatsapp_message | multi_step | reply",
+          "action": "open_app | call | send_sms | toggle_setting | set_volume | media_control | play_media | set_alarm | set_timer | open_vision | web_search | lock_app | unlock_app | set_pin | read_screen | whatsapp_message | multi_step | reply",
           "target": "string or null - app name / contact name / setting name / volume level / media action / time / duration",
           "message": "string or null - sms body, or the spoken reply text for the user",
           "extra": {"key": "value"}
@@ -41,7 +41,9 @@ class GeminiClient(private val apiKey: String) {
         - For "call", target = contact name.
         - For "toggle_setting", target = one of "wifi","bluetooth","flashlight","airplane_mode".
         - For "set_volume", target = one of "up","down","mute","max" or a 0-100 number.
-        - For "media_control", target = one of "play","pause","next","previous".
+        - For "media_control", target = one of "play","pause","next","previous" (resume/pause current audio only).
+        - For "play_media", target = song/artist/query to open on YouTube (e.g. user said "play Believer").
+        - For "web_search", always use action web_search with the query; do not reply with plain text that you cannot search.
         - For "set_alarm", target = time in 24-hour "HH:mm" format.
         - For "set_timer", target = total duration in seconds as a plain number string.
         - For "open_vision", target = one of "ocr","objects","faces".

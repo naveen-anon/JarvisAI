@@ -783,16 +783,15 @@ class OfflineBrain(
             AssistantCommand("media_control", "previous")
         containsAny(cmd, "stop music", "gaana band karo") ->
             AssistantCommand("media_control", "stop")
-        // Named track → YouTube search (hands-free)
         containsAny(cmd, "play on youtube", "youtube pe", "youtube par") -> {
             val q = original
                 .replace(Regex("(?i)play on youtube|youtube pe|youtube par"), "")
-                .replace(Regex("(?i)\b(chalao|chala|karo)\b"), "")
+                .replace(Regex("(?i)\\b(chalao|chala|karo)\\b"), "")
                 .trim()
             AssistantCommand("play_media", q.ifBlank { null })
         }
         containsAny(cmd, "play music", "play song", "gaana chalao", "gana chalao") ||
-            (cmd.startsWith("play ") && "store" !in cmd) -> {
+            (cmd.startsWith("play ") && "store" !in cmd && "playlist" !in cmd) -> {
             val q = when {
                 cmd.startsWith("play song") -> original.substringAfter("play song").trim()
                 cmd.startsWith("play music") -> original.substringAfter("play music").trim()
@@ -850,10 +849,14 @@ class OfflineBrain(
 
 
         // Phase 5 — Web search
-        containsAny(cmd, "search for", "search the web", "web search", "search online") ||
+        containsAny(cmd, "search for", "search the web", "web search", "search online", "google search") ||
             cmd.startsWith("search for ") || cmd.startsWith("google ") || cmd.startsWith("search ") -> {
             val q = when {
                 "search for" in cmd -> original.substringAfter("search for").trim()
+                "google search" in cmd -> original.substringAfter("google search").trim()
+                "web search" in cmd -> original.substringAfter("web search").trim()
+                "search the web" in cmd -> original.substringAfter("search the web").trim()
+                "search online" in cmd -> original.substringAfter("search online").trim()
                 cmd.startsWith("google ") -> original.substringAfter("google ").trim()
                 cmd.startsWith("search ") -> original.substringAfter("search ").trim()
                 else -> original.substringAfter(" ").trim()

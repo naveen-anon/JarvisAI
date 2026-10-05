@@ -31,6 +31,14 @@ object SpeechNormalizer {
         // Macros
         "create macro" to "create macro",
         "list macros" to "list macros",
+        // Search / play
+        "serch for" to "search for",
+        "search fro" to "search for",
+        "google for" to "search for",
+        "look up" to "search for",
+        "play the song" to "play song",
+        "put on youtube" to "play on youtube",
+        "youtube pe chalao" to "play on youtube",
     )
 
     fun normalize(raw: String): String {

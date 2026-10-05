@@ -56,10 +56,9 @@ class LockScreenActivity : AppCompatActivity() {
             text = "APP LOCK"
             setTextColor(0xFFF0FBFF.toInt())
             textSize = 22f
-            setTypeface(Typeface.MONOSPACE)
             gravity = Gravity.CENTER
             setPadding(0, dp(8), 0, 0)
-            setTypeface(typeface, Typeface.BOLD)
+            setTypeface(Typeface.MONOSPACE, Typeface.BOLD)
         }
 
         val lockType = try { lockManager.getLockType() } catch (_: Exception) {

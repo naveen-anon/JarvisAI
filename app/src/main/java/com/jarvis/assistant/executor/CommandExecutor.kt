@@ -102,6 +102,7 @@ class CommandExecutor(private val context: Context) {
         val video = (kind ?: "voice").lowercase().contains("video")
         val pm = context.packageManager
         val packages = when {
+            "business" in a -> listOf("com.whatsapp.w4b", "com.whatsapp")
             "whatsapp" in a -> listOf("com.whatsapp", "com.whatsapp.w4b")
             "telegram" in a -> listOf("org.telegram.messenger", "org.telegram.messenger.web")
             "instagram" in a || "insta" in a -> listOf("com.instagram.android")
@@ -231,9 +232,18 @@ class CommandExecutor(private val context: Context) {
         val apps = pm.getInstalledApplications(0)
         val labeled = apps.map { app -> pm.getApplicationLabel(app).toString() to app }
         val exact = labeled.firstOrNull { it.first.equals(appName.trim(), ignoreCase = true) }
-        val contains = labeled
-            .filter { it.first.contains(appName.trim(), ignoreCase = true) }
-            .maxByOrNull { it.first.length }
+        val wantBusiness = q.contains("business")
+        val containsList = labeled.filter { it.first.contains(appName.trim(), ignoreCase = true) }
+        val contains = if (wantBusiness) {
+            containsList.filter {
+                it.first.contains("business", ignoreCase = true) ||
+                    it.second.packageName.contains("w4b")
+            }.maxByOrNull { it.first.length } ?: containsList.maxByOrNull { it.first.length }
+        } else {
+            containsList
+                .filter { !it.first.contains("business", ignoreCase = true) || q.contains("business") }
+                .maxByOrNull { it.first.length }
+        }
         val match = exact?.second ?: contains?.second
         if (match != null) {
             val launchIntent = pm.getLaunchIntentForPackage(match.packageName)
@@ -504,12 +514,16 @@ class CommandExecutor(private val context: Context) {
     /** Phase 5 — "web search". Opens a browser search rather than trying to scrape results
      *  itself, since Jarvis has no in-app browsing/rendering surface. */
     private fun webSearch(query: String?): String {
-        if (query.isNullOrBlank()) return "What should I search for?"
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(
-            "https://www.google.com/search?q=" + Uri.encode(query)
-        )).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-        context.startActivity(intent)
-        return "Searching for $query"
+        if (query.isNullOrBlank()) return "What should I search for, sir?"
+        return try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(
+                "https://www.google.com/search?q=" + Uri.encode(query.trim())
+            )).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+            context.startActivity(intent)
+            "Searching for $query."
+        } catch (_: Exception) {
+            "Couldn't open web search, sir."
+        }
     }
 
 

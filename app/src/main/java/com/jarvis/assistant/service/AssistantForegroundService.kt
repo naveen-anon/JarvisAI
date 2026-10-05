@@ -243,6 +243,8 @@ class AssistantForegroundService : Service() {
         }
         try { tts.speak(ack) } catch (_: Exception) {}
 
+        // Let "Yes sir/ma'am" finish before opening the mic (reduces cutting off the command)
+        mainHandler.postDelayed({
         stt.listenOnce(
             onResult = { speech ->
                 try { stt.stopContinuous() } catch (_: Exception) {}
@@ -260,6 +262,7 @@ class AssistantForegroundService : Service() {
                 listener?.onStateChanged(BrainState.IDLE)
             }
         )
+        }, 900L)
     }
 
     private fun handleUserSpeech(speech: String) {

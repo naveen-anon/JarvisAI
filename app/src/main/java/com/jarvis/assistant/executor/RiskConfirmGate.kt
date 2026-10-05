@@ -42,13 +42,13 @@ object RiskConfirmGate {
             return false
         }
         return when (type) {
-            ActionType.CALL -> true
+            // Hands-free: voice call executes immediately (user already spoke the command)
+            ActionType.CALL -> false
             ActionType.MULTI_STEP -> true
             ActionType.UNLOCK_APP -> true
             else -> {
                 val a = cmd.action.lowercase()
-                a.contains("unlock") || a.contains("delete") || a.contains("wipe") ||
-                    a == "call" || a == "multi_step"
+                a.contains("delete") || a.contains("wipe") || a == "multi_step"
             }
         }
     }
