@@ -469,7 +469,7 @@ class CommandExecutor(private val context: Context) {
     private fun openClock(mode: String?, action: String?): String {
         val m = (mode ?: "alarm").lowercase()
         val i = Intent(context, com.jarvis.assistant.ui.clock.ClockActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra(com.jarvis.assistant.ui.clock.ClockActivity.EXTRA_MODE, m)
             when {
                 m == "timer" -> {

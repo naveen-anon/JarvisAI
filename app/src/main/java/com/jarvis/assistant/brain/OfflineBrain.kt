@@ -371,6 +371,17 @@ class OfflineBrain(
             return autoLearn.getDailyRoutineSummary()
         }
 
+        // Clock voice — direct execute
+        if (containsAny(cmd, "open clock", "clock kholo", "show clock", "jarvis clock")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("open_clock", "alarm"))
+        }
+        if (containsAny(cmd, "start stopwatch", "stopwatch start", "stopwatch chalu", "open stopwatch", "stopwatch kholo")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("stopwatch", "start"))
+        }
+        if (containsAny(cmd, "open timer", "timer kholo", "show timer")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("open_clock", "timer"))
+        }
+
         // Device commands (apps, calls, SMS, settings toggles, volume, media, alarm, timer)
         toDeviceCommand(cmd, text)?.let { command ->
             // PC connect needs the live service (for the socket server + speech pipeline),
