@@ -144,6 +144,9 @@ class MainActivity : AppCompatActivity(),
                             ).show()
                         }
                     },
+                    onPassword = {
+                        startActivity(Intent(this, com.jarvis.assistant.ui.password.PasswordManagerActivity::class.java))
+                    },
                     onNavHome = { },
                     onNavChat = {
                         startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))

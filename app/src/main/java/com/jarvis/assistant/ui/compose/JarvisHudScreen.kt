@@ -119,6 +119,7 @@ data class JarvisHudActions(
     val onSecurity: () -> Unit = {},
     val onStats: () -> Unit = {},
     val onClock: () -> Unit = {},
+    val onPassword: () -> Unit = {},
     val onNavHome: () -> Unit = {},
     val onNavChat: () -> Unit = {},
     val onNavMic: () -> Unit = {},
@@ -236,6 +237,11 @@ fun JarvisHudScreen(
                 ModuleTile(
                     "CLOCK", "Alarm · timer · stopwatch.",
                     onClick = actions.onClock,
+                    modifier = Modifier.weight(1f)
+                )
+                ModuleTile(
+                    "PASSWORD", "Secure vault.",
+                    onClick = actions.onPassword,
                     modifier = Modifier.weight(1f)
                 )
                 ModuleTile(

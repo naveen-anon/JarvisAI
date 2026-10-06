@@ -168,5 +168,8 @@
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
+            <activity android:name=".ui.password.PasswordManagerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Jarvis" />
     </application>
 </manifest>
