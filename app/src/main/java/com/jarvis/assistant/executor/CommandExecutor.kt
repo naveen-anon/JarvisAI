@@ -48,6 +48,8 @@ class CommandExecutor(private val context: Context) {
             ActionType.MEDIA_CONTROL -> mediaControl(cmd.target)
             ActionType.SET_ALARM -> setAlarm(cmd.target)
             ActionType.SET_TIMER -> setTimer(cmd.target)
+            ActionType.OPEN_CLOCK -> openClock(cmd.target, cmd.message)
+            ActionType.STOPWATCH -> openClock("stopwatch", cmd.target ?: "start")
             ActionType.OPEN_VISION -> openVision(cmd.target)
             ActionType.SHOW_ARMOR -> showArmor(cmd.target)
             ActionType.WEB_SEARCH -> webSearch(cmd.target)
@@ -463,6 +465,35 @@ class CommandExecutor(private val context: Context) {
         }
     }
 
+
+    private fun openClock(mode: String?, action: String?): String {
+        val m = (mode ?: "alarm").lowercase()
+        val i = Intent(context, com.jarvis.assistant.ui.clock.ClockActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra(com.jarvis.assistant.ui.clock.ClockActivity.EXTRA_MODE, m)
+            when {
+                m == "timer" -> {
+                    val sec = action?.toIntOrNull() ?: 0
+                    if (sec > 0) putExtra(com.jarvis.assistant.ui.clock.ClockActivity.EXTRA_SECONDS, sec)
+                    putExtra(com.jarvis.assistant.ui.clock.ClockActivity.EXTRA_AUTO_START, sec > 0)
+                }
+                m == "stopwatch" -> {
+                    val auto = action.isNullOrBlank() || action == "start"
+                    putExtra(com.jarvis.assistant.ui.clock.ClockActivity.EXTRA_AUTO_START, auto)
+                }
+            }
+        }
+        return try {
+            context.startActivity(i)
+            when (m) {
+                "timer" -> "Timer ready, sir."
+                "stopwatch" -> "Stopwatch ready, sir."
+                else -> "Clock open, sir."
+            }
+        } catch (_: Exception) {
+            "Couldn't open clock."
+        }
+    }
 
     private fun setTimer(target: String?): String {
         val seconds = target?.toIntOrNull() ?: return "How long should the timer be?"

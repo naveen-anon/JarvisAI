@@ -828,19 +828,19 @@ class OfflineBrain(
             val app: String?
             when {
                 " on spotify" in lower -> {
-                    song = Regex("(?i)\\s+on spotify.*").replace(q, "").trim()
+                    song = Regex("(?i)\s+on spotify.*").replace(q, "").trim()
                     app = "spotify"
                 }
                 " on youtube music" in lower -> {
-                    song = Regex("(?i)\\s+on youtube music.*").replace(q, "").trim()
+                    song = Regex("(?i)\s+on youtube music.*").replace(q, "").trim()
                     app = "youtube music"
                 }
                 " on yt music" in lower -> {
-                    song = Regex("(?i)\\s+on yt music.*").replace(q, "").trim()
+                    song = Regex("(?i)\s+on yt music.*").replace(q, "").trim()
                     app = "youtube music"
                 }
                 " on youtube" in lower -> {
-                    song = Regex("(?i)\\s+on youtube.*").replace(q, "").trim()
+                    song = Regex("(?i)\s+on youtube.*").replace(q, "").trim()
                     app = "youtube"
                 }
                 else -> {
@@ -851,6 +851,15 @@ class OfflineBrain(
             if (song.isBlank()) AssistantCommand("media_control", "play")
             else AssistantCommand("play_media", song, app)
         }
+
+        containsAny(cmd, "open clock", "clock kholo", "show clock") ->
+            AssistantCommand("open_clock", "alarm")
+        containsAny(cmd, "start stopwatch", "stopwatch start", "stop watch start", "stopwatch chalu") ->
+            AssistantCommand("stopwatch", "start")
+        containsAny(cmd, "open stopwatch", "stopwatch kholo") ->
+            AssistantCommand("open_clock", "stopwatch")
+        containsAny(cmd, "open timer", "timer kholo") ->
+            AssistantCommand("open_clock", "timer")
 
         containsAny(cmd, "set alarm", "wake me up", "alarm laga", "alarm set karo") ->
             AssistantCommand("set_alarm", extractTime(cmd))

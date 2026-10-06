@@ -161,5 +161,6 @@
         <activity android:name=".ui.security.SecurityReportActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
         <activity android:name=".ui.briefing.BriefingActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
             <activity android:name=".vision.PresenceWatchActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
+            <activity android:name=".ui.clock.ClockActivity" android:exported="false" android:theme="@style/Theme.Jarvis" />
     </application>
 </manifest>

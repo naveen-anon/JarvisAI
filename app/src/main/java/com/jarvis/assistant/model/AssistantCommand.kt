@@ -25,6 +25,8 @@ enum class ActionType(val key: String) {
     MEDIA_CONTROL("media_control"),
     SET_ALARM("set_alarm"),
     SET_TIMER("set_timer"),
+    OPEN_CLOCK("open_clock"),
+    STOPWATCH("stopwatch"),
     OPEN_VISION("open_vision"),
     WEB_SEARCH("web_search"),
     PLAY_MEDIA("play_media"),
