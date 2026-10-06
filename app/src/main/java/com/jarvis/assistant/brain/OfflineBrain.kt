@@ -828,19 +828,19 @@ class OfflineBrain(
             val app: String?
             when {
                 " on spotify" in lower -> {
-                    song = Regex("(?i)\s+on spotify.*").replace(q, "").trim()
+                    song = q.substringBefore(Regex("(?i) on spotify")).trim()
                     app = "spotify"
                 }
                 " on youtube music" in lower -> {
-                    song = Regex("(?i)\s+on youtube music.*").replace(q, "").trim()
+                    song = q.substringBefore(Regex("(?i) on youtube music")).trim()
                     app = "youtube music"
                 }
                 " on yt music" in lower -> {
-                    song = Regex("(?i)\s+on yt music.*").replace(q, "").trim()
+                    song = q.substringBefore(Regex("(?i) on yt music")).trim()
                     app = "youtube music"
                 }
                 " on youtube" in lower -> {
-                    song = Regex("(?i)\s+on youtube.*").replace(q, "").trim()
+                    song = q.substringBefore(Regex("(?i) on youtube")).trim()
                     app = "youtube"
                 }
                 else -> {
