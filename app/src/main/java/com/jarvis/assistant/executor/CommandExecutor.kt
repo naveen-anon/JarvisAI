@@ -1,11 +1,13 @@
 package com.jarvis.assistant.executor
 
+import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.net.Uri
 import android.provider.AlarmClock
+import android.provider.MediaStore
 import android.provider.ContactsContract
 import android.provider.Settings
 import android.telephony.SmsManager
@@ -49,7 +51,7 @@ class CommandExecutor(private val context: Context) {
             ActionType.OPEN_VISION -> openVision(cmd.target)
             ActionType.SHOW_ARMOR -> showArmor(cmd.target)
             ActionType.WEB_SEARCH -> webSearch(cmd.target)
-            ActionType.PLAY_MEDIA -> playOnYoutube(cmd.target)
+            ActionType.PLAY_MEDIA -> playMedia(cmd.target, cmd.message)
             ActionType.LOCK_APP -> lockApp(cmd.target)
             ActionType.UNLOCK_APP -> unlockApp(cmd.target)
             ActionType.UNLOCK_PHONE -> unlockPhone()
@@ -527,34 +529,96 @@ class CommandExecutor(private val context: Context) {
     }
 
 
-    private fun playOnYoutube(query: String?): String {
+
+    /**
+     * Personal design: play on the app the user asked for.
+     * message = optional app hint: spotify | youtube music | youtube
+     */
+    private fun playMedia(query: String?, appHint: String?): String {
         if (query.isNullOrBlank()) return "What should I play, sir?"
         val q = query.trim()
+        val hint = (appHint ?: "").lowercase()
         val pm = context.packageManager
-        return try {
-            val search = Intent(Intent.ACTION_SEARCH).apply {
-                setPackage("com.google.android.youtube")
-                putExtra("query", q)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        fun tryStart(i: Intent): Boolean {
+            return try {
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (i.resolveActivity(pm) == null) return false
+                context.startActivity(i)
+                true
+            } catch (_: Exception) {
+                false
             }
-            if (search.resolveActivity(pm) != null) {
-                context.startActivity(search)
-                return "Searching YouTube for $q."
-            }
-            val view = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("https://www.youtube.com/results?search_query=" + Uri.encode(q))
-            ).apply {
-                setPackage("com.google.android.youtube")
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            if (view.resolveActivity(pm) == null) view.setPackage(null)
-            context.startActivity(view)
-            "Opening YouTube for $q."
-        } catch (_: Exception) {
-            "Couldn't open YouTube, sir."
         }
+
+        when {
+            "spotify" in hint -> {
+                val deep = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:search:" + Uri.encode(q)))
+                if (tryStart(deep)) return "Opening Spotify for $q."
+                val web = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/search/" + Uri.encode(q)))
+                if (tryStart(web)) return "Opening Spotify search for $q."
+                return "Spotify doesn't appear to be installed, sir."
+            }
+            "youtube music" in hint || "yt music" in hint -> {
+                val i = Intent(Intent.ACTION_SEARCH).apply {
+                    setPackage("com.google.android.apps.youtube.music")
+                    putExtra("query", q)
+                }
+                if (tryStart(i)) return "Opening YouTube Music for $q."
+                val v = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://music.youtube.com/search?q=" + Uri.encode(q))
+                ).apply { setPackage("com.google.android.apps.youtube.music") }
+                if (tryStart(v)) return "Opening YouTube Music for $q."
+                return "YouTube Music doesn't appear to be installed, sir."
+            }
+            "youtube" in hint && "music" !in hint -> {
+                val play = Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH).apply {
+                    setPackage("com.google.android.youtube")
+                    putExtra(SearchManager.QUERY, q)
+                    putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "vnd.android.cursor.item/audio")
+                }
+                if (tryStart(play)) return "Playing $q on YouTube."
+                val search = Intent(Intent.ACTION_SEARCH).apply {
+                    setPackage("com.google.android.youtube")
+                    putExtra("query", q)
+                }
+                if (tryStart(search)) return "Searching YouTube for $q — tap the first result to play."
+            }
+        }
+
+        // No / unknown hint: system play-from-search (often Spotify / YT Music)
+        val globalPlay = Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH).apply {
+            putExtra(SearchManager.QUERY, q)
+            putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "vnd.android.cursor.item/audio")
+        }
+        if (tryStart(globalPlay)) return "Playing $q."
+
+        if (pm.getLaunchIntentForPackage("com.spotify.music") != null) {
+            val i = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:search:" + Uri.encode(q)))
+            if (tryStart(i)) return "Opening Spotify for $q."
+        }
+
+        val ytMusic = Intent(Intent.ACTION_SEARCH).apply {
+            setPackage("com.google.android.apps.youtube.music")
+            putExtra("query", q)
+        }
+        if (tryStart(ytMusic)) return "Opening YouTube Music for $q."
+
+        val yt = Intent(Intent.ACTION_SEARCH).apply {
+            setPackage("com.google.android.youtube")
+            putExtra("query", q)
+        }
+        if (tryStart(yt)) return "Searching YouTube for $q — tap the first result to play."
+
+        val web = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://www.youtube.com/results?search_query=" + Uri.encode(q))
+        )
+        if (tryStart(web)) return "Opening YouTube for $q."
+        return "Couldn't start playback, sir."
     }
+
 
     /** Phase 5 — "App lock by voice". Requires a PIN to already be set (see setPin). */
     /**

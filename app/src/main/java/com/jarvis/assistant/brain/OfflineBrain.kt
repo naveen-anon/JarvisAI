@@ -458,6 +458,15 @@ class OfflineBrain(
         // Auto-learn: proactively surface a learned habit before falling back to generic suggestions
         autoLearn.suggestBasedOnLearning()?.let { return it }
 
+        // On-device NLU (personal design) — structured command only
+        try {
+            val nluCmd = com.jarvis.assistant.ai.OnDeviceNlu(context).classify(text)
+            if (nluCmd != null) {
+                return executor.execute(nluCmd)
+            }
+        } catch (_: Exception) {}
+
+
         // Smart suggestions (only if we should)
         if (conversationContext.shouldSuggestAction()) {
             val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
@@ -783,12 +792,26 @@ class OfflineBrain(
             AssistantCommand("media_control", "previous")
         containsAny(cmd, "stop music", "gaana band karo") ->
             AssistantCommand("media_control", "stop")
+        containsAny(cmd, "play on spotify", "spotify pe", "spotify par") -> {
+            val q = original
+                .replace(Regex("(?i)play on spotify|spotify pe|spotify par|on spotify"), "")
+                .replace(Regex("(?i)\b(play|chalao|chala|karo)\b"), "")
+                .trim()
+            AssistantCommand("play_media", q.ifBlank { null }, "spotify")
+        }
+        containsAny(cmd, "play on youtube music", "youtube music pe", "yt music") -> {
+            val q = original
+                .replace(Regex("(?i)play on youtube music|youtube music pe|yt music|on youtube music"), "")
+                .replace(Regex("(?i)\b(play|chalao|chala|karo)\b"), "")
+                .trim()
+            AssistantCommand("play_media", q.ifBlank { null }, "youtube music")
+        }
         containsAny(cmd, "play on youtube", "youtube pe", "youtube par") -> {
             val q = original
-                .replace(Regex("(?i)play on youtube|youtube pe|youtube par"), "")
-                .replace(Regex("(?i)\\b(chalao|chala|karo)\\b"), "")
+                .replace(Regex("(?i)play on youtube|youtube pe|youtube par|on youtube"), "")
+                .replace(Regex("(?i)\b(chalao|chala|karo|play)\b"), "")
                 .trim()
-            AssistantCommand("play_media", q.ifBlank { null })
+            AssistantCommand("play_media", q.ifBlank { null }, "youtube")
         }
         containsAny(cmd, "play music", "play song", "gaana chalao", "gana chalao") ||
             (cmd.startsWith("play ") && "store" !in cmd && "playlist" !in cmd) -> {
@@ -800,11 +823,35 @@ class OfflineBrain(
                 cmd.startsWith("play ") -> original.substringAfter("play ").trim()
                 else -> ""
             }.removePrefix("the ").trim()
-            if (q.isBlank()) AssistantCommand("media_control", "play")
-            else AssistantCommand("play_media", q)
+            val lower = q.lowercase()
+            val song: String
+            val app: String?
+            when {
+                " on spotify" in lower -> {
+                    song = Regex("(?i)\s+on spotify.*").replace(q, "").trim()
+                    app = "spotify"
+                }
+                " on youtube music" in lower -> {
+                    song = Regex("(?i)\s+on youtube music.*").replace(q, "").trim()
+                    app = "youtube music"
+                }
+                " on yt music" in lower -> {
+                    song = Regex("(?i)\s+on yt music.*").replace(q, "").trim()
+                    app = "youtube music"
+                }
+                " on youtube" in lower -> {
+                    song = Regex("(?i)\s+on youtube.*").replace(q, "").trim()
+                    app = "youtube"
+                }
+                else -> {
+                    song = q
+                    app = null
+                }
+            }
+            if (song.isBlank()) AssistantCommand("media_control", "play")
+            else AssistantCommand("play_media", song, app)
         }
 
-        // Alarm — "set alarm for 7:30" / "alarm laga do 7 baje"
         containsAny(cmd, "set alarm", "wake me up", "alarm laga", "alarm set karo") ->
             AssistantCommand("set_alarm", extractTime(cmd))
 
