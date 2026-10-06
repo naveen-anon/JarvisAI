@@ -496,18 +496,22 @@ class CommandExecutor(private val context: Context) {
     }
 
     private fun setTimer(target: String?): String {
-        val seconds = target?.toIntOrNull() ?: return "How long should the timer be?"
+        val seconds = target?.toIntOrNull() ?: return "How long should the timer be, sir?"
+        // 1) System clock if available
         val intent = Intent(AlarmClock.ACTION_SET_TIMER).apply {
             putExtra(AlarmClock.EXTRA_LENGTH, seconds)
             putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+            putExtra(AlarmClock.EXTRA_MESSAGE, "Jarvis")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        return try {
-            context.startActivity(intent)
-            "Timer started for ${formatDuration(seconds)}"
-        } catch (e: Exception) {
-            "I couldn't find a clock app to start the timer."
-        }
+        try {
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(intent)
+                return "Timer started for ${formatDuration(seconds)}."
+            }
+        } catch (_: Exception) {}
+        // 2) In-app Jarvis clock window
+        return openClock("timer", seconds.toString())
     }
 
     private fun parseHourMinute(target: String?): Pair<Int, Int>? {

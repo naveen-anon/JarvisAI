@@ -132,6 +132,18 @@ class MainActivity : AppCompatActivity(),
                             } catch (_: Exception) {}
                         }
                     },
+                    onClock = {
+                        try {
+                            startActivity(
+                                Intent(this, com.jarvis.assistant.ui.clock.ClockActivity::class.java)
+                                    .putExtra(com.jarvis.assistant.ui.clock.ClockActivity.EXTRA_MODE, "alarm")
+                            )
+                        } catch (e: Exception) {
+                            android.widget.Toast.makeText(
+                                this, "Clock error: ${e.message}", android.widget.Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    },
                     onNavHome = { },
                     onNavChat = {
                         startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
