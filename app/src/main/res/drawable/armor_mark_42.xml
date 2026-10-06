@@ -14,7 +14,7 @@
   <path android:fillColor="#F5C518" android:pathData="M98,112 L142,112 L140,155 L100,155 Z"/>
   <!-- triangle RT -->
   <path android:fillColor="#0A4A5A" android:pathData="M120,125 L138,152 L102,152 Z"/>
-  <path android:fillColor="#00E5FF" android:pathData="M120,132 L130,148 L110,148 Z"/>
+  <path android:fillColor="#00D9FF" android:pathData="M120,132 L130,148 L110,148 Z"/>
   <path android:fillColor="#F5C518" android:pathData="M72,102 m-14,0 a14,12 0 1,1 28,0 a14,12 0 1,1 -28,0"/>
   <path android:fillColor="#F5C518" android:pathData="M168,102 m-14,0 a14,12 0 1,1 28,0 a14,12 0 1,1 -28,0"/>
   <path android:fillColor="#C41E3A" android:pathData="M60,112 L80,108 L74,180 L56,184 Z"/>
@@ -23,6 +23,6 @@
   <path android:fillColor="#F5C518" android:pathData="M164,176 L186,178 L188,195 L162,195 Z"/>
   <path android:fillColor="#C41E3A" android:pathData="M92,26 C92,8 148,8 148,26 L154,68 L146,92 L94,92 L86,68 Z"/>
   <path android:fillColor="#F5C518" android:pathData="M102,48 L138,48 L136,74 L104,74 Z"/>
-  <path android:fillColor="#00E5FF" android:pathData="M106,56 L134,56 L132,68 L108,68 Z"/>
+  <path android:fillColor="#00D9FF" android:pathData="M106,56 L134,56 L132,68 L108,68 Z"/>
 
 </vector>

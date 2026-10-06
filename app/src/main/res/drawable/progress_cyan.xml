@@ -5,7 +5,7 @@
     </item>
     <item android:id="@android:id/progress">
         <clip>
-            <shape><solid android:color="#00E5FF"/><corners android:radius="6dp"/></shape>
+            <shape><solid android:color="#00D9FF"/><corners android:radius="6dp"/></shape>
         </clip>
     </item>
 </layer-list>

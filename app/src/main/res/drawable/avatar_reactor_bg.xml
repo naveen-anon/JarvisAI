@@ -19,7 +19,7 @@
     </item>
     <item android:width="10dp" android:height="10dp" android:gravity="center">
         <shape android:shape="oval">
-            <solid android:color="#00E5FF" />
+            <solid android:color="#00D9FF" />
         </shape>
     </item>
 </layer-list>

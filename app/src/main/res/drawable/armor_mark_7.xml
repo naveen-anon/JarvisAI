@@ -23,7 +23,7 @@
   <path android:strokeWidth="2" android:strokeColor="#8B0000" android:fillColor="#00000000" android:pathData="M100,175 L140,175 M100,188 L140,188"/>
   <!-- arc reactor ring + core -->
   <path android:fillColor="#0A4A5A" android:pathData="M120,140 m-16,0 a16,16 0 1,1 32,0 a16,16 0 1,1 -32,0"/>
-  <path android:fillColor="#00E5FF" android:pathData="M120,140 m-9,0 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0"/>
+  <path android:fillColor="#00D9FF" android:pathData="M120,140 m-9,0 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0"/>
   <path android:fillColor="#E0FFFF" android:pathData="M120,140 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0"/>
   <!-- shoulder pods -->
   <path android:fillColor="#F5C518" android:pathData="M70,105 m-16,0 a16,14 0 1,1 32,0 a16,14 0 1,1 -32,0"/>
@@ -39,7 +39,7 @@
   <!-- faceplate gold -->
   <path android:fillColor="#F5C518" android:pathData="M100,48 L140,48 L138,78 L102,78 Z"/>
   <!-- visor -->
-  <path android:fillColor="#00E5FF" android:pathData="M104,58 L136,58 L134,70 L106,70 Z"/>
+  <path android:fillColor="#00D9FF" android:pathData="M104,58 L136,58 L134,70 L106,70 Z"/>
   <!-- jaw -->
   <path android:fillColor="#B71C1C" android:pathData="M98,78 L142,78 L138,92 L102,92 Z"/>
 

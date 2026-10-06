@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#020810"
+    android:background="#03080E"
     android:paddingStart="12dp"
     android:paddingEnd="12dp"
     android:paddingTop="6dp"
@@ -56,7 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="J.A.R.V.I.S"
-                    android:textColor="#00E5FF"
+                    android:textColor="#00D9FF"
                     android:textSize="14sp"
                     android:maxLines="1"
                     android:ellipsize="end"
@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="00:00"
-                android:textColor="#00E5FF"
+                android:textColor="#00D9FF"
                 android:textSize="11sp"
                 android:maxLines="1"
                 android:fontFamily="monospace"
@@ -99,7 +99,7 @@
                 <ImageView
                     android:layout_width="14dp" android:layout_height="14dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_chat" android:tint="#00E5FF" />
+                    android:src="@drawable/ic_chat" android:tint="#00D9FF" />
             </FrameLayout>
 
             <FrameLayout
@@ -110,7 +110,7 @@
                 <ImageView
                     android:layout_width="15dp" android:layout_height="15dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_settings" android:tint="#00E5FF" />
+                    android:src="@drawable/ic_settings" android:tint="#00D9FF" />
             </FrameLayout>
         </LinearLayout>
     </com.jarvis.assistant.ui.ChamferedPanel>
@@ -121,7 +121,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="STANDING BY"
-        android:textColor="#00E5FF"
+        android:textColor="#00D9FF"
         android:textSize="11sp"
         android:fontFamily="monospace"
         android:letterSpacing="0.12"
@@ -149,14 +149,14 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:gravity="center" android:orientation="horizontal" android:padding="8dp">
                 <ImageView android:layout_width="14dp" android:layout_height="14dp"
-                    android:src="@drawable/ic_battery_bolt" android:tint="#00E5FF"
+                    android:src="@drawable/ic_battery_bolt" android:tint="#00D9FF"
                     android:layout_marginEnd="5dp" />
                 <TextView
                     android:id="@+id/txtBattery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="BATT: —%"
-                    android:textColor="#00E5FF"
+                    android:textColor="#00D9FF"
                     android:textSize="10sp"
                     android:fontFamily="monospace" />
             </LinearLayout>
@@ -171,14 +171,14 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:gravity="center" android:orientation="horizontal" android:padding="8dp">
                 <ImageView android:layout_width="14dp" android:layout_height="14dp"
-                    android:src="@drawable/ic_wifi" android:tint="#00E5FF"
+                    android:src="@drawable/ic_wifi" android:tint="#00D9FF"
                     android:layout_marginEnd="5dp" />
                 <TextView
                     android:id="@+id/txtNetwork"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="WiFi"
-                    android:textColor="#00E5FF"
+                    android:textColor="#00D9FF"
                     android:textSize="10sp"
                     android:fontFamily="monospace" />
             </LinearLayout>
@@ -192,14 +192,14 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:gravity="center" android:orientation="horizontal" android:padding="8dp">
                 <ImageView android:layout_width="14dp" android:layout_height="14dp"
-                    android:src="@drawable/ic_ram_chip" android:tint="#00E5FF"
+                    android:src="@drawable/ic_ram_chip" android:tint="#00D9FF"
                     android:layout_marginEnd="5dp" />
                 <TextView
                     android:id="@+id/txtPerf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="RAM: —%"
-                    android:textColor="#00E5FF"
+                    android:textColor="#00D9FF"
                     android:textSize="10sp"
                     android:fontFamily="monospace" />
             </LinearLayout>
@@ -324,7 +324,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="A.I."
-                android:textColor="#00E5FF"
+                android:textColor="#00D9FF"
                 android:textSize="12sp"
                 android:maxLines="1"
                 android:fontFamily="monospace"
@@ -341,7 +341,7 @@
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:src="@drawable/ic_ai_spark"
-                android:tint="#00E5FF"
+                android:tint="#00D9FF"
                 android:layout_marginTop="3dp" />
         </LinearLayout>
     </LinearLayout>
@@ -379,11 +379,11 @@
         android:gravity="center"
         android:text="Talk"
         android:drawableStart="@drawable/ic_mic"
-        android:drawableTint="#00E5FF"
+        android:drawableTint="#00D9FF"
         android:drawablePadding="10dp"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
-        android:textColor="#00E5FF"
+        android:textColor="#00D9FF"
         android:textSize="16sp"
         android:fontFamily="monospace"
         android:textStyle="bold"
@@ -411,7 +411,7 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:src="@drawable/ic_chat"
-            android:tint="#00E5FF"
+            android:tint="#00D9FF"
             android:layout_marginEnd="8dp" />
 
         <TextView
@@ -420,7 +420,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Online."
-            android:textColor="#00E5FF"
+            android:textColor="#00D9FF"
             android:textSize="13sp"
             android:fontFamily="monospace" />
     </LinearLayout>
@@ -444,7 +444,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="≫"
-            android:textColor="#00E5FF"
+            android:textColor="#00D9FF"
             android:textSize="14sp"
             android:layout_marginEnd="8dp" />
 
@@ -480,9 +480,9 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                 android:gravity="center" android:orientation="horizontal">
                 <ImageView android:layout_width="12dp" android:layout_height="12dp"
-                    android:src="@drawable/ic_calendar" android:tint="#00E5FF" android:layout_marginEnd="3dp" />
+                    android:src="@drawable/ic_calendar" android:tint="#00D9FF" android:layout_marginEnd="3dp" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Briefing" android:textColor="#00E5FF" android:textSize="8sp" android:maxLines="1"
+                    android:text="Briefing" android:textColor="#00D9FF" android:textSize="8sp" android:maxLines="1"
                     android:ellipsize="end" android:fontFamily="monospace" />
             </LinearLayout>
         </com.jarvis.assistant.ui.ChamferedPanel>
@@ -496,9 +496,9 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                 android:gravity="center" android:orientation="horizontal">
                 <ImageView android:layout_width="12dp" android:layout_height="12dp"
-                    android:src="@drawable/ic_ram_chip" android:tint="#00E5FF" android:layout_marginEnd="3dp" />
+                    android:src="@drawable/ic_ram_chip" android:tint="#00D9FF" android:layout_marginEnd="3dp" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="System" android:textColor="#00E5FF" android:textSize="8sp" android:maxLines="1"
+                    android:text="System" android:textColor="#00D9FF" android:textSize="8sp" android:maxLines="1"
                     android:ellipsize="end" android:fontFamily="monospace" />
             </LinearLayout>
         </com.jarvis.assistant.ui.ChamferedPanel>
@@ -512,9 +512,9 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                 android:gravity="center" android:orientation="horizontal">
                 <ImageView android:layout_width="12dp" android:layout_height="12dp"
-                    android:src="@drawable/ic_info" android:tint="#00E5FF" android:layout_marginEnd="3dp" />
+                    android:src="@drawable/ic_info" android:tint="#00D9FF" android:layout_marginEnd="3dp" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Vision" android:textColor="#00E5FF" android:textSize="8sp" android:maxLines="1"
+                    android:text="Vision" android:textColor="#00D9FF" android:textSize="8sp" android:maxLines="1"
                     android:ellipsize="end" android:fontFamily="monospace" />
             </LinearLayout>
         </com.jarvis.assistant.ui.ChamferedPanel>
@@ -527,9 +527,9 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                 android:gravity="center" android:orientation="horizontal">
                 <ImageView android:layout_width="12dp" android:layout_height="12dp"
-                    android:src="@drawable/ic_shield" android:tint="#00E5FF" android:layout_marginEnd="3dp" />
+                    android:src="@drawable/ic_shield" android:tint="#00D9FF" android:layout_marginEnd="3dp" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Armor" android:textColor="#00E5FF" android:textSize="8sp" android:maxLines="1"
+                    android:text="Armor" android:textColor="#00D9FF" android:textSize="8sp" android:maxLines="1"
                     android:ellipsize="end" android:fontFamily="monospace" />
             </LinearLayout>
         </com.jarvis.assistant.ui.ChamferedPanel>

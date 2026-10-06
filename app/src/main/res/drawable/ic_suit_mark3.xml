@@ -12,7 +12,7 @@
         android:pathData="M72,26 C72,14 128,14 128,26 L134,68 C134,84 66,84 66,68 Z"
         android:fillAlpha="0.35"/>
     <!-- Visor -->
-    <path android:fillColor="#00E5FF"
+    <path android:fillColor="#00D9FF"
         android:pathData="M82,42 L118,42 L114,60 L86,60 Z"/>
     <!-- Eyes -->
     <path android:fillColor="#80F0FF"
@@ -30,7 +30,7 @@
         android:pathData="M70,90 L130,90 L128,105 L72,105 Z"
         android:fillAlpha="0.7"/>
     <!-- Arc reactor outer -->
-    <path android:fillColor="#00E5FF"
+    <path android:fillColor="#00D9FF"
         android:pathData="M100,118 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0"/>
     <path android:fillColor="#80F0FF"
         android:pathData="M100,118 m-14,0 a14,14 0 1,1 28,0 a14,14 0 1,1 -28,0"/>

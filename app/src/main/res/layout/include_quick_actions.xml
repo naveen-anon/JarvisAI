@@ -19,7 +19,7 @@
             android:background="@drawable/bg_quick_chip"
             android:gravity="center"
             android:text="Call"
-            android:textColor="#00E5FF"
+            android:textColor="#00D9FF"
             android:textSize="11sp"
             android:fontFamily="monospace" />
         <TextView
@@ -30,7 +30,7 @@
             android:background="@drawable/bg_quick_chip"
             android:gravity="center"
             android:text="Message"
-            android:textColor="#00E5FF"
+            android:textColor="#00D9FF"
             android:textSize="11sp"
             android:fontFamily="monospace" />
         <TextView
@@ -41,7 +41,7 @@
             android:background="@drawable/bg_quick_chip"
             android:gravity="center"
             android:text="WhatsApp"
-            android:textColor="#00E5FF"
+            android:textColor="#00D9FF"
             android:textSize="11sp"
             android:fontFamily="monospace" />
         <TextView
@@ -51,7 +51,7 @@
             android:background="@drawable/bg_quick_chip"
             android:gravity="center"
             android:text="Camera"
-            android:textColor="#00E5FF"
+            android:textColor="#00D9FF"
             android:textSize="11sp"
             android:fontFamily="monospace" />
     </LinearLayout>

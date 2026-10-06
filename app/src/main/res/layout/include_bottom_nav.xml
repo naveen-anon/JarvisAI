@@ -27,12 +27,12 @@
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@drawable/ic_home"
-                android:tint="#00E5FF" />
+                android:tint="#00D9FF" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Home"
-                android:textColor="#00E5FF"
+                android:textColor="#00D9FF"
                 android:textSize="9sp"
                 android:fontFamily="monospace"
                 android:layout_marginTop="2dp" />
@@ -78,7 +78,7 @@
                 android:layout_height="28dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_robot"
-                android:tint="#00E5FF" />
+                android:tint="#00D9FF" />
         </FrameLayout>
 
         <!-- Vision -->

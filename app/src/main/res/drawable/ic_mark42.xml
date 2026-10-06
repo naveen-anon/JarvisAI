@@ -18,8 +18,8 @@
     <path android:pathData="M27,13 L33,13 L33,17 L27,17 Z" android:fillColor="#050D14" />
     <path android:pathData="M39,13 L45,13 L45,17 L39,17 Z" android:fillColor="#050D14" />
     <!-- Glowing eyes -->
-    <path android:pathData="M28,14 L32,14 L32,16 L28,16 Z" android:fillColor="#00E5FF" />
-    <path android:pathData="M40,14 L44,14 L44,16 L40,16 Z" android:fillColor="#00E5FF" />
+    <path android:pathData="M28,14 L32,14 L32,16 L28,16 Z" android:fillColor="#00D9FF" />
+    <path android:pathData="M40,14 L44,14 L44,16 L40,16 Z" android:fillColor="#00D9FF" />
     <!-- Jaw / mouth slit -->
     <path android:pathData="M32,19 L40,19 L39,21.5 L33,21.5 Z" android:fillColor="#C4920A" />
 
@@ -63,9 +63,9 @@
 
     <!-- Gauntlets + repulsors -->
     <path android:pathData="M7,55 L15,55 L15,62 L7,62 Z" android:fillColor="#9B1B2E" />
-    <path android:pathData="M9,57 L13,57 L13,60 L9,60 Z" android:fillColor="#00E5FF" />
+    <path android:pathData="M9,57 L13,57 L13,60 L9,60 Z" android:fillColor="#00D9FF" />
     <path android:pathData="M57,55 L65,55 L65,62 L57,62 Z" android:fillColor="#9B1B2E" />
-    <path android:pathData="M59,57 L63,57 L63,60 L59,60 Z" android:fillColor="#00E5FF" />
+    <path android:pathData="M59,57 L63,57 L63,60 L59,60 Z" android:fillColor="#00D9FF" />
 
     <!-- ===== BELT ===== -->
     <path android:pathData="M22,48 L50,48 L48,52 L24,52 Z" android:fillColor="#6B101C" />

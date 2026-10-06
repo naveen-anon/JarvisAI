@@ -11,10 +11,10 @@
   <path android:strokeWidth="5" android:strokeColor="#3D3D3D" android:fillColor="#00000000" android:pathData="M80,105 L160,105"/>
   <path android:strokeWidth="4" android:strokeColor="#3D3D3D" android:fillColor="#00000000" android:pathData="M85,125 L155,125 M90,145 L150,145 M95,165 L145,165 M100,185 L140,185"/>
   <path android:strokeWidth="5" android:strokeColor="#C9A227" android:fillColor="#00000000" android:pathData="M120,100 L120,210"/>
-  <path android:fillColor="#00E5FF" android:pathData="M120,140 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0"/>
+  <path android:fillColor="#00D9FF" android:pathData="M120,140 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0"/>
   <path android:strokeWidth="5" android:strokeColor="#3D3D3D" android:fillColor="#00000000" android:pathData="M80,105 L55,185 M160,105 L185,185"/>
   <path android:fillColor="#3D3D3D" android:pathData="M100,30 C100,12 140,12 140,30 L144,65 L138,88 L102,88 L96,65 Z"/>
   <path android:fillColor="#C9A227" android:pathData="M108,48 L132,48 L130,68 L110,68 Z"/>
-  <path android:fillColor="#00E5FF" android:pathData="M112,54 L128,54 L126,62 L114,62 Z"/>
+  <path android:fillColor="#00D9FF" android:pathData="M112,54 L128,54 L126,62 L114,62 Z"/>
 
 </vector>

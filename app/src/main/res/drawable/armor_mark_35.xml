@@ -12,7 +12,7 @@
   <path android:fillColor="#C41E3A" android:pathData="M126,278 L154,278 L154,302 L126,302 Z"/>
   <path android:fillColor="#C41E3A" android:pathData="M78,100 L162,100 L158,210 L82,210 Z"/>
   <path android:fillColor="#8B0000" android:pathData="M95,115 L145,115 L142,160 L98,160 Z"/>
-  <path android:fillColor="#00E5FF" android:pathData="M120,138 m-11,0 a11,11 0 1,1 22,0 a11,11 0 1,1 -22,0"/>
+  <path android:fillColor="#00D9FF" android:pathData="M120,138 m-11,0 a11,11 0 1,1 22,0 a11,11 0 1,1 -22,0"/>
   <path android:fillColor="#C41E3A" android:pathData="M50,110 L78,105 L70,175 L48,180 Z"/>
   <path android:fillColor="#C41E3A" android:pathData="M162,105 L190,110 L192,180 L170,175 Z"/>
   <!-- claws -->
@@ -20,6 +20,6 @@
   <path android:strokeWidth="4" android:strokeColor="#F5C518" android:fillColor="#00000000" android:pathData="M192,180 L210,210 M192,180 L185,215"/>
   <path android:fillColor="#C41E3A" android:pathData="M90,28 C90,8 150,8 150,28 L156,70 L148,95 L92,95 L84,70 Z"/>
   <path android:fillColor="#8B0000" android:pathData="M102,50 L138,50 L136,75 L104,75 Z"/>
-  <path android:fillColor="#00E5FF" android:pathData="M106,58 L134,58 L132,68 L108,68 Z"/>
+  <path android:fillColor="#00D9FF" android:pathData="M106,58 L134,58 L132,68 L108,68 Z"/>
 
 </vector>

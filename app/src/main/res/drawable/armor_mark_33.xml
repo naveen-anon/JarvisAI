@@ -12,7 +12,7 @@
   <path android:fillColor="#C41E3A" android:pathData="M126,278 L154,278 L154,302 L126,302 Z"/>
   <path android:fillColor="#C0C0C0" android:pathData="M72,98 L168,98 L172,130 L162,210 L78,210 L68,130 Z"/>
   <path android:fillColor="#C41E3A" android:pathData="M95,115 L145,115 L142,160 L98,160 Z"/>
-  <path android:fillColor="#00E5FF" android:pathData="M120,138 m-12,0 a12,12 0 1,1 24,0 a12,12 0 1,1 -24,0"/>
+  <path android:fillColor="#00D9FF" android:pathData="M120,138 m-12,0 a12,12 0 1,1 24,0 a12,12 0 1,1 -24,0"/>
   <path android:fillColor="#E0FFFF" android:pathData="M120,138 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0"/>
   <!-- wide fins -->
   <path android:fillColor="#C41E3A" android:pathData="M55,95 L78,105 L70,125 L45,115 Z"/>
@@ -21,6 +21,6 @@
   <path android:fillColor="#B0B0B0" android:pathData="M162,108 L185,112 L188,186 L168,182 Z"/>
   <path android:fillColor="#C0C0C0" android:pathData="M90,28 C90,8 150,8 150,28 L156,70 L148,95 L92,95 L84,70 Z"/>
   <path android:fillColor="#C41E3A" android:pathData="M102,50 L138,50 L136,75 L104,75 Z"/>
-  <path android:fillColor="#00E5FF" android:pathData="M106,58 L134,58 L132,68 L108,68 Z"/>
+  <path android:fillColor="#00D9FF" android:pathData="M106,58 L134,58 L132,68 L108,68 Z"/>
 
 </vector>
