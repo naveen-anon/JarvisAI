@@ -425,44 +425,40 @@ class CommandExecutor(private val context: Context) {
     }
 
     /** Deep-links into the default Clock app to create an alarm — no special permission needed. */
-    private fun setAlarm(target: String?): String {
-        val (hour, minute) = parseHourMinute(target) ?: return "What time should the alarm be, sir?"
+private fun setAlarm(target: String?): String {
+        // "2 minutes" style → treat as timer
+        val asTimer = target?.trim()?.let { raw ->
+            val m = Regex("""(?i)(\d+)\s*(min|minute|minutes|m)\b""").find(raw)
+            m?.groupValues?.get(1)?.toIntOrNull()?.times(60)
+        }
+        if (asTimer != null && asTimer > 0) {
+            return setTimer(asTimer.toString())
+        }
+
+        val parsed = parseHourMinute(target)
+        if (parsed == null) {
+            // No clock time — open Jarvis alarm UI
+            return openClock("alarm", null)
+        }
+        val (hour, minute) = parsed
         val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
             putExtra(AlarmClock.EXTRA_HOUR, hour)
             putExtra(AlarmClock.EXTRA_MINUTES, minute)
             putExtra(AlarmClock.EXTRA_SKIP_UI, false)
+            putExtra(AlarmClock.EXTRA_MESSAGE, "Jarvis")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val h12 = if (hour % 12 == 0) 12 else hour % 12
         val ampm = if (hour < 12) "AM" else "PM"
         val display = "$h12:" + minute.toString().padStart(2, '0') + " $ampm"
-        return try {
+        try {
             if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(intent)
-                "Alarm set for $display."
-            } else {
-                val clocks = listOf(
-                    "com.google.android.deskclock",
-                    "com.android.deskclock",
-                    "com.sec.android.app.clockpackage",
-                    "com.oneplus.deskclock",
-                    "com.coloros.alarmclock",
-                    "com.miui.clock",
-                    "com.huawei.deskclock"
-                )
-                for (pkg in clocks) {
-                    val launch = context.packageManager.getLaunchIntentForPackage(pkg)
-                    if (launch != null) {
-                        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(launch)
-                        return "Opening clock. Please confirm the alarm for $display."
-                    }
-                }
-                "I couldn't find a clock app. Install Google Clock, or set the alarm manually."
+                return "Alarm set for $display."
             }
-        } catch (_: Exception) {
-            "I couldn't set the alarm on this device."
-        }
+        } catch (_: Exception) { }
+        // No system clock app — Jarvis window
+        return openClock("alarm", null)
     }
 
 

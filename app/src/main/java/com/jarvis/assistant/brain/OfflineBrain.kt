@@ -873,8 +873,17 @@ class OfflineBrain(
         containsAny(cmd, "open timer", "timer kholo") ->
             AssistantCommand("open_clock", "timer")
 
-        containsAny(cmd, "set alarm", "wake me up", "alarm laga", "alarm set karo") ->
-            AssistantCommand("set_alarm", extractTime(cmd))
+        containsAny(cmd, "set alarm", "wake me up", "alarm laga", "alarm set karo") -> {
+            // "alarm for 5 minutes" is really a timer
+            val mins = Regex("""(\d+)\s*(min|minute|minutes|m)\b""").find(cmd)
+            if (mins != null) {
+                val sec = (mins.groupValues[1].toIntOrNull() ?: 0) * 60
+                if (sec > 0) AssistantCommand("set_timer", sec.toString())
+                else AssistantCommand("set_alarm", extractTime(cmd))
+            } else {
+                AssistantCommand("set_alarm", extractTime(cmd))
+            }
+        }
 
         // Timer — "set a timer for 5 minutes" / "5 minute ka timer laga do"
         containsAny(cmd, "set a timer", "set timer", "start timer", "timer laga") ->
