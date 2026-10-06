@@ -828,19 +828,19 @@ class OfflineBrain(
             val app: String?
             when {
                 " on spotify" in lower -> {
-                    song = q.substringBefore(Regex("(?i) on spotify")).trim()
+                    song = q.substring(0, lower.indexOf(" on spotify")).trim()
                     app = "spotify"
                 }
                 " on youtube music" in lower -> {
-                    song = q.substringBefore(Regex("(?i) on youtube music")).trim()
+                    song = q.substring(0, lower.indexOf(" on youtube music")).trim()
                     app = "youtube music"
                 }
                 " on yt music" in lower -> {
-                    song = q.substringBefore(Regex("(?i) on yt music")).trim()
+                    song = q.substring(0, lower.indexOf(" on yt music")).trim()
                     app = "youtube music"
                 }
                 " on youtube" in lower -> {
-                    song = q.substringBefore(Regex("(?i) on youtube")).trim()
+                    song = q.substring(0, lower.indexOf(" on youtube")).trim()
                     app = "youtube"
                 }
                 else -> {
@@ -848,6 +848,7 @@ class OfflineBrain(
                     app = null
                 }
             }
+
             if (song.isBlank()) AssistantCommand("media_control", "play")
             else AssistantCommand("play_media", song, app)
         }
