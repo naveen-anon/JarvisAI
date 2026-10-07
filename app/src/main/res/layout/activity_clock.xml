@@ -577,6 +577,20 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/btnSwPause"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/glass_button_bg"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:text="PAUSE"
+                    android:textColor="#00D9FF"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
                     android:id="@+id/btnSwLap"
                     android:layout_width="0dp"
                     android:layout_height="48dp"

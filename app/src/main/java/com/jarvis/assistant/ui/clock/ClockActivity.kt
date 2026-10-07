@@ -127,7 +127,7 @@ class ClockActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btnTimerPause).setOnClickListener { pauseTimer() }
         findViewById<TextView>(R.id.btnTimerReset).setOnClickListener { resetTimer() }
         findViewById<TextView>(R.id.btnSwStart).setOnClickListener { startStopwatch() }
-        findViewById<TextView>(R.id.btnSwPause).setOnClickListener { pauseStopwatch() }
+        findViewById<TextView>(R.id.btnSwStart).setOnClickListener { pauseStopwatch() }
         findViewById<TextView>(R.id.btnSwReset).setOnClickListener { resetStopwatch() }
 
         when (intent.getStringExtra(EXTRA_MODE)?.lowercase()) {
