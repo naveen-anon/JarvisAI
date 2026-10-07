@@ -4,222 +4,250 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.text.InputType
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import com.jarvis.assistant.R
 import com.jarvis.assistant.security.PasswordVault
 
+/**
+ * JARVIS HUD-style password vault (reference UI).
+ */
 class PasswordManagerActivity : AppCompatActivity() {
 
     private lateinit var vault: PasswordVault
+    private lateinit var setupCard: View
+    private lateinit var listSection: View
     private lateinit var listHost: LinearLayout
     private lateinit var status: TextView
-    private lateinit var overlay: FrameLayout
-    private lateinit var overlayCard: LinearLayout
-    private lateinit var overlayTitle: TextView
-    private lateinit var overlayMsg: TextView
-    private lateinit var overlayInput: EditText
-    private lateinit var overlayBtnOk: TextView
-    private lateinit var overlayBtnCancel: TextView
-    private lateinit var addFields: LinearLayout
+    private lateinit var pinInput: EditText
+    private lateinit var strengthRow: LinearLayout
+    private lateinit var strengthLabel: TextView
+    private lateinit var btnOk: TextView
+    private lateinit var bioSwitch: SwitchCompat
 
-    private var overlayMode: String = "unlock"
-    private var addTitle: EditText? = null
-    private var addUser: EditText? = null
-    private var addPass: EditText? = null
-    private var addNotes: EditText? = null
+    private var mode: String = "setup" // setup | unlock | list
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_password_manager)
         vault = PasswordVault(this)
 
-        findViewById<TextView>(R.id.btnPwmBack).setOnClickListener { finish() }
-        findViewById<TextView>(R.id.btnPwmAdd).setOnClickListener {
-            if (ensureUnlocked()) showAddGlass()
-        }
-        findViewById<TextView>(R.id.btnPwmLock).setOnClickListener {
-            vault.lock()
-            refresh()
-            toast("Vault locked.")
-        }
+        setupCard = findViewById(R.id.pwmSetupCard)
+        listSection = findViewById(R.id.pwmListSection)
         listHost = findViewById(R.id.pwmList)
         status = findViewById(R.id.txtPwmStatus)
-        overlay = findViewById(R.id.pwmOverlay)
-        overlayCard = findViewById(R.id.pwmOverlayCard)
-        overlayTitle = findViewById(R.id.pwmOverlayTitle)
-        overlayMsg = findViewById(R.id.pwmOverlayMsg)
-        overlayInput = findViewById(R.id.pwmOverlayInput)
-        overlayBtnOk = findViewById(R.id.pwmOverlayOk)
-        overlayBtnCancel = findViewById(R.id.pwmOverlayCancel)
-        addFields = findViewById(R.id.pwmAddFields)
+        pinInput = findViewById(R.id.pwmOverlayInput)
+        strengthRow = findViewById(R.id.pwmStrengthRow)
+        strengthLabel = findViewById(R.id.txtPwmStrength)
+        btnOk = findViewById(R.id.pwmOverlayOk)
+        bioSwitch = findViewById(R.id.switchPwmBio)
 
-        overlayCard.background = glassPanel()
-        styleGlassInput(overlayInput)
-        overlayBtnOk.setOnClickListener { onOverlayOk() }
-        overlayBtnCancel.setOnClickListener {
-            if (overlayMode == "setup" || (overlayMode == "unlock" && !vault.isUnlocked())) {
-                finish()
-            } else {
-                hideOverlay()
+        findViewById<TextView>(R.id.btnPwmBack).setOnClickListener { finish() }
+        findViewById<TextView>(R.id.btnPwmLock).setOnClickListener {
+            vault.lock()
+            showLockedUi()
+            toast("Vault locked.")
+        }
+        findViewById<TextView>(R.id.btnPwmAdd).setOnClickListener {
+            if (vault.isUnlocked()) showAddInline()
+        }
+
+        pinInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                updateStrength(s?.toString().orEmpty())
             }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        btnOk.setOnClickListener { onPrimaryAction() }
+
+        // restore bio preference
+        val prefs = getSharedPreferences("jarvis_pwm", MODE_PRIVATE)
+        bioSwitch.isChecked = prefs.getBoolean("bio_enabled", true)
+        bioSwitch.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean("bio_enabled", checked).apply()
         }
 
         when {
-            !vault.hasMasterPin() -> showSetupGlass()
-            !vault.isUnlocked() -> showUnlockGlass()
-            else -> refresh()
+            !vault.hasMasterPin() -> showSetupUi()
+            !vault.isUnlocked() -> showUnlockUi()
+            else -> showListUi()
         }
     }
 
-    private fun glassPanel(): GradientDrawable = GradientDrawable().apply {
-        shape = GradientDrawable.RECTANGLE
-        cornerRadius = 28f
-        setColor(0xCC0A1825.toInt())
-        setStroke(2, 0x9900D9FF.toInt())
+    private fun showSetupUi() {
+        mode = "setup"
+        setupCard.visibility = View.VISIBLE
+        listSection.visibility = View.GONE
+        status.text = "Set a master PIN (min 4).\nEncrypts passwords on this device."
+        btnOk.text = "🔒  CREATE VAULT"
+        pinInput.setText("")
+        updateStrength("")
     }
 
-    private fun styleGlassInput(et: EditText) {
-        et.background = GradientDrawable().apply {
-            cornerRadius = 18f
-            setColor(0x66051018.toInt())
-            setStroke(1, 0x6600D9FF.toInt())
-        }
-        et.setTextColor(Color.parseColor("#E8FBFF"))
-        et.setHintTextColor(Color.parseColor("#5A8A99"))
-        et.typeface = Typeface.MONOSPACE
-        et.setPadding(36, 28, 36, 28)
+    private fun showUnlockUi() {
+        mode = "unlock"
+        setupCard.visibility = View.VISIBLE
+        listSection.visibility = View.GONE
+        status.text = "Enter master PIN to decrypt entries."
+        btnOk.text = "🔓  UNLOCK"
+        pinInput.setText("")
+        updateStrength("")
     }
 
-    private fun ensureUnlocked(): Boolean {
-        if (vault.isUnlocked()) return true
-        if (!vault.hasMasterPin()) { showSetupGlass(); return false }
-        showUnlockGlass()
-        return false
+    private fun showLockedUi() {
+        if (vault.hasMasterPin()) showUnlockUi() else showSetupUi()
     }
 
-    private fun showOverlay() { overlay.visibility = View.VISIBLE }
-    private fun hideOverlay() {
-        overlay.visibility = View.GONE
-        addFields.visibility = View.GONE
-        overlayInput.visibility = View.VISIBLE
-        overlayMsg.visibility = View.VISIBLE
-        overlayBtnOk.setOnClickListener { onOverlayOk() }
+    private fun showListUi() {
+        mode = "list"
+        setupCard.visibility = View.GONE
+        listSection.visibility = View.VISIBLE
+        refreshList()
     }
 
-    private fun showSetupGlass() {
-        overlayMode = "setup"
-        overlayTitle.text = "CREATE VAULT"
-        overlayMsg.text = "Set a master PIN (min 4). Encrypts passwords on this device."
-        overlayInput.hint = "Master PIN"
-        overlayInput.setText("")
-        overlayInput.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
-        overlayBtnOk.text = "SAVE"
-        overlayBtnCancel.text = "CLOSE"
-        addFields.visibility = View.GONE
-        overlayInput.visibility = View.VISIBLE
-        showOverlay()
-    }
-
-    private fun showUnlockGlass() {
-        overlayMode = "unlock"
-        overlayTitle.text = "UNLOCK VAULT"
-        overlayMsg.text = "Enter master PIN to decrypt entries."
-        overlayInput.hint = "Master PIN"
-        overlayInput.setText("")
-        overlayInput.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
-        overlayBtnOk.text = "UNLOCK"
-        overlayBtnCancel.text = "CLOSE"
-        addFields.visibility = View.GONE
-        overlayInput.visibility = View.VISIBLE
-        showOverlay()
-    }
-
-    private fun showAddGlass() {
-        overlayMode = "add"
-        overlayTitle.text = "ADD ENTRY"
-        overlayMsg.text = "Stored encrypted until you lock the vault."
-        overlayInput.visibility = View.GONE
-        addFields.visibility = View.VISIBLE
-        addFields.removeAllViews()
-        addTitle = glassField("Title (e.g. Gmail)").also { addFields.addView(it) }
-        addUser = glassField("Username / email").also { addFields.addView(it) }
-        addPass = glassField("Password", true).also { addFields.addView(it) }
-        addNotes = glassField("Notes (optional)").also { addFields.addView(it) }
-        overlayBtnOk.text = "SAVE"
-        overlayBtnCancel.text = "CANCEL"
-        showOverlay()
-    }
-
-    private fun glassField(hint: String, password: Boolean = false): EditText {
-        return EditText(this).apply {
-            this.hint = hint
-            inputType = if (password)
-                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-            else InputType.TYPE_CLASS_TEXT
-            styleGlassInput(this)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = 12 }
-        }
-    }
-
-    private fun onOverlayOk() {
-        when (overlayMode) {
+    private fun onPrimaryAction() {
+        val pin = pinInput.text.toString()
+        when (mode) {
             "setup" -> {
-                if (vault.setMasterPin(overlayInput.text.toString())) {
-                    hideOverlay(); toast("Vault ready."); refresh()
+                if (vault.setMasterPin(pin)) {
+                    toast("Vault ready.")
+                    showListUi()
                 } else toast("PIN must be at least 4 digits.")
             }
             "unlock" -> {
-                if (vault.unlock(overlayInput.text.toString())) {
-                    hideOverlay(); refresh()
+                if (vault.unlock(pin)) {
+                    toast("Unlocked.")
+                    showListUi()
                 } else toast("Wrong PIN.")
             }
-            "add" -> {
-                val title = addTitle?.text?.toString().orEmpty()
-                val pass = addPass?.text?.toString().orEmpty()
-                if (title.isBlank() || pass.isBlank()) {
-                    toast("Title and password required."); return
-                }
-                if (vault.add(title, addUser?.text?.toString().orEmpty(), pass,
-                        addNotes?.text?.toString().orEmpty())) {
-                    hideOverlay(); toast("Saved."); refresh()
-                } else toast("Could not save.")
-            }
-            "reveal" -> hideOverlay()
         }
     }
 
-    private fun refresh() {
+    private fun updateStrength(pin: String) {
+        strengthRow.removeAllViews()
+        val score = when {
+            pin.length >= 8 -> 4
+            pin.length >= 6 -> 3
+            pin.length >= 4 -> 2
+            pin.length >= 1 -> 1
+            else -> 0
+        }
+        val label = when (score) {
+            0 -> "—"
+            1 -> "WEAK"
+            2 -> "FAIR"
+            3 -> "GOOD"
+            else -> "STRONG"
+        }
+        strengthLabel.text = label
+        strengthLabel.setTextColor(
+            when (score) {
+                0, 1 -> Color.parseColor("#FF6B6B")
+                2 -> Color.parseColor("#FFAA00")
+                else -> Color.parseColor("#00D9FF")
+            }
+        )
+        for (i in 0 until 4) {
+            val seg = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
+                    marginEnd = if (i < 3) 6 else 0
+                }
+                background = GradientDrawable().apply {
+                    cornerRadius = 4f
+                    setColor(
+                        if (i < score) Color.parseColor("#00D9FF")
+                        else Color.parseColor("#1A3040")
+                    )
+                }
+            }
+            strengthRow.addView(seg)
+        }
+    }
+
+    private fun showAddInline() {
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(40, 24, 40, 8)
+        }
+        fun field(hint: String, password: Boolean = false) = EditText(this).apply {
+            this.hint = hint
+            setTextColor(Color.parseColor("#E8FBFF"))
+            setHintTextColor(Color.parseColor("#5A8A99"))
+            typeface = Typeface.MONOSPACE
+            inputType = if (password)
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            else android.text.InputType.TYPE_CLASS_TEXT
+            background = GradientDrawable().apply {
+                cornerRadius = 16f
+                setColor(0x330A1825)
+                setStroke(1, 0x6600D9FF)
+            }
+            setPadding(28, 24, 28, 24)
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.bottomMargin = 12
+            layoutParams = lp
+            box.addView(this)
+        }
+        val title = field("Title (e.g. Gmail)")
+        val user = field("Username / email")
+        val pass = field("Password", true)
+        val notes = field("Notes (optional)")
+        androidx.appcompat.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Add entry")
+            .setView(box)
+            .setPositiveButton("Save") { _, _ ->
+                if (title.text.isBlank() || pass.text.isBlank()) {
+                    toast("Title and password required.")
+                    return@setPositiveButton
+                }
+                if (vault.add(title.text.toString(), user.text.toString(), pass.text.toString(), notes.text.toString())) {
+                    toast("Saved.")
+                    refreshList()
+                } else toast("Could not save.")
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun refreshList() {
         listHost.removeAllViews()
-        if (!vault.isUnlocked()) {
-            status.text = "LOCKED — enter master PIN"
-            status.setTextColor(Color.parseColor("#FFAA00"))
+        val entries = vault.list()
+        if (entries.isEmpty()) {
+            listHost.addView(TextView(this).apply {
+                text = "Vault empty — tap ADD ENTRY"
+                setTextColor(Color.parseColor("#5A8A99"))
+                typeface = Typeface.MONOSPACE
+                textSize = 12f
+                setPadding(8, 16, 8, 16)
+            })
             return
         }
-        val entries = vault.list()
-        status.text = if (entries.isEmpty()) "Vault empty — tap ADD ENTRY"
-        else "${entries.size} entr${if (entries.size == 1) "y" else "ies"}"
-        status.setTextColor(Color.parseColor("#5A8A99"))
-
         entries.forEach { e ->
             val card = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(28, 24, 28, 24)
-                background = glassPanel()
+                setPadding(28, 22, 28, 22)
+                background = GradientDrawable().apply {
+                    cornerRadius = 22f
+                    setColor(0xCC0A1825.toInt())
+                    setStroke(2, 0x8800D9FF.toInt())
+                }
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { bottomMargin = 14 }
+                ).apply { bottomMargin = 12 }
             }
             card.addView(TextView(this).apply {
                 text = e.title.ifBlank { "(untitled)" }
@@ -234,7 +262,7 @@ class PasswordManagerActivity : AppCompatActivity() {
                     setTextColor(Color.parseColor("#B8ECFF"))
                     textSize = 12f
                     typeface = Typeface.MONOSPACE
-                    setPadding(0, 8, 0, 0)
+                    setPadding(0, 6, 0, 0)
                 })
             }
             card.addView(TextView(this).apply {
@@ -242,25 +270,35 @@ class PasswordManagerActivity : AppCompatActivity() {
                 setTextColor(Color.parseColor("#5A8A99"))
                 textSize = 12f
                 typeface = Typeface.MONOSPACE
-                setPadding(0, 6, 0, 0)
             })
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 setPadding(0, 12, 0, 0)
             }
-            row.addView(chip("SHOW") {
-                overlayMode = "reveal"
-                overlayTitle.text = e.title.ifBlank { "ENTRY" }
-                overlayMsg.text = buildString {
-                    if (e.username.isNotBlank()) append("User: ${e.username}\n")
-                    append("Pass: ${e.password}")
-                    if (e.notes.isNotBlank()) append("\n${e.notes}")
+            fun chip(label: String, action: () -> Unit) = TextView(this@PasswordManagerActivity).apply {
+                text = label
+                setTextColor(Color.parseColor("#00D9FF"))
+                textSize = 11f
+                typeface = Typeface.MONOSPACE
+                gravity = Gravity.CENTER
+                setPadding(20, 12, 20, 12)
+                background = GradientDrawable().apply {
+                    cornerRadius = 14f
+                    setColor(0x330A1825)
+                    setStroke(1, 0x6600D9FF)
                 }
-                overlayInput.visibility = View.GONE
-                addFields.visibility = View.GONE
-                overlayBtnOk.text = "OK"
-                overlayBtnCancel.text = "CLOSE"
-                showOverlay()
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginEnd = 10 }
+                setOnClickListener { action() }
+            }
+            row.addView(chip("SHOW") {
+                androidx.appcompat.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                    .setTitle(e.title)
+                    .setMessage("User: ${e.username}\nPass: ${e.password}\n${e.notes}")
+                    .setPositiveButton("OK", null)
+                    .show()
             })
             row.addView(chip("COPY") {
                 val cm = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
@@ -268,32 +306,14 @@ class PasswordManagerActivity : AppCompatActivity() {
                 toast("Copied.")
             })
             row.addView(chip("DELETE") {
-                vault.delete(e.id); refresh(); toast("Deleted.")
+                vault.delete(e.id)
+                refreshList()
+                toast("Deleted.")
             })
             card.addView(row)
             listHost.addView(card)
         }
     }
-
-    private fun chip(label: String, onClick: () -> Unit): TextView =
-        TextView(this).apply {
-            text = label
-            setTextColor(Color.parseColor("#00D9FF"))
-            textSize = 11f
-            typeface = Typeface.MONOSPACE
-            gravity = Gravity.CENTER
-            setPadding(22, 14, 22, 14)
-            background = GradientDrawable().apply {
-                cornerRadius = 16f
-                setColor(0x440A1825.toInt())
-                setStroke(1, 0x8800D9FF.toInt())
-            }
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { marginEnd = 10 }
-            setOnClickListener { onClick() }
-        }
 
     private fun toast(msg: String) =
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
