@@ -234,7 +234,7 @@ fun JarvisHudScreen(
                 )
                 Box(Modifier.weight(1.4f), contentAlignment = Alignment.Center) {
                     HubReactor(
-                        active = ui.waveformActive,
+                        state = ui.hudState,
                         onClick = actions.onTalk,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -458,22 +458,60 @@ private fun CompanionCard(
 
 @Composable
 private fun HubReactor(
-    active: Boolean,
+    state: HudState,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val infinite = rememberInfiniteTransition(label = "arcReactor")
+    // IDLE = dim slow | LISTENING = cyan fast | THINKING = amber tight | SPEAKING = white-cyan
+    val spinMs = when (state) {
+        HudState.LISTENING -> 2800
+        HudState.THINKING, HudState.EXECUTING -> 1500
+        HudState.SPEAKING -> 3800
+        HudState.ERROR -> 2000
+        HudState.DONE -> 9000
+        else -> 14000
+    }
+    val pulseMs = when (state) {
+        HudState.LISTENING -> 700
+        HudState.THINKING, HudState.EXECUTING -> 500
+        HudState.SPEAKING -> 900
+        else -> 1600
+    }
+    val primary = when (state) {
+        HudState.LISTENING -> Cyan
+        HudState.THINKING, HudState.EXECUTING -> Amber
+        HudState.SPEAKING -> CyanBright
+        HudState.ERROR -> Red
+        HudState.DONE -> OrangeBright
+        else -> Cyan.copy(alpha = 0.55f)
+    }
+    val accent = when (state) {
+        HudState.LISTENING -> CyanBright
+        HudState.THINKING, HudState.EXECUTING -> Orange
+        HudState.SPEAKING -> Color.White
+        HudState.ERROR -> Red
+        else -> CyanDim
+    }
+    val energy = when (state) {
+        HudState.IDLE -> 0.55f
+        HudState.LISTENING -> 1f
+        HudState.THINKING, HudState.EXECUTING -> 0.95f
+        HudState.SPEAKING -> 1f
+        HudState.ERROR -> 0.85f
+        else -> 0.75f
+    }
+
+    val infinite = rememberInfiniteTransition(label = "arcReactor_$state")
     val spin by infinite.animateFloat(
         0f, 360f,
-        infiniteRepeatable(tween(if (active) 3200 else 12000, easing = LinearEasing)),
+        infiniteRepeatable(tween(spinMs, easing = LinearEasing)),
         label = "spin"
     )
     val pulse by infinite.animateFloat(
         0.92f, 1.08f,
-        infiniteRepeatable(tween(1400, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        infiniteRepeatable(tween(pulseMs, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "pulse"
     )
-    val energy = if (active) 1f else 0.7f
 
     Box(
         modifier
@@ -490,8 +528,8 @@ private fun HubReactor(
             drawCircle(
                 brush = Brush.radialGradient(
                     listOf(
-                        Cyan.copy(alpha = 0.40f * energy * pulse),
-                        Cyan.copy(alpha = 0.12f * energy),
+                        primary.copy(alpha = 0.45f * energy * pulse),
+                        primary.copy(alpha = 0.14f * energy),
                         Color.Transparent
                     ),
                     Offset(cx, cy),
@@ -503,7 +541,7 @@ private fun HubReactor(
 
             // Outer thin ring
             drawCircle(
-                Cyan.copy(alpha = 0.55f * energy),
+                primary.copy(alpha = 0.65f * energy),
                 r,
                 Offset(cx, cy),
                 style = Stroke(width = 1.5.dp.toPx())
@@ -557,8 +595,8 @@ private fun HubReactor(
                 brush = Brush.radialGradient(
                     listOf(
                         Color.White.copy(alpha = 0.95f),
-                        CyanBright.copy(alpha = 0.9f),
-                        Cyan.copy(alpha = 0.55f),
+                        accent.copy(alpha = 0.9f),
+                        primary.copy(alpha = 0.55f),
                         Color(0xFF021018)
                     ),
                     Offset(cx, cy),
@@ -570,7 +608,7 @@ private fun HubReactor(
 
             // Core rim
             drawCircle(
-                CyanBright.copy(alpha = 0.95f * energy),
+                accent.copy(alpha = 0.95f * energy),
                 r * 0.34f * pulse,
                 Offset(cx, cy),
                 style = Stroke(width = 2.dp.toPx())
