@@ -24,8 +24,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # Do NOT request obsolete package "tools"
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+          accept-android-sdk-licenses: true
+
+      - name: Install platform / build-tools
+        run: |
+          sdkmanager --install \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "platform-tools"
+          yes | sdkmanager --licenses >/dev/null || true
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -45,7 +57,7 @@ jobs:
         run: |
           APK=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
           echo "path=$APK" >> $GITHUB_OUTPUT
-          ls -la app/build/outputs/apk/debug/ || true
+          ls -la "$(dirname "$APK")" || true
 
       - name: Upload APK (artifact)
         uses: actions/upload-artifact@v4
@@ -55,7 +67,6 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-      # Unique tag each run — avoids "latest" update HttpError
       - name: Publish prerelease
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: softprops/action-gh-release@v2
