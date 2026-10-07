@@ -30,9 +30,9 @@ class StatsActivity : AppCompatActivity() {
     private val C_TEXT = Color.parseColor("#B8ECFF")
     private val C_MUTED = Color.parseColor("#5A8A99")
     private val C_WHITE = Color.parseColor("#F0FBFF")
-    private val C_PURPLE = Color.parseColor("#C084FC")
-    private val C_GREEN = Color.parseColor("#22C55E")
-    private val C_PINK = Color.parseColor("#EC4899")
+    private val C_PURPLE = Color.parseColor("#00D9FF")
+    private val C_GREEN = Color.parseColor("#00D9FF")
+    private val C_PINK = Color.parseColor("#00D9FF")
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
@@ -76,7 +76,7 @@ class StatsActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(dp(size), dp(size))
         }
 
-    private fun jgCard(bgRes: Int = R.drawable.bg_jg_card) = ContextCompat.getDrawable(this, bgRes)
+    private fun jgCard(bgRes: Int = R.drawable.liquid_glass_card) = ContextCompat.getDrawable(this, bgRes)
     private fun jgChip() = ContextCompat.getDrawable(this, R.drawable.bg_jg_chip)
     private fun jgButtonOutline() = ContextCompat.getDrawable(this, R.drawable.bg_jg_button_outline)
 
@@ -165,10 +165,10 @@ class StatsActivity : AppCompatActivity() {
 
         metricsRow.addView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = jgCard(R.drawable.bg_jg_card_purple)
+            background = jgCard(R.drawable.liquid_glass_card)
             setPadding(dp(14), dp(14), dp(14), dp(14))
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-            addView(iconBadge(R.drawable.ic_flame, R.drawable.bg_icon_ring_purple, C_PURPLE, size = 40, iconSize = 18))
+            addView(iconBadge(R.drawable.ic_flame, R.drawable.bg_icon_ring_cyan, C_PURPLE, size = 40, iconSize = 18))
             addView(spacer(8))
             addView(TextView(this@StatsActivity).apply {
                 text = "DAY STREAK"; setTextColor(C_PURPLE); textSize = 11f
@@ -186,7 +186,7 @@ class StatsActivity : AppCompatActivity() {
                 text = "${stats.currentStreak}"; setTextColor(C_PURPLE); textSize = 34f
                 typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
             })
-            streakRow.addView(smallIcon(R.drawable.ic_flame, Color.parseColor("#FB923C"), 20).apply {
+            streakRow.addView(smallIcon(R.drawable.ic_flame, Color.parseColor("#00D9FF"), 20).apply {
                 layoutParams = LinearLayout.LayoutParams(dp(20), dp(20)).apply { marginStart = dp(8) }
             })
             addView(streakRow)
@@ -201,8 +201,8 @@ class StatsActivity : AppCompatActivity() {
         root.addView(spacer(10))
 
         root.addView(infoCard(
-            bg = R.drawable.bg_jg_card_green,
-            ring = R.drawable.bg_icon_ring_green,
+            bg = R.drawable.liquid_glass_card,
+            ring = R.drawable.bg_icon_ring_cyan,
             icon = R.drawable.ic_star_filled,
             title = "MOST USED APPS",
             titleColor = C_GREEN,
@@ -211,8 +211,8 @@ class StatsActivity : AppCompatActivity() {
         ))
         root.addView(spacer(10))
         root.addView(infoCard(
-            bg = R.drawable.bg_jg_card_pink,
-            ring = R.drawable.bg_icon_ring_pink,
+            bg = R.drawable.liquid_glass_card,
+            ring = R.drawable.bg_icon_ring_cyan,
             icon = R.drawable.ic_people,
             title = "MOST CONTACTED",
             titleColor = C_PINK,
