@@ -162,8 +162,49 @@ fun JarvisHudScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            HubHeader(subtitle = ui.stateLabel.ifBlank { "STANDING BY" })
-            Spacer(Modifier.height(12.dp))
+            // Header
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        "J.A.R.V.I.S",
+                        color = Cyan,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 3.sp
+                    )
+                    Text(
+                        "Artificial Intelligence Assistant",
+                        color = CyanDim,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF22C55E))
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text("ONLINE", color = Color(0xFF22C55E), fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                    Text(
+                        ui.stateLabel.ifBlank { "Standing by" }.lowercase().replaceFirstChar { it.uppercase() },
+                        color = CyanSoft,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
 
             val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
             val hello = when {
@@ -180,75 +221,49 @@ fun JarvisHudScreen(
                 online = true
             )
 
-            Spacer(Modifier.height(8.dp))
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                HubReactor(
-                    active = ui.waveformActive,
-                    onClick = actions.onTalk
+            Spacer(Modifier.height(10.dp))
+
+            // Reactor hero with side telemetry panels
+            Row(
+                Modifier.fillMaxWidth().height(200.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SideTelemetryLeft(
+                    battery = ui.battery,
+                    modifier = Modifier.weight(0.9f)
                 )
+                Box(Modifier.weight(1.4f), contentAlignment = Alignment.Center) {
+                    HubReactor(
+                        active = ui.waveformActive,
+                        onClick = actions.onTalk,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                SideTelemetryRight(modifier = Modifier.weight(0.9f))
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
+
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ModuleTile(
-                    "TODAY'S BRIEFING", "Summary for today.",
-                    onClick = actions.onBriefing,
-                    modifier = Modifier.weight(1f)
-                )
-                ModuleTile(
-                    "SYSTEM CORE", "Battery, network, status.",
-                    onClick = actions.onSystem,
-                    modifier = Modifier.weight(1f)
-                )
+                ModuleTile("TODAY'S BRIEFING", "Summary for today.", onClick = actions.onBriefing, modifier = Modifier.weight(1f))
+                ModuleTile("SYSTEM CORE", "Battery, network, status.", onClick = actions.onSystem, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ModuleTile(
-                    "VOICE / CHAT", "Speak or type.",
-                    onClick = actions.onChat,
-                    modifier = Modifier.weight(1f)
-                )
-                ModuleTile(
-                    "VISION", "Camera intelligence.",
-                    onClick = actions.onVision,
-                    modifier = Modifier.weight(1f)
-                )
+                ModuleTile("VOICE / CHAT", "Speak or type.", onClick = actions.onChat, modifier = Modifier.weight(1f))
+                ModuleTile("VISION", "Camera intelligence.", onClick = actions.onVision, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ModuleTile(
-                    "SECURITY", "Device posture report.",
-                    onClick = actions.onSecurity,
-                    modifier = Modifier.weight(1f)
-                )
-                ModuleTile(
-                    "STATS", "Usage and health.",
-                    onClick = actions.onStats,
-                    modifier = Modifier.weight(1f)
-                )
+                ModuleTile("SECURITY", "Device posture report.", onClick = actions.onSecurity, modifier = Modifier.weight(1f))
+                ModuleTile("STATS", "Usage and health.", onClick = actions.onStats, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ModuleTile(
-                    "SETTINGS", "Voice, memory, prefs.",
-                    onClick = actions.onSettings,
-                    modifier = Modifier.weight(1f)
-                )
-                ModuleTile(
-                    "CLOCK", "Alarm · timer · stopwatch.",
-                    onClick = actions.onClock,
-                    modifier = Modifier.weight(1f)
-                )
-                ModuleTile(
-                    "PASSWORD", "Secure vault.",
-                    onClick = actions.onPassword,
-                    modifier = Modifier.weight(1f)
-                )
-                ModuleTile(
-                    "LISTEN", "Start listening now.",
-                    onClick = actions.onTalk,
-                    modifier = Modifier.weight(1f)
-                )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ModuleTile("SETTINGS", "Voice, memory", onClick = actions.onSettings, modifier = Modifier.weight(1f), compact = true)
+                ModuleTile("CLOCK", "Alarm", onClick = actions.onClock, modifier = Modifier.weight(1f), compact = true)
+                ModuleTile("PASSWORD", "Vault", onClick = actions.onPassword, modifier = Modifier.weight(1f), compact = true)
+                ModuleTile("LISTEN", "Mic", onClick = actions.onTalk, modifier = Modifier.weight(1f), compact = true)
             }
 
             Spacer(Modifier.weight(1f))
@@ -318,6 +333,75 @@ private fun HubHeader(subtitle: String) {
         }
     }
 }
+
+
+@Composable
+private fun SideTelemetryLeft(battery: String, modifier: Modifier = Modifier) {
+    val pct = battery.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        modifier
+            .clip(shape)
+            .background(Brush.verticalGradient(listOf(GlassFillTop, GlassFillBot)))
+            .border(1.dp, Orange.copy(alpha = 0.55f), shape)
+            .padding(10.dp)
+    ) {
+        Text("ARC REACTOR", color = Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Text("MK-IV", color = CyanBright, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        TeleBar("POWER", pct.coerceIn(0, 100) / 100f)
+        Spacer(Modifier.height(6.dp))
+        TeleBar("TEMP", 0.36f)
+        Spacer(Modifier.height(6.dp))
+        TeleBar("EFFICIENCY", 0.98f)
+    }
+}
+
+@Composable
+private fun SideTelemetryRight(modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        modifier
+            .clip(shape)
+            .background(Brush.verticalGradient(listOf(GlassFillTop, GlassFillBot)))
+            .border(1.dp, Orange.copy(alpha = 0.55f), shape)
+            .padding(10.dp)
+    ) {
+        Text("STARK INDUSTRIES", color = Cyan, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Text("ENERGY CORE", color = CyanSoft, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text("STABLE", color = CyanBright, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(6.dp))
+        Text("AUTO REGULATING", color = CyanSoft, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text("SYSTEMS ONLINE", color = CyanBright, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun TeleBar(label: String, value: Float) {
+    Column {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(label, color = CyanSoft, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+            Text("${(value * 100).toInt()}%", color = CyanBright, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+        }
+        Spacer(Modifier.height(3.dp))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(5.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color(0x3300D9FF))
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth(value.coerceIn(0.05f, 1f))
+                    .fillMaxHeight()
+                    .background(Brush.horizontalGradient(listOf(Cyan, CyanBright)))
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun CompanionCard(
@@ -508,54 +592,51 @@ private fun ModuleTile(
     title: String,
     subtitle: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    compact: Boolean = false
 ) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(if (compact) 16.dp else 18.dp)
     Box(
         modifier
-            .heightIn(min = 72.dp)
+            .heightIn(min = if (compact) 64.dp else 72.dp)
             .clip(shape)
             .background(Brush.verticalGradient(listOf(GlassFillTop, GlassFillBot)))
-            .border(1.2.dp, GlassStrokeCyan.copy(alpha = 0.55f), shape)
+            .border(1.dp, Cyan.copy(alpha = 0.55f), shape)
+            .border(1.dp, Orange.copy(alpha = 0.25f), shape)
             .clickable(onClick = onClick)
     ) {
-        // Specular top
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(22.dp)
+                .height(18.dp)
                 .align(Alignment.TopCenter)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0x44FFFFFF), Color.Transparent)
-                    )
-                )
+                .background(Brush.verticalGradient(listOf(Color(0x33FFFFFF), Color.Transparent)))
         )
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = if (compact) 10.dp else 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
                     title,
                     color = CyanBright,
-                    fontSize = 11.sp,
+                    fontSize = if (compact) 10.sp else 11.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     maxLines = 1
                 )
-                Spacer(Modifier.height(3.dp))
+                Spacer(Modifier.height(2.dp))
                 Text(
                     subtitle,
                     color = CyanSoft,
-                    fontSize = 10.sp,
+                    fontSize = if (compact) 9.sp else 10.sp,
                     maxLines = 2,
                     fontFamily = FontFamily.Monospace
                 )
             }
-            Text("›", color = Cyan, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("›", color = Orange.copy(alpha = 0.9f), fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
