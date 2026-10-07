@@ -77,6 +77,52 @@ class ClockActivity : AppCompatActivity() {
         tabStopwatch.setOnClickListener { showTab(2) }
 
         findViewById<TextView>(R.id.btnSetAlarm).setOnClickListener { setSystemAlarm() }
+
+        // AM/PM + steppers (HUD)
+        var isPm = false
+        fun paintAmPm() {
+            val am = findViewById<TextView>(R.id.btnAm)
+            val pm = findViewById<TextView>(R.id.btnPm)
+            if (isPm) {
+                am.setBackgroundResource(R.drawable.glass_button_bg)
+                am.setTextColor(0xFF00D9FF.toInt())
+                pm.setBackgroundResource(R.drawable.glass_button_filled)
+                pm.setTextColor(0xFF03080E.toInt())
+            } else {
+                am.setBackgroundResource(R.drawable.glass_button_filled)
+                am.setTextColor(0xFF03080E.toInt())
+                pm.setBackgroundResource(R.drawable.glass_button_bg)
+                pm.setTextColor(0xFF00D9FF.toInt())
+            }
+        }
+        findViewById<TextView>(R.id.btnAm).setOnClickListener { isPm = false; paintAmPm() }
+        findViewById<TextView>(R.id.btnPm).setOnClickListener { isPm = true; paintAmPm() }
+        fun bump(et: EditText, delta: Int, minV: Int, maxV: Int) {
+            val v = (et.text.toString().toIntOrNull() ?: minV) + delta
+            val n = when {
+                v > maxV -> minV
+                v < minV -> maxV
+                else -> v
+            }
+            et.setText(n.toString().padStart(2, '0'))
+        }
+        findViewById<TextView>(R.id.btnHourUp).setOnClickListener { bump(inputAlarmHour, 1, 1, 12) }
+        findViewById<TextView>(R.id.btnHourDown).setOnClickListener { bump(inputAlarmHour, -1, 1, 12) }
+        findViewById<TextView>(R.id.btnMinUp).setOnClickListener { bump(inputAlarmMin, 1, 0, 59) }
+        findViewById<TextView>(R.id.btnMinDown).setOnClickListener { bump(inputAlarmMin, -1, 0, 59) }
+        // tag isPm for setSystemAlarm
+        findViewById<TextView>(R.id.btnAm).tag = false
+        findViewById<TextView>(R.id.btnPm).setOnClickListener {
+            isPm = true
+            findViewById<TextView>(R.id.btnAm).tag = true
+            paintAmPm()
+        }
+        findViewById<TextView>(R.id.btnAm).setOnClickListener {
+            isPm = false
+            findViewById<TextView>(R.id.btnAm).tag = false
+            paintAmPm()
+        }
+
         findViewById<TextView>(R.id.btnTimerStart).setOnClickListener { startTimer() }
         findViewById<TextView>(R.id.btnTimerPause).setOnClickListener { pauseTimer() }
         findViewById<TextView>(R.id.btnTimerReset).setOnClickListener { resetTimer() }
@@ -108,28 +154,37 @@ class ClockActivity : AppCompatActivity() {
         panelAlarm.visibility = if (index == 0) View.VISIBLE else View.GONE
         panelTimer.visibility = if (index == 1) View.VISIBLE else View.GONE
         panelStopwatch.visibility = if (index == 2) View.VISIBLE else View.GONE
-        val active = 0xFF00D9FF.toInt()
-        val idle = 0xFF5A8A99.toInt()
-        tabAlarm.setTextColor(if (index == 0) active else idle)
-        tabTimer.setTextColor(if (index == 1) active else idle)
-        tabStopwatch.setTextColor(if (index == 2) active else idle)
+        val onBg = R.drawable.glass_button_filled
+        val offBg = R.drawable.glass_button_bg
+        val onC = 0xFF03080E.toInt()
+        val offC = 0xFF00D9FF.toInt()
+        tabAlarm.setBackgroundResource(if (index == 0) onBg else offBg)
+        tabTimer.setBackgroundResource(if (index == 1) onBg else offBg)
+        tabStopwatch.setBackgroundResource(if (index == 2) onBg else offBg)
+        tabAlarm.setTextColor(if (index == 0) onC else offC)
+        tabTimer.setTextColor(if (index == 1) onC else offC)
+        tabStopwatch.setTextColor(if (index == 2) onC else offC)
     }
 
     private fun setSystemAlarm() {
-        val h = inputAlarmHour.text.toString().toIntOrNull() ?: 7
-        val m = inputAlarmMin.text.toString().toIntOrNull() ?: 0
-        val hour = h.coerceIn(0, 23)
-        val min = m.coerceIn(0, 59)
+        var h = inputAlarmHour.text.toString().toIntOrNull() ?: 7
+        val min = (inputAlarmMin.text.toString().toIntOrNull() ?: 0).coerceIn(0, 59)
+        val pm = (findViewById<TextView>(R.id.btnAm).tag as? Boolean) == true
+        // 12h UI → 24h for AlarmClock
+        h = h.coerceIn(1, 12)
+        var hour = h % 12
+        if (pm) hour += 12
         val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
             putExtra(AlarmClock.EXTRA_HOUR, hour)
             putExtra(AlarmClock.EXTRA_MINUTES, min)
             putExtra(AlarmClock.EXTRA_SKIP_UI, false)
             putExtra(AlarmClock.EXTRA_MESSAGE, "Jarvis")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         try {
             startActivity(intent)
         } catch (_: Exception) {
-            txtTimerDisplay // ignore
+            // no system clock — still close gracefully
         }
     }
 

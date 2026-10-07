@@ -9,11 +9,86 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="14dp">
 
+        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/liquid_glass_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/glass_chip_bg"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:text="◉"
+                android:textColor="#00D9FF"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.12"
+                    android:text="J.A.R.V.I.S"
+                    android:textColor="#00D9FF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Artificial Intelligence Assistant"
+                    android:textColor="#5A8A99"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/glass_button_bg"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="● ONLINE"
+                    android:textColor="#22C55E"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Standing by"
+                    android:textColor="#5A8A99"
+                    android:textSize="9sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- CLOCK title -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -21,78 +96,79 @@
                 android:id="@+id/btnClockBack"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:fontFamily="monospace"
                 android:gravity="center"
                 android:text="←"
                 android:textColor="#00D9FF"
                 android:textSize="20sp" />
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:fontFamily="monospace"
-                android:text="CLOCK"
+                android:letterSpacing="0.1"
+                android:text="⏱  CLOCK"
                 android:textColor="#00D9FF"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.12" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
+        <!-- Tabs -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tabAlarm"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
-                android:background="@drawable/glass_button_bg"
+                android:background="@drawable/glass_button_filled"
                 android:fontFamily="monospace"
                 android:gravity="center"
-                android:text="ALARM"
-                android:textColor="#00D9FF"
-                android:textSize="12sp"
+                android:text="🔔 ALARM"
+                android:textColor="#03080E"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tabTimer"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/glass_button_bg"
                 android:fontFamily="monospace"
                 android:gravity="center"
-                android:text="TIMER"
-                android:textColor="#5A8A99"
-                android:textSize="12sp"
+                android:text="⏲ TIMER"
+                android:textColor="#00D9FF"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tabStopwatch"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:background="@drawable/glass_button_bg"
                 android:fontFamily="monospace"
                 android:gravity="center"
-                android:text="STOPWATCH"
-                android:textColor="#5A8A99"
+                android:text="⏱ STOPWATCH"
+                android:textColor="#00D9FF"
                 android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- ALARM -->
+        <!-- ALARM PANEL -->
         <LinearLayout
             android:id="@+id/panelAlarm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/glass_card_bg"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/liquid_glass_card"
             android:orientation="vertical"
             android:padding="16dp">
 
@@ -100,9 +176,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
-                android:text="SET ALARM"
-                android:textColor="#B8ECFF"
-                android:textSize="13sp"
+                android:text="🔔  SET ALARM"
+                android:textColor="#00D9FF"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -110,88 +186,248 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:fontFamily="monospace"
-                android:text="Uses system clock app (reliable overnight alarms)."
+                android:text="Use system clock app (reliable overnight alarms)."
                 android:textColor="#5A8A99"
                 android:textSize="11sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="18dp"
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/inputAlarmHour"
-                    android:layout_width="72dp"
-                    android:layout_height="48dp"
+                <!-- AM/PM -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/btnAm"
+                        android:layout_width="52dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/glass_button_filled"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="AM"
+                        android:textColor="#03080E"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btnPm"
+                        android:layout_width="52dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/glass_button_bg"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="PM"
+                        android:textColor="#00D9FF"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Hour -->
+                <LinearLayout
+                    android:layout_width="88dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/glass_button_bg"
-                    android:fontFamily="monospace"
                     android:gravity="center"
-                    android:hint="HH"
-                    android:inputType="number"
-                    android:text="07"
-                    android:textColor="#E8FBFF"
-                    android:textColorHint="#5A8A99"
-                    android:textSize="18sp" />
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:id="@+id/btnHourUp"
+                        android:layout_width="match_parent"
+                        android:layout_height="28dp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="▲"
+                        android:textColor="#00D9FF"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/inputAlarmHour"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:text="07"
+                        android:textColor="#E8FBFF"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btnHourDown"
+                        android:layout_width="match_parent"
+                        android:layout_height="28dp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="▼"
+                        android:textColor="#00D9FF"
+                        android:textSize="12sp" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="10dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:fontFamily="monospace"
                     android:text=":"
                     android:textColor="#00D9FF"
-                    android:textSize="22sp" />
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
 
-                <EditText
-                    android:id="@+id/inputAlarmMin"
-                    android:layout_width="72dp"
-                    android:layout_height="48dp"
+                <!-- Min -->
+                <LinearLayout
+                    android:layout_width="88dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/glass_button_bg"
-                    android:fontFamily="monospace"
                     android:gravity="center"
-                    android:hint="MM"
-                    android:inputType="number"
-                    android:text="00"
-                    android:textColor="#E8FBFF"
-                    android:textColorHint="#5A8A99"
-                    android:textSize="18sp" />
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:id="@+id/btnMinUp"
+                        android:layout_width="match_parent"
+                        android:layout_height="28dp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="▲"
+                        android:textColor="#00D9FF"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/inputAlarmMin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:text="00"
+                        android:textColor="#E8FBFF"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btnMinDown"
+                        android:layout_width="match_parent"
+                        android:layout_height="28dp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="▼"
+                        android:textColor="#00D9FF"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
                 android:id="@+id/btnSetAlarm"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="16dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="18dp"
                 android:background="@drawable/glass_button_filled"
                 android:fontFamily="monospace"
                 android:gravity="center"
-                android:text="SET ALARM"
+                android:text="🔔  SET ALARM  ›"
                 android:textColor="#03080E"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
+
+            <!-- Feature chips -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/glass_chip_bg"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:text="SLEEP\nBetter rest"
+                    android:textColor="#00D9FF"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/glass_chip_bg"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:text="SMART WAKE\nOn time"
+                    android:textColor="#00D9FF"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/glass_chip_bg"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:text="SECURE\nSystem clock"
+                    android:textColor="#00D9FF"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/glass_chip_bg"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:text="STABLE\nReliable"
+                    android:textColor="#00D9FF"
+                    android:textSize="9sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- TIMER -->
+        <!-- TIMER PANEL -->
         <LinearLayout
             android:id="@+id/panelTimer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/glass_card_bg"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/liquid_glass_card"
             android:orientation="vertical"
             android:padding="16dp"
             android:visibility="gone">
 
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="⏲  TIMER"
+                android:textColor="#00D9FF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
                 android:id="@+id/txtTimerDisplay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:fontFamily="monospace"
                 android:gravity="center"
-                android:text="00:00.00"
-                android:textColor="#00D9FF"
-                android:textSize="40sp"
+                android:text="00:05:00"
+                android:textColor="#E8FBFF"
+                android:textSize="36sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -203,8 +439,8 @@
 
                 <EditText
                     android:id="@+id/inputTimerMin"
-                    android:layout_width="72dp"
-                    android:layout_height="44dp"
+                    android:layout_width="80dp"
+                    android:layout_height="48dp"
                     android:background="@drawable/glass_button_bg"
                     android:fontFamily="monospace"
                     android:gravity="center"
@@ -212,20 +448,22 @@
                     android:inputType="number"
                     android:text="5"
                     android:textColor="#E8FBFF"
-                    android:textColorHint="#5A8A99" />
+                    android:textColorHint="#5A8A99"
+                    android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="8dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:fontFamily="monospace"
                     android:text=":"
                     android:textColor="#00D9FF"
-                    android:textSize="18sp" />
+                    android:textSize="20sp" />
 
                 <EditText
                     android:id="@+id/inputTimerSec"
-                    android:layout_width="72dp"
-                    android:layout_height="44dp"
+                    android:layout_width="80dp"
+                    android:layout_height="48dp"
                     android:background="@drawable/glass_button_bg"
                     android:fontFamily="monospace"
                     android:gravity="center"
@@ -233,7 +471,8 @@
                     android:inputType="number"
                     android:text="0"
                     android:textColor="#E8FBFF"
-                    android:textColorHint="#5A8A99" />
+                    android:textColorHint="#5A8A99"
+                    android:textSize="16sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -245,107 +484,123 @@
                 <TextView
                     android:id="@+id/btnTimerStart"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:background="@drawable/glass_button_filled"
                     android:fontFamily="monospace"
                     android:gravity="center"
                     android:text="START"
                     android:textColor="#03080E"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/btnTimerPause"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:background="@drawable/glass_button_bg"
                     android:fontFamily="monospace"
                     android:gravity="center"
                     android:text="PAUSE"
                     android:textColor="#00D9FF"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/btnTimerReset"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:background="@drawable/glass_button_bg"
                     android:fontFamily="monospace"
                     android:gravity="center"
                     android:text="RESET"
                     android:textColor="#00D9FF"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- STOPWATCH -->
+        <!-- STOPWATCH PANEL -->
         <LinearLayout
             android:id="@+id/panelStopwatch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/glass_card_bg"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/liquid_glass_card"
             android:orientation="vertical"
             android:padding="16dp"
             android:visibility="gone">
 
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="⏱  STOPWATCH"
+                android:textColor="#00D9FF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
                 android:id="@+id/txtStopwatchDisplay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:fontFamily="monospace"
                 android:gravity="center"
                 android:text="00:00.00"
-                android:textColor="#00D9FF"
-                android:textSize="40sp"
+                android:textColor="#E8FBFF"
+                android:textSize="36sp"
                 android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/btnSwStart"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:background="@drawable/glass_button_filled"
                     android:fontFamily="monospace"
                     android:gravity="center"
                     android:text="START"
                     android:textColor="#03080E"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/btnSwPause"
+                    android:id="@+id/btnSwLap"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:background="@drawable/glass_button_bg"
                     android:fontFamily="monospace"
                     android:gravity="center"
-                    android:text="PAUSE"
+                    android:text="LAP"
                     android:textColor="#00D9FF"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/btnSwReset"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:background="@drawable/glass_button_bg"
                     android:fontFamily="monospace"
                     android:gravity="center"
                     android:text="RESET"
                     android:textColor="#00D9FF"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
@@ -353,10 +608,21 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:fontFamily="monospace"
             android:gravity="center"
-            android:text="Voice: set alarm 7:30 · timer 5 minutes · start stopwatch"
+            android:text="Voice: set alarm 7:00 AM · timer 5 minutes · start stopwatch"
+            android:textColor="#3D6A7A"
+            android:textSize="10sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:text="—  J.A.R.V.I.S  ·  ALWAYS WITH YOU  —"
             android:textColor="#2A4A55"
             android:textSize="10sp" />
     </LinearLayout>
