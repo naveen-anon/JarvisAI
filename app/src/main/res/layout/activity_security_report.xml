@@ -4,49 +4,290 @@
     android:layout_height="match_parent"
     android:background="#03080E"
     android:fillViewport="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="18dp">
+        android:padding="14dp">
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:gravity="center_vertical">
-            <TextView android:id="@+id/btnSecBack" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="←" android:textColor="#00D9FF"
-                android:textSize="22sp" android:padding="8dp" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:text="SECURITY"
-                android:textColor="#00D9FF" android:textSize="15sp" android:textStyle="bold"
-                android:fontFamily="monospace" android:letterSpacing="0.1" />
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/liquid_glass_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/btnSecBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:text="←"
+                android:textColor="#00D9FF"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.1"
+                    android:text="SECURITY"
+                    android:textColor="#00D9FF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="J.A.R.V.I.S"
+                    android:textColor="#5A8A99"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/glass_button_bg"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="● ONLINE"
+                    android:textColor="#22C55E"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Standing by"
+                    android:textColor="#5A8A99"
+                    android:textSize="9sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:background="@drawable/liquid_glass_card"
-            android:padding="18dp" android:layout_marginTop="14dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="POSTURE SCORE" android:textColor="#5A8A99" android:textSize="10sp"
-                android:fontFamily="monospace" />
-            <TextView android:id="@+id/txtSecScore" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="—" android:textColor="#00D9FF"
-                android:textSize="40sp" android:fontFamily="monospace" android:layout_marginTop="4dp" />
-            <TextView android:id="@+id/txtSecTitle" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:text="—" android:textColor="#B8ECFF"
-                android:textSize="14sp" android:fontFamily="monospace" android:layout_marginTop="6dp" />
-            <TextView android:id="@+id/txtSecBody" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:text="…" android:textColor="#8AB4C0"
-                android:textSize="13sp" android:lineSpacingExtra="5dp" android:layout_marginTop="12dp" />
+        <!-- Score row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/liquid_glass_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/glass_chip_bg"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtSecScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="—"
+                    android:textColor="#00D9FF"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="/100"
+                    android:textColor="#5A8A99"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="SECURITY POSTURE"
+                    android:textColor="#5A8A99"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/txtSecGrade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Grade —"
+                    android:textColor="#E8FBFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtSecTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Score —"
+                    android:textColor="#00D9FF"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/txtSecSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="monospace"
+                    android:text="Scanning…"
+                    android:textColor="#8AB4C0"
+                    android:textSize="12sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <TextView android:id="@+id/btnSecRefresh" android:layout_width="match_parent"
-            android:layout_height="48dp" android:layout_marginTop="14dp" android:gravity="center"
-            android:text="REFRESH SCAN" android:textColor="#00D9FF" android:textSize="13sp"
-            android:fontFamily="monospace" android:textStyle="bold"
-            android:background="@drawable/liquid_glass_card" />
-        <TextView android:id="@+id/btnSecSpeak" android:layout_width="match_parent"
-            android:layout_height="48dp" android:layout_marginTop="10dp" android:gravity="center"
-            android:text="READ ALOUD" android:textColor="#03080E" android:textSize="13sp"
-            android:fontFamily="monospace" android:textStyle="bold"
-            android:background="@drawable/bg_jg_button" />
+        <!-- Risk summary counts -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/liquid_glass_card"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="🛡  RISK SUMMARY"
+                android:textColor="#00D9FF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView android:id="@+id/txtRiskCritical" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:fontFamily="monospace" android:text="● Critical  0" android:textColor="#FF6B6B" android:textSize="11sp" />
+                <TextView android:id="@+id/txtRiskHigh" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:fontFamily="monospace" android:text="● High  0" android:textColor="#FFAA00" android:textSize="11sp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <TextView android:id="@+id/txtRiskMedium" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:fontFamily="monospace" android:text="● Medium  0" android:textColor="#E8C547" android:textSize="11sp" />
+                <TextView android:id="@+id/txtRiskLow" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:fontFamily="monospace" android:text="● Low  0" android:textColor="#00D9FF" android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Priority findings header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="monospace"
+                android:text="⚠  PRIORITY FINDINGS"
+                android:textColor="#00D9FF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtIssueCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="0 ISSUES"
+                android:textColor="#5A8A99"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/secFindingsHost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+
+        <!-- Hidden legacy body for TTS fallback -->
+        <TextView
+            android:id="@+id/txtSecBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnSecRefresh"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/glass_button_bg"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:text="REFRESH"
+                android:textColor="#00D9FF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnSecSpeak"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/glass_button_filled"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:text="READ ALOUD"
+                android:textColor="#03080E"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:text="—  J.A.R.V.I.S  ·  SECURE YOUR DIGITAL LIFE  —"
+            android:textColor="#2A4A55"
+            android:textSize="10sp" />
     </LinearLayout>
 </ScrollView>
