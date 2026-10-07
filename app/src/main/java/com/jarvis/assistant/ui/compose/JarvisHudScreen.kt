@@ -178,7 +178,7 @@ fun JarvisHudScreen(
                         letterSpacing = 3.sp
                     )
                     Text(
-                        "Artificial Intelligence Assistant",
+                        "Just A Rether Very Intelligent System",
                         color = CyanDim,
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace
@@ -250,7 +250,7 @@ fun JarvisHudScreen(
             }
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ModuleTile("VOICE / CHAT", "Speak or type.", onClick = actions.onChat, modifier = Modifier.weight(1f))
+                ModuleTile("CHAT", "Speak or type.", onClick = actions.onChat, modifier = Modifier.weight(1f))
                 ModuleTile("VISION", "Camera intelligence.", onClick = actions.onVision, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
@@ -268,7 +268,7 @@ fun JarvisHudScreen(
 
             Spacer(Modifier.weight(1f))
             Text(
-                "Tap reactor or Listen · Hey Jarvis",
+                "Developer Naveen Khatri | J.A.R.V.I.S",
                 color = CyanDim,
                 fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace,
@@ -301,7 +301,7 @@ private fun HubHeader(subtitle: String) {
                 letterSpacing = 2.sp
             )
             Text(
-                "Artificial Intelligence Assistant",
+                "Just A Rether Very Intelligent System",
                 color = CyanDim,
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace
@@ -367,7 +367,7 @@ private fun SideTelemetryRight(modifier: Modifier = Modifier) {
             .border(1.dp, Orange.copy(alpha = 0.55f), shape)
             .padding(10.dp)
     ) {
-        Text("STARK INDUSTRIES", color = Cyan, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Text("NAVEEN INDUSTRIES", color = Cyan, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         Text("ENERGY CORE", color = CyanSoft, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
         Text("STABLE", color = CyanBright, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
