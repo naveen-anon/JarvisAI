@@ -347,7 +347,7 @@ private fun SideTelemetryLeft(battery: String, modifier: Modifier = Modifier) {
             .padding(10.dp)
     ) {
         Text("ARC REACTOR", color = Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-        Text("MK-IV", color = CyanBright, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Text("android", color = CyanBright, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         TeleBar("POWER", pct.coerceIn(0, 100) / 100f)
         Spacer(Modifier.height(6.dp))
