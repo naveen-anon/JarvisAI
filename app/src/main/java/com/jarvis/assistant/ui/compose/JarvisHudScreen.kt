@@ -87,8 +87,8 @@ private val Panel = Color(0xFF0A1825)
 private val PanelDim = Color(0xFF050E16)
 
 // Liquid glass
-private val GlassFillTop = Color(0xCC0C1A28)
-private val GlassFillBot = Color(0x99050810)
+private val GlassFillTop = Color(0x990C1A28)
+private val GlassFillBot = Color(0x66050810)
 private val GlassStroke = Color(0x66FFFFFF)
 private val GlassStrokeCyan = Color(0x8800D9FF)
 private val GridLine = Color(0xFF1A3040)
@@ -462,54 +462,47 @@ private fun HubReactor(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // IDLE = dim slow | LISTENING = cyan fast | THINKING = amber tight | SPEAKING = white-cyan
     val spinMs = when (state) {
         HudState.LISTENING -> 2800
         HudState.THINKING, HudState.EXECUTING -> 1500
         HudState.SPEAKING -> 3800
         HudState.ERROR -> 2000
-        HudState.DONE -> 9000
-        else -> 14000
-    }
-    val pulseMs = when (state) {
-        HudState.LISTENING -> 700
-        HudState.THINKING, HudState.EXECUTING -> 500
-        HudState.SPEAKING -> 900
-        else -> 1600
+        else -> 12000
     }
     val primary = when (state) {
         HudState.LISTENING -> Cyan
         HudState.THINKING, HudState.EXECUTING -> Amber
         HudState.SPEAKING -> CyanBright
         HudState.ERROR -> Red
-        HudState.DONE -> OrangeBright
-        else -> Cyan.copy(alpha = 0.55f)
+        else -> Cyan
     }
     val accent = when (state) {
         HudState.LISTENING -> CyanBright
         HudState.THINKING, HudState.EXECUTING -> Orange
         HudState.SPEAKING -> Color.White
-        HudState.ERROR -> Red
-        else -> CyanDim
+        else -> CyanBright
     }
     val energy = when (state) {
-        HudState.IDLE -> 0.55f
+        HudState.IDLE -> 0.75f
         HudState.LISTENING -> 1f
-        HudState.THINKING, HudState.EXECUTING -> 0.95f
         HudState.SPEAKING -> 1f
-        HudState.ERROR -> 0.85f
-        else -> 0.75f
+        else -> 0.9f
     }
 
-    val infinite = rememberInfiniteTransition(label = "arcReactor_$state")
+    val infinite = rememberInfiniteTransition(label = "arc_$state")
     val spin by infinite.animateFloat(
         0f, 360f,
         infiniteRepeatable(tween(spinMs, easing = LinearEasing)),
         label = "spin"
     )
+    val spin2 by infinite.animateFloat(
+        360f, 0f,
+        infiniteRepeatable(tween(spinMs * 2, easing = LinearEasing)),
+        label = "spin2"
+    )
     val pulse by infinite.animateFloat(
         0.92f, 1.08f,
-        infiniteRepeatable(tween(pulseMs, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        infiniteRepeatable(tween(1200), RepeatMode.Reverse),
         label = "pulse"
     )
 
@@ -522,59 +515,62 @@ private fun HubReactor(
         Canvas(Modifier.fillMaxSize()) {
             val cx = size.width / 2f
             val cy = size.height / 2f
-            val r = size.minDimension / 2f * 0.90f
+            val r = size.minDimension / 2f * 0.92f
 
-            // Deep ambient glow
+            // Soft ambient glow (transparent glass feel)
             drawCircle(
                 brush = Brush.radialGradient(
                     listOf(
-                        primary.copy(alpha = 0.45f * energy * pulse),
-                        primary.copy(alpha = 0.14f * energy),
+                        primary.copy(alpha = 0.35f * energy * pulse),
+                        primary.copy(alpha = 0.10f * energy),
                         Color.Transparent
                     ),
                     Offset(cx, cy),
-                    r * 1.35f
+                    r * 1.4f
                 ),
-                radius = r * 1.15f,
+                radius = r * 1.2f,
                 center = Offset(cx, cy)
             )
 
             // Outer thin ring
             drawCircle(
-                primary.copy(alpha = 0.65f * energy),
+                primary.copy(alpha = 0.35f * energy),
                 r,
                 Offset(cx, cy),
-                style = Stroke(width = 1.5.dp.toPx())
+                style = Stroke(width = 1.2.dp.toPx())
             )
 
-            // Major ticks only (cleaner)
-            for (i in 0 until 8) {
-                val a = Math.toRadians(i * 45.0 - 90.0)
+            // Tick marks
+            for (i in 0 until 12) {
+                val a = Math.toRadians(i * 30.0 - 90.0 + spin * 0.15)
                 val cos = kotlin.math.cos(a).toFloat()
                 val sin = kotlin.math.sin(a).toFloat()
+                val major = i % 3 == 0
+                val inner = if (major) r * 0.88f else r * 0.92f
                 drawLine(
-                    CyanBright.copy(alpha = 0.75f * energy),
-                    Offset(cx + r * 0.88f * cos, cy + r * 0.88f * sin),
-                    Offset(cx + r * 0.98f * cos, cy + r * 0.98f * sin),
-                    strokeWidth = 2.dp.toPx()
+                    primary.copy(alpha = if (major) 0.7f * energy else 0.35f * energy),
+                    Offset(cx + cos * inner, cy + sin * inner),
+                    Offset(cx + cos * r * 0.98f, cy + sin * r * 0.98f),
+                    strokeWidth = if (major) 2.dp.toPx() else 1.dp.toPx(),
+                    cap = StrokeCap.Round
                 )
             }
 
-            // One rotating arc segment (not full dashed clutter)
+            // Rotating arc segments
             rotate(spin, Offset(cx, cy)) {
                 drawArc(
-                    color = CyanBright.copy(alpha = 0.9f * energy),
-                    startAngle = -20f,
-                    sweepAngle = 70f,
+                    color = primary.copy(alpha = 0.9f * energy),
+                    startAngle = -25f,
+                    sweepAngle = 80f,
                     useCenter = false,
                     topLeft = Offset(cx - r * 0.78f, cy - r * 0.78f),
                     size = androidx.compose.ui.geometry.Size(r * 1.56f, r * 1.56f),
-                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+                    style = Stroke(width = 3.5.dp.toPx(), cap = StrokeCap.Round)
                 )
                 drawArc(
-                    color = Cyan.copy(alpha = 0.35f * energy),
+                    color = accent.copy(alpha = 0.55f * energy),
                     startAngle = 120f,
-                    sweepAngle = 90f,
+                    sweepAngle = 55f,
                     useCenter = false,
                     topLeft = Offset(cx - r * 0.78f, cy - r * 0.78f),
                     size = androidx.compose.ui.geometry.Size(r * 1.56f, r * 1.56f),
@@ -582,44 +578,49 @@ private fun HubReactor(
                 )
             }
 
+            // Counter-spin mid ring
+            rotate(spin2, Offset(cx, cy)) {
+                drawArc(
+                    color = primary.copy(alpha = 0.45f * energy),
+                    startAngle = 40f,
+                    sweepAngle = 100f,
+                    useCenter = false,
+                    topLeft = Offset(cx - r * 0.58f, cy - r * 0.58f),
+                    size = androidx.compose.ui.geometry.Size(r * 1.16f, r * 1.16f),
+                    style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
+                )
+            }
+
             // Mid ring
             drawCircle(
-                Cyan.copy(alpha = 0.4f * energy),
-                r * 0.58f,
+                primary.copy(alpha = 0.3f * energy),
+                r * 0.55f,
                 Offset(cx, cy),
                 style = Stroke(width = 1.2.dp.toPx())
             )
 
-            // Bright core sphere
+            // Inner bright core
             drawCircle(
                 brush = Brush.radialGradient(
                     listOf(
                         Color.White.copy(alpha = 0.95f),
-                        accent.copy(alpha = 0.9f),
-                        primary.copy(alpha = 0.55f),
-                        Color(0xFF021018)
+                        accent.copy(alpha = 0.85f),
+                        primary.copy(alpha = 0.4f),
+                        Color.Transparent
                     ),
                     Offset(cx, cy),
-                    r * 0.38f * pulse
+                    r * 0.32f * pulse
                 ),
-                radius = r * 0.34f * pulse,
+                radius = r * 0.28f * pulse,
                 center = Offset(cx, cy)
             )
-
-            // Core rim
             drawCircle(
-                accent.copy(alpha = 0.95f * energy),
-                r * 0.34f * pulse,
+                accent.copy(alpha = 0.9f * energy),
+                r * 0.28f * pulse,
                 Offset(cx, cy),
-                style = Stroke(width = 2.dp.toPx())
+                style = Stroke(width = 1.8.dp.toPx())
             )
-
-            // Hot center
-            drawCircle(
-                Color.White.copy(alpha = 0.95f),
-                r * 0.07f * pulse,
-                Offset(cx, cy)
-            )
+            drawCircle(Color.White.copy(alpha = 0.95f), r * 0.06f * pulse, Offset(cx, cy))
         }
     }
 }
