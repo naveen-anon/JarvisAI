@@ -1,5 +1,11 @@
 package com.jarvis.assistant.ui.compose
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.systemBars
+
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.background
@@ -45,6 +51,8 @@ fun SecurityScreen(
     Column(
         Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .background(bgBrush())
             .padding(14.dp)
             .verticalScroll(rememberScrollState())

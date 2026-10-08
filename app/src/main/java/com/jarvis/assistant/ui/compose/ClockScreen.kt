@@ -1,5 +1,11 @@
 package com.jarvis.assistant.ui.compose
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.systemBars
+
 import android.provider.AlarmClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -84,6 +90,8 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
     Column(
         Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .background(bgBrush())
             .padding(14.dp)
             .verticalScroll(rememberScrollState())

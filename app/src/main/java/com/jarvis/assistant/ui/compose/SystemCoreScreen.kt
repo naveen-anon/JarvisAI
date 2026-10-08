@@ -1,5 +1,11 @@
 package com.jarvis.assistant.ui.compose
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.systemBars
+
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
@@ -89,6 +95,8 @@ fun SystemCoreScreen(onBack: () -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .background(bgBrush())
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
