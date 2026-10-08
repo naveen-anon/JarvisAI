@@ -356,44 +356,37 @@ class SettingsActivity : AppCompatActivity() {
             )
             addView(pinStatus)
             addView(hudButton("SET PASSWORD") {
-                val act = this@SettingsActivity
-                val input = EditText(act).apply {
-                    inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-                    hint = "Password (min 4)"
-                    setPadding(40, 30, 40, 30)
+                showGlassInputDialog(
+                    title = "Jarvis App Password",
+                    message = "Min 4 characters. Stored as hash only.",
+                    hint = "Password",
+                    password = true,
+                    positive = "Save"
+                ) { s ->
+                    if (s.length >= 4) {
+                        AppLockManager(this@SettingsActivity).setCredential(
+                            AppLockManager.LockType.PASSWORD, s
+                        )
+                        toast("Password saved.")
+                    } else toast("Min 4 characters.")
                 }
-                android.app.AlertDialog.Builder(act, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                    .setTitle("Jarvis App Password")
-                    .setView(input)
-                    .setPositiveButton("Save") { _, _ ->
-                        val s = input.text.toString()
-                        if (s.length >= 4) {
-                            AppLockManager(act).setCredential(AppLockManager.LockType.PASSWORD, s)
-                            toast("Password saved.")
-                        } else toast("Min 4 characters.")
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
             })
             addView(hudButton("SET PATTERN PATH") {
-                val act = this@SettingsActivity
-                val input = EditText(act).apply {
-                    hint = "0-1-2-5-8"
-                    setPadding(40, 30, 40, 30)
+                showGlassInputDialog(
+                    title = "Pattern (dots 0-8)",
+                    message = "3x3 grid: 0 1 2 / 3 4 5 / 6 7 8. Example: 0-3-6-7-8",
+                    hint = "0-1-2-5-8",
+                    password = true,
+                    positive = "Save"
+                ) { s ->
+                    val v = s.trim()
+                    if (v.length >= 5 && v.contains("-")) {
+                        AppLockManager(this@SettingsActivity).setCredential(
+                            AppLockManager.LockType.PATTERN, v
+                        )
+                        toast("Pattern saved.")
+                    } else toast("Use form like 0-1-2-5-8")
                 }
-                android.app.AlertDialog.Builder(act, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                    .setTitle("Pattern (dots 0-8)")
-                    .setMessage("3x3 grid: 0 1 2 / 3 4 5 / 6 7 8. Example unlock-L: 0-3-6-7-8")
-                    .setView(input)
-                    .setPositiveButton("Save") { _, _ ->
-                        val s = input.text.toString().trim()
-                        if (s.length >= 5 && s.contains("-")) {
-                            AppLockManager(act).setCredential(AppLockManager.LockType.PATTERN, s)
-                            toast("Pattern saved.")
-                        } else toast("Use form like 0-1-2-5-8")
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
             })
             addView(hudButton("SET / CHANGE APP PIN") {
                 showJarvisPinDialog(pinStatus)
@@ -466,64 +459,91 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showJarvisPinDialog(pinStatus: TextView) {
-        val density = resources.displayMetrics.density
-        fun dp(v: Int) = (v * density).toInt()
+        showGlassInputDialog(
+            title = "Jarvis App PIN",
+            message = "Min 4 digits. Hash only — not phone lock PIN.",
+            hint = "••••",
+            password = false,
+            positive = "SAVE"
+        ) { pin ->
+            if (pin.length < 4) toast("PIN must be at least 4 digits.")
+            else {
+                AppLockManager(this).setPin(pin)
+                pinStatus.text = "PIN is set."
+                toast("App PIN saved.")
+            }
+        }
+    }
 
-        val container = LinearLayout(this).apply {
+
+
+    private fun showGlassInputDialog(
+        title: String,
+        message: String? = null,
+        hint: String,
+        password: Boolean,
+        positive: String = "Save",
+        onSave: (String) -> Unit
+    ) {
+        val pad = (20 * resources.displayMetrics.density).toInt()
+        val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(20), dp(8), dp(20), dp(4))
-            setBackgroundColor(Color.parseColor("#03080E"))
+            setPadding(pad, pad / 2, pad, pad / 2)
+            background = GradientDrawable().apply {
+                cornerRadius = 28f
+                setColor(0xE0050E16.toInt())
+                setStroke(2, 0x9900D9FF.toInt())
+            }
         }
-
-        val title = TextView(this).apply {
-            text = "JARVIS APP PIN"
-            setTextColor(Color.parseColor("#00D9FF"))
-            textSize = 15f
-            typeface = android.graphics.Typeface.MONOSPACE
-            setPadding(0, 0, 0, dp(6))
+        if (!message.isNullOrBlank()) {
+            root.addView(TextView(this).apply {
+                text = message
+                setTextColor(0xFF5A8A99.toInt())
+                textSize = 12f
+                typeface = Typeface.MONOSPACE
+                setPadding(0, 0, 0, pad / 2)
+            })
         }
-        val sub = TextView(this).apply {
-            text = "Min 4 digits. Not your phone lock PIN."
-            setTextColor(Color.parseColor("#5A8A99"))
-            textSize = 12f
-            setPadding(0, 0, 0, dp(12))
+        val input = EditText(this).apply {
+            this.hint = hint
+            setHintTextColor(0xFF5A8A99.toInt())
+            setTextColor(0xFFE8FBFF.toInt())
+            textSize = 16f
+            typeface = Typeface.MONOSPACE
+            inputType = if (password)
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            else
+                android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            background = GradientDrawable().apply {
+                cornerRadius = 20f
+                setColor(0x660A1825.toInt())
+                setStroke(2, 0x6600D9FF.toInt())
+            }
+            setPadding(pad, pad * 2 / 3, pad, pad * 2 / 3)
         }
-        val input = hudEditText("").apply {
-            hint = "••••"
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER or
-                android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
-            setHintTextColor(Color.parseColor("#5A8A99"))
-            setTextColor(Color.parseColor("#E8F9FF"))
-            setBackgroundColor(Color.parseColor("#0A1825"))
-            setPadding(dp(14), dp(12), dp(14), dp(12))
-        }
-        container.addView(title)
-        container.addView(sub)
-        container.addView(input)
+        root.addView(input)
 
         val dlg = android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-            .setView(container)
-            .setPositiveButton("SAVE") { _, _ ->
-                val pin = input.text.toString().trim()
-                if (pin.length < 4) toast("PIN must be at least 4 digits.")
-                else {
-                    AppLockManager(this).setPin(pin)
-                    pinStatus.text = "PIN is set."
-                    toast("App PIN saved.")
-                }
-            }
-            .setNegativeButton("CANCEL", null)
+            .setTitle(title)
+            .setView(root)
+            .setPositiveButton(positive) { _, _ -> onSave(input.text?.toString().orEmpty()) }
+            .setNegativeButton("Cancel", null)
             .create()
 
         dlg.setOnShowListener {
-            dlg.window?.setBackgroundDrawable(
-                android.graphics.drawable.ColorDrawable(Color.parseColor("#0A1825"))
-            )
-            dlg.getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.parseColor("#00D9FF"))
-            dlg.getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.parseColor("#5A8A99"))
+            dlg.window?.setBackgroundDrawable(GradientDrawable().apply {
+                cornerRadius = 32f
+                setColor(0xF003080E.toInt())
+                setStroke(2, 0xAA00D9FF.toInt())
+            })
+            dlg.getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(0xFF00D9FF.toInt())
+            dlg.getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(0xFF5A8A99.toInt())
+            dlg.findViewById<TextView>(android.R.id.title)?.apply {
+                setTextColor(0xFF00D9FF.toInt())
+                typeface = Typeface.MONOSPACE
+            }
         }
         dlg.show()
     }
-
 
 }
