@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- outer ring -->
+    <path
+        android:fillColor="#001018"
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="1.5"
+        android:pathData="M24,4c11,0 20,9 20,20s-9,20 -20,20S4,35 4,24 13,4 24,4z"/>
+    <!-- head plate -->
+    <path
+        android:fillColor="#0A1825"
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="1.2"
+        android:pathData="M14,20c0,-6 4.5,-10 10,-10s10,4 10,10v6c0,5 -4,9 -10,9s-10,-4 -10,-9v-6z"/>
+    <!-- left eye -->
+    <path
+        android:fillColor="#00D9FF"
+        android:pathData="M18,22m-2.2,0a2.2,2.2 0,1 1,4.4 0a2.2,2.2 0,1 1,-4.4 0"/>
+    <!-- right eye -->
+    <path
+        android:fillColor="#00D9FF"
+        android:pathData="M30,22m-2.2,0a2.2,2.2 0,1 1,4.4 0a2.2,2.2 0,1 1,-4.4 0"/>
+    <!-- visor line -->
+    <path
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="1"
+        android:strokeLineCap="round"
+        android:pathData="M20,22h8"/>
+    <!-- mouth slit -->
+    <path
+        android:strokeColor="#5A8A99"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M20,30h8"/>
+    <!-- antenna -->
+    <path
+        android:strokeColor="#00D9FF"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:pathData="M24,10V6"/>
+    <path
+        android:fillColor="#00D9FF"
+        android:pathData="M24,5m-1.5,0a1.5,1.5 0,1 1,3 0a1.5,1.5 0,1 1,-3 0"/>
+</vector>

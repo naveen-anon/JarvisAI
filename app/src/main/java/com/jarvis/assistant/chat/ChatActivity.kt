@@ -309,7 +309,7 @@ class ChatActivity : AppCompatActivity(), AssistantForegroundService.AssistantLi
         }
         background = ContextCompat.getDrawable(
             this@ChatActivity,
-            if (isUser) R.drawable.avatar_user_bg else R.drawable.avatar_reactor_bg
+            if (isUser) R.drawable.ic_avatar_user else R.drawable.ic_avatar_jarvis
         )
         gravity = Gravity.CENTER
         textSize = 16f
