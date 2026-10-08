@@ -182,33 +182,29 @@ class AssistantForegroundService : Service() {
      */
     private fun startSttWakeFallback() {
         val sm = com.jarvis.assistant.util.SettingsManager(this)
-        if (!sm.getSttContinuousWake()) {
+        // Background listen ON is enough; STT continuous follows it (Siri-style Hey Jarvis).
+        if (!sm.getBackgroundListen()) {
             android.util.Log.i(
                 "JarvisService",
-                "STT continuous wake off. Enable in Settings, or use Porcupine / clap / Talk."
+                "Background listen off — no STT wake. Turn on in Settings."
             )
             try { stt.stopContinuous() } catch (_: Exception) {}
             return
         }
-        android.util.Log.i("JarvisService", "STT continuous wake active (higher battery)")
+        android.util.Log.i("JarvisService", "STT continuous wake active — say Hey Jarvis")
         try { stt.stopContinuous() } catch (_: Exception) {}
         stt.listenContinuous { trailing ->
             mainHandler.post {
                 try { stt.stopContinuous() } catch (_: Exception) {}
                 startListeningCycle()
                 if (trailing.isNotBlank()) {
-                    // "hey jarvis what time is it" → trailing may already be the command
                     mainHandler.postDelayed({
                         if (trailing.length > 2) handleUserSpeech(trailing)
                     }, 600L)
                 }
                 mainHandler.postDelayed({
-                    if (SettingsManager(this).getBackgroundListen() &&
-                        SettingsManager(this).getSttContinuousWake()
-                    ) {
+                    if (SettingsManager(this).getBackgroundListen()) {
                         startSttWakeFallback()
-                    } else if (SettingsManager(this).getBackgroundListen()) {
-                        startWakeWordListening()
                     }
                 }, 2_500L)
             }
