@@ -171,5 +171,11 @@
             <activity android:name=".ui.password.PasswordManagerActivity"
             android:exported="false"
             android:theme="@style/Theme.Jarvis" />
+            <receiver android:name=".util.JarvisAlarmReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.jarvis.assistant.ACTION_JARVIS_ALARM" />
+            </intent-filter>
+        </receiver>
     </application>
+    <uses-permission android:name="android.permission.VIBRATE" />
 </manifest>

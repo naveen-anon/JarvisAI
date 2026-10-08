@@ -1,6 +1,5 @@
 package com.jarvis.assistant.ui.compose
 
-import android.content.Intent
 import android.provider.AlarmClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +15,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jarvis.assistant.util.JarvisAlarmScheduler
 import kotlinx.coroutines.delay
 
 @Composable
@@ -25,14 +25,13 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
     var hour by remember { mutableIntStateOf(7) }
     var minute by remember { mutableIntStateOf(0) }
     var isPm by remember { mutableStateOf(false) }
+    var status by remember { mutableStateOf("") }
 
-    // timer
     var timerMin by remember { mutableIntStateOf(5) }
     var timerSec by remember { mutableIntStateOf(0) }
     var timerLeft by remember { mutableLongStateOf(0L) }
     var timerRunning by remember { mutableStateOf(false) }
 
-    // stopwatch
     var swMs by remember { mutableLongStateOf(0L) }
     var swRunning by remember { mutableStateOf(false) }
 
@@ -40,7 +39,24 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
         if (timerRunning && timerLeft > 0) {
             delay(200)
             timerLeft = (timerLeft - 200).coerceAtLeast(0)
-            if (timerLeft == 0L) timerRunning = false
+            if (timerLeft == 0L) {
+                timerRunning = false
+                status = JarvisAlarmScheduler.scheduleInApp(
+                    context,
+                    java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY),
+                    java.util.Calendar.getInstance().get(java.util.Calendar.MINUTE),
+                    "Jarvis Timer"
+                )
+                // fire immediately via ringtone
+                try {
+                    context.sendBroadcast(
+                        android.content.Intent(JarvisAlarmScheduler.ACTION_FIRE)
+                            .setPackage(context.packageName)
+                            .putExtra(JarvisAlarmScheduler.EXTRA_LABEL, "Timer done")
+                    )
+                    status = "Timer finished — ringtone + vibrate."
+                } catch (_: Exception) {}
+            }
         }
     }
     LaunchedEffect(swRunning) {
@@ -53,17 +69,16 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
     fun setAlarm() {
         var h = hour % 12
         if (isPm) h += 12
-        try {
-            context.startActivity(
-                Intent(AlarmClock.ACTION_SET_ALARM).apply {
-                    putExtra(AlarmClock.EXTRA_HOUR, h)
-                    putExtra(AlarmClock.EXTRA_MINUTES, minute)
-                    putExtra(AlarmClock.EXTRA_SKIP_UI, false)
-                    putExtra(AlarmClock.EXTRA_MESSAGE, "Jarvis")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-            )
-        } catch (_: Exception) {}
+        if (hour == 12 && !isPm) h = 0
+        if (hour == 12 && isPm) h = 12
+        // normalize from 1-12 UI
+        val hour24 = when {
+            !isPm && hour == 12 -> 0
+            !isPm -> hour
+            isPm && hour == 12 -> 12
+            else -> hour + 12
+        }
+        status = JarvisAlarmScheduler.setSystemAlarm(context, hour24, minute, "Jarvis")
     }
 
     Column(
@@ -93,14 +108,13 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
                 GlassButton(label, onClick = { tab = i }, modifier = Modifier.weight(1f), filled = tab == i)
             }
         }
-
         Spacer(Modifier.height(14.dp))
 
         when (tab) {
             0 -> GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("🔔  SET ALARM", color = JColors.Cyan, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                    Text("System clock app (reliable overnight).", color = JColors.CyanSoft, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                    Text("Uses phone Clock app when available · else in-app ringtone + vibrate.", color = JColors.CyanSoft, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                     Spacer(Modifier.height(16.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column {
@@ -115,6 +129,20 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
                     }
                     Spacer(Modifier.height(16.dp))
                     GlassButton("🔔  SET ALARM  ›", onClick = { setAlarm() }, filled = true, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(8.dp))
+                    GlassButton(
+                        "⚡  IN-APP ONLY (ringtone + vibrate)",
+                        onClick = {
+                            val hour24 = when {
+                                !isPm && hour == 12 -> 0
+                                !isPm -> hour
+                                isPm && hour == 12 -> 12
+                                else -> hour + 12
+                            }
+                            status = JarvisAlarmScheduler.scheduleInApp(context, hour24, minute, "Jarvis")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
             1 -> GlassCard(modifier = Modifier.fillMaxWidth()) {
@@ -157,6 +185,10 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
             }
         }
 
+        if (status.isNotBlank()) {
+            Spacer(Modifier.height(12.dp))
+            Text(status, color = JColors.Amber, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+        }
         Spacer(Modifier.height(16.dp))
         Text(
             "Voice: set alarm 7:00 AM · timer 5 minutes · start stopwatch",
@@ -171,18 +203,9 @@ fun ClockScreen(onBack: () -> Unit, initialTab: Int = 0) {
 @Composable
 private fun Stepper(value: Int, up: () -> Unit, down: () -> Unit, pad: Boolean = false) {
     GlassCard(corner = 14.dp) {
-        Column(
-            Modifier.width(88.dp).padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(Modifier.width(88.dp).padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("▲", color = JColors.Cyan, fontSize = 14.sp, modifier = Modifier.clickable(onClick = up).padding(4.dp))
-            Text(
-                if (pad) "%02d".format(value) else "%02d".format(value),
-                color = JColors.Text,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
-            )
+            Text("%02d".format(value), color = JColors.Text, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             Text("▼", color = JColors.Cyan, fontSize = 14.sp, modifier = Modifier.clickable(onClick = down).padding(4.dp))
         }
     }
