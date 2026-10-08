@@ -1,5 +1,17 @@
 package com.jarvis.assistant.vision
 
+import java.io.ByteArrayOutputStream
+
+import android.graphics.YuvImage
+
+import android.graphics.Rect
+
+import android.graphics.ImageFormat
+
+import android.graphics.BitmapFactory
+
+import android.graphics.Bitmap
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -170,6 +182,33 @@ class VisionActivity : AppCompatActivity() {
                                             append("I don't see clear labels, objects, faces, codes, or text in this frame, sir.")
                                     }.trim()
                                 }
+                                
+                                "identify", "identity", "who" -> {
+                                    val bmp = imageProxyToBitmap(image)
+                                    if (bmp == null) {
+                                        "Couldn't read camera frame, sir."
+                                    } else {
+                                        val ids = FaceIdentityHelper.identify(this@VisionActivity, bmp)
+                                        if (ids.isEmpty()) {
+                                            "No face in frame, sir."
+                                        } else {
+                                            ids.joinToString(" ") {
+                                                if (it.known) "Identity ${it.label}, ${it.detail}."
+                                                else "Unknown person."
+                                            }
+                                        }
+                                    }
+                                }
+                                "enroll" -> {
+                                    val name = intent.getStringExtra("enroll_name") ?: "User"
+                                    val bmp = imageProxyToBitmap(image)
+                                    if (bmp == null) {
+                                        "Couldn't read camera frame, sir."
+                                    } else {
+                                        FaceIdentityHelper.enrollFromBitmap(this@VisionActivity, bmp, name)
+                                    }
+                                }
+
                                 else -> "Unknown vision mode."
                             }
                             val spoken = result.replace(Regex("\\s+"), " ").trim().let {
@@ -200,4 +239,27 @@ class VisionActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_MODE = "vision_mode"
     }
+
+    private fun imageProxyToBitmap(image: ImageProxy): Bitmap? {
+        return try {
+            val yBuffer = image.planes[0].buffer
+            val uBuffer = image.planes[1].buffer
+            val vBuffer = image.planes[2].buffer
+            val ySize = yBuffer.remaining()
+            val uSize = uBuffer.remaining()
+            val vSize = vBuffer.remaining()
+            val nv21 = ByteArray(ySize + uSize + vSize)
+            yBuffer.get(nv21, 0, ySize)
+            vBuffer.get(nv21, ySize, vSize)
+            uBuffer.get(nv21, ySize + vSize, uSize)
+            val yuv = YuvImage(nv21, ImageFormat.NV21, image.width, image.height, null)
+            val out = ByteArrayOutputStream()
+            yuv.compressToJpeg(Rect(0, 0, image.width, image.height), 90, out)
+            val bytes = out.toByteArray()
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
 }

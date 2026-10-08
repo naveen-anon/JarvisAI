@@ -45,6 +45,28 @@ class OfflineBrain(
         // Add to conversation history
         conversationContext.addMessage(text, isUserInput = true)
 
+        if (containsAny(cmd, "who is this", "identify person", "identify face", "who is that", "chehra pehchano")) {
+            return try {
+                val i = android.content.Intent(context, com.jarvis.assistant.vision.VisionActivity::class.java)
+                i.putExtra(com.jarvis.assistant.vision.VisionActivity.EXTRA_MODE, "identify")
+                i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(i)
+                "Opening identity scan, sir."
+            } catch (_: Exception) { "Couldn't open vision identify." }
+        }
+        Regex("""(?:enroll face as|remember this face as|save face as)\s+(.+)""").find(cmd)?.let { m ->
+            val name = m.groupValues[1].trim()
+            return try {
+                val i = android.content.Intent(context, com.jarvis.assistant.vision.VisionActivity::class.java)
+                i.putExtra(com.jarvis.assistant.vision.VisionActivity.EXTRA_MODE, "enroll")
+                i.putExtra("enroll_name", name)
+                i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(i)
+                "Look at the camera to enroll $name, sir."
+            } catch (_: Exception) { "Couldn't start face enroll." }
+        }
+
+
 
         // In-app voice / video calls
         if (containsAny(cmd, "video call", "video calling", "video call karo", "video call on")) {
