@@ -132,7 +132,7 @@ fun BriefingScreen(
                 Text(
                     title.ifBlank { "Good day, sir." },
                     color = JColors.Text,
-                    fontSize = 20.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace
                 )
@@ -140,9 +140,9 @@ fun BriefingScreen(
                 Text(
                     body,
                     color = JColors.CyanBright.copy(alpha = 0.92f),
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
-                    lineHeight = 22.sp
+                    lineHeight = 18.sp
                 )
                 Spacer(Modifier.height(14.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
