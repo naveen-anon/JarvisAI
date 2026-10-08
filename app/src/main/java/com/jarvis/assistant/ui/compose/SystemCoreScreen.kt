@@ -262,17 +262,21 @@ private fun storagePct(): Int = try {
     if (total <= 0L) 0 else (((total - avail) * 100) / total).toInt().coerceIn(0, 100)
 } catch (_: Exception) { 0 }
 
-private fun networkLabel(context: Context): String = try {
-    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val n = cm.activeNetwork ?: return "OFFLINE"
-    val caps = cm.getNetworkCapabilities(n) ?: return "OFFLINE"
-    when {
-        caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WI-FI (ONLINE)"
-        caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "MOBILE DATA (ONLINE)"
-        caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ETHERNET (ONLINE)"
-        else -> "ONLINE"
+private fun networkLabel(context: Context): String {
+    return try {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val n = cm.activeNetwork ?: return "OFFLINE"
+        val caps = cm.getNetworkCapabilities(n) ?: return "OFFLINE"
+        when {
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WI-FI (ONLINE)"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "MOBILE DATA (ONLINE)"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ETHERNET (ONLINE)"
+            else -> "ONLINE"
+        }
+    } catch (_: Exception) {
+        "UNKNOWN"
     }
-} catch (_: Exception) { "UNKNOWN" }
+}
 
 private fun localIpv4(): String = try {
     NetworkInterface.getNetworkInterfaces().toList().flatMap { it.inetAddresses.toList() }
