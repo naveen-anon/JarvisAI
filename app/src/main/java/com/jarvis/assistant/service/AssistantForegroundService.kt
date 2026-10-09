@@ -70,6 +70,8 @@ class AssistantForegroundService : Service() {
     }
 
     var listener: AssistantListener? = null
+    private var lastListenCycleMs = 0L
+    private var listenCycleRunning = false
 
     interface AssistantListener {
         fun onStateChanged(state: BrainState)
@@ -215,12 +217,18 @@ class AssistantForegroundService : Service() {
     }
 
     fun startListeningCycle() {
-        // One-shot command mic only — never leave continuous STT running.
+        val now = System.currentTimeMillis()
+        if (listenCycleRunning || now - lastListenCycleMs < 1800L) {
+            android.util.Log.d("JarvisService", "listen cycle debounced")
+            return
+        }
+        lastListenCycleMs = now
+        listenCycleRunning = true
+
         try { stt.stopContinuous() } catch (_: Exception) {}
         try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
 
-        // Siri-style acknowledgment before listening for the command
         val ack = try {
             val sm = SettingsManager(this)
             val name = sm.getUserName().trim().lowercase()
@@ -234,26 +242,32 @@ class AssistantForegroundService : Service() {
         }
         try { tts.speak(ack) } catch (_: Exception) {}
 
-        // Let "Yes sir/ma'am" finish before opening the mic (reduces cutting off the command)
+        // Mic only after TTS so we don't capture "Yes sir" or double-fire
         mainHandler.postDelayed({
-        stt.listenOnce(
-            onResult = { speech ->
-                try { stt.stopContinuous() } catch (_: Exception) {}
-                if (speech.isNotBlank()) {
-                    handleUserSpeech(speech)
-                } else {
+            stt.listenOnce(
+                onResult = { speech ->
+                    listenCycleRunning = false
+                    try { stt.stopContinuous() } catch (_: Exception) {}
+                    val s = speech.trim()
+                    val echo = s.equals("yes sir", true) ||
+                        s.equals("yes ma'am", true) ||
+                        s.equals("yes mam", true) ||
+                        s.equals("yes", true)
+                    if (s.isNotBlank() && !echo) {
+                        handleUserSpeech(s)
+                    } else {
+                        try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                        listener?.onStateChanged(BrainState.IDLE)
+                    }
+                },
+                onError = {
+                    listenCycleRunning = false
+                    try { stt.stopContinuous() } catch (_: Exception) {}
                     try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                     listener?.onStateChanged(BrainState.IDLE)
                 }
-            },
-            onError = {
-                try { stt.stopContinuous() } catch (_: Exception) {}
-                try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
-                listener?.onStateChanged(BrainState.ERROR)
-                listener?.onStateChanged(BrainState.IDLE)
-            }
-        )
-        }, 900L)
+            )
+        }, 1000L)
     }
 
     private fun handleUserSpeech(speech: String) {
