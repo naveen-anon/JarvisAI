@@ -133,7 +133,7 @@ class AssistantForegroundService : Service() {
         val sm = com.jarvis.assistant.util.SettingsManager(this)
         // NEVER open Google STT here. Only low-power Porcupine (if key) or clap.
         // background_listen only starts Porcupine; STT continuous path is a no-op.
-        if (sm.getBackgroundListen()) {
+        if (sm.getWakeWordEnabled() || sm.getBackgroundListen()) {
             startWakeWordListening()
         } else {
             try { stt.stopContinuous() } catch (_: Exception) {}
@@ -181,35 +181,30 @@ class AssistantForegroundService : Service() {
      * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
      */
     private fun startSttWakeFallback() {
-        val sm = com.jarvis.assistant.util.SettingsManager(this)
-        // Background listen ON is enough; STT continuous follows it (Siri-style Hey Jarvis).
-        if (!sm.getBackgroundListen()) {
-            android.util.Log.i(
-                "JarvisService",
-                "Background listen off — no STT wake. Turn on in Settings."
-            )
+        val sm = SettingsManager(this)
+        if (!sm.getWakeWordEnabled()) {
+            android.util.Log.i("JarvisService", "Wake word OFF — mic released")
             try { stt.stopContinuous() } catch (_: Exception) {}
             return
         }
-        android.util.Log.i("JarvisService", "STT continuous wake active — say Hey Jarvis")
+        android.util.Log.i("JarvisService", "Wake word ON — listening for Hey Jarvis")
         try { stt.stopContinuous() } catch (_: Exception) {}
         stt.listenContinuous { trailing ->
             mainHandler.post {
                 try { stt.stopContinuous() } catch (_: Exception) {}
                 startListeningCycle()
-                if (trailing.isNotBlank()) {
-                    mainHandler.postDelayed({
-                        if (trailing.length > 2) handleUserSpeech(trailing)
-                    }, 600L)
+                if (trailing.isNotBlank() && trailing.length > 2) {
+                    mainHandler.postDelayed({ handleUserSpeech(trailing) }, 600L)
                 }
                 mainHandler.postDelayed({
-                    if (SettingsManager(this).getBackgroundListen()) {
+                    if (SettingsManager(this).getWakeWordEnabled()) {
                         startSttWakeFallback()
                     }
-                }, 2_500L)
+                }, 2500L)
             }
         }
     }
+
 
 
     /** Text chat — same offline-first pipeline as voice. */

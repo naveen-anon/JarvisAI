@@ -73,6 +73,11 @@ class SettingsManager(context: Context) {
     fun markFeedbackGiven() = prefs.edit().putBoolean("feedback_given", true).apply()
 
     // Background wake-word listening (must stay INSIDE the class)
+    
+    /** "Hey Jarvis" via Google STT continuous. Uses mic while on. */
+    fun getWakeWordEnabled(): Boolean = prefs.getBoolean("wake_word", true)
+    fun setWakeWordEnabled(v: Boolean) = prefs.edit().putBoolean("wake_word", v).apply()
+
     fun getBackgroundListen(): Boolean = prefs.getBoolean("background_listen", true)
     
     /** Google STT continuous "hey jarvis" — higher battery; off by default. */
