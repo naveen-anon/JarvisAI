@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity(),
 
     private var service: AssistantForegroundService? = null
     private var bound = false
+    private var pendingListen = false
 
     private lateinit var systemStatus: SystemStatusManager
     private lateinit var locationHelper: LocationHelper
@@ -67,6 +68,10 @@ class MainActivity : AppCompatActivity(),
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             service = (binder as AssistantForegroundService.LocalBinder).getService()
             service?.listener = this@MainActivity
+            if (pendingListen) {
+                pendingListen = false
+                service?.startListeningCycle()
+            }
             bound = true
         }
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -86,15 +91,8 @@ class MainActivity : AppCompatActivity(),
             JarvisHudScreen(
                 ui = uiState,
                 actions = JarvisHudActions(
-                    onTalk = { service?.startListeningCycle() },
-                    onReactorTap = {
-                        if (bound) service?.startListeningCycle()
-                        else permissionLauncher.launch(arrayOf(
-                            Manifest.permission.RECORD_AUDIO,
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ))
-                    },
+                    onTalk = { ensureListening() },
+                    onReactorTap = { ensureListening() },
                     onChat = {
                         startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
                     },
@@ -151,7 +149,7 @@ class MainActivity : AppCompatActivity(),
                     onNavChat = {
                         startActivity(Intent(this, com.jarvis.assistant.chat.ChatActivity::class.java))
                     },
-                    onNavMic = { service?.startListeningCycle() },
+                    onNavMic = { ensureListening() },
                     onNavVision = {
                         try {
                             startActivity(Intent(this, com.jarvis.assistant.vision.VisionActivity::class.java))
@@ -334,4 +332,30 @@ class MainActivity : AppCompatActivity(),
             .setCancelable(true)
             .show()
     }
+
+    private fun ensureListening() {
+        try {
+            val i = Intent(this, AssistantForegroundService::class.java)
+            startForegroundService(i)
+        } catch (_: Exception) {
+            try {
+                startService(Intent(this, AssistantForegroundService::class.java))
+            } catch (_: Exception) {}
+        }
+        val s = service
+        if (s != null) {
+            s.startListeningCycle()
+        } else {
+            // Not bound yet — bind then listen on connect
+            pendingListen = true
+            try {
+                bindService(
+                    Intent(this, AssistantForegroundService::class.java),
+                    connection,
+                    BIND_AUTO_CREATE
+                )
+            } catch (_: Exception) {}
+        }
+    }
+
 }
