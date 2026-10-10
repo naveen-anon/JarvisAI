@@ -25,7 +25,7 @@ class OpenWakeWordEngine(private val context: Context) {
                 WakeWordModel(
                     name = "Hey Jarvis",
                     modelPath = "hey_jarvis.onnx",
-                    threshold = 0.5f
+                    threshold = 0.35f
                 )
             )
             val eng = WakeWordEngine(

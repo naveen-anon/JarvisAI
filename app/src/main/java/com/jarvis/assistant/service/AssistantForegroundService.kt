@@ -134,13 +134,9 @@ class AssistantForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — clap or say Jarvis to activate"))
         val sm = com.jarvis.assistant.util.SettingsManager(this)
-        // NEVER open Google STT here. Only low-power Porcupine (if key) or clap.
-        // background_listen only starts Porcupine; STT continuous path is a no-op.
-        if (sm.getWakeWordEnabled() || sm.getBackgroundListen()) {
-            startWakeWordListening()
-        } else {
-            try { stt.stopContinuous() } catch (_: Exception) {}
-        }
+        // Always start on-device wake (OpenWakeWord). Mic stays on by design while listening.
+        try { stt.stopContinuous() } catch (_: Exception) {}
+        startWakeWordListening()
         val action = intent?.action
         if (action == com.jarvis.assistant.widget.JarvisWidgetActionReceiver.ACTION_START_LISTENING) {
             startListeningCycle()
