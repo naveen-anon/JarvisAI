@@ -40,14 +40,14 @@ class OpenWakeWordEngine(private val context: Context) {
                 eng.detections
                     .catch { e -> Log.e(TAG, "detections error", e) }
                     .collect { det ->
-                        Log.i(TAG, "wake: \( {det.model.name} score= \){det.score}")
+                        Log.i(TAG, "wake detected: " + det.model.name + " score=" + det.score)
                         onWake()
                     }
             }
             Log.i(TAG, "started")
             true
         } catch (e: Exception) {
-            Log.e(TAG, "start failed: ${e.message}", e)
+            Log.e(TAG, "start failed: " + e.message, e)
             false
         }
     }
