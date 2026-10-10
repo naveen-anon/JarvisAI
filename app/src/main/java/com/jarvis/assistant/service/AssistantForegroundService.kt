@@ -58,6 +58,7 @@ class AssistantForegroundService : Service() {
     private lateinit var pcBridge: PcBridgeServer
     private lateinit var voiceAuth: com.jarvis.assistant.voice.VoiceAuthManager
     private lateinit var porcupine: com.jarvis.assistant.voice.PorcupineWakeWord
+    private var openWake: com.jarvis.assistant.voice.OpenWakeWordEngine? = null
     private var voiceSessionVerified = false
     private val scope = CoroutineScope(Dispatchers.Main)
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -135,7 +136,7 @@ class AssistantForegroundService : Service() {
         val sm = com.jarvis.assistant.util.SettingsManager(this)
         // NEVER open Google STT here. Only low-power Porcupine (if key) or clap.
         // background_listen only starts Porcupine; STT continuous path is a no-op.
-        if (false && (sm.getWakeWordEnabled() || sm.getBackgroundListen())) {
+        if (sm.getWakeWordEnabled() || sm.getBackgroundListen()) {
             startWakeWordListening()
         } else {
             try { stt.stopContinuous() } catch (_: Exception) {}
@@ -148,25 +149,48 @@ class AssistantForegroundService : Service() {
     }
 
     private fun startWakeWordListening() {
-        // Prefer Picovoice Porcupine (on-device, low power). Falls back to
-        // SpeechRecognizer continuous mode when PICOVOICE_ACCESS_KEY is missing.
+        // 1) openWakeWord (no Picovoice key) — say "hello world" until hey_jarvis.onnx added
+        try {
+            if (openWake == null) {
+                openWake = com.jarvis.assistant.voice.OpenWakeWordEngine(this)
+            }
+            val okOw = openWake!!.start {
+                mainHandler.post {
+                    try { openWake?.stop() } catch (_: Exception) {}
+                    startListeningCycle()
+                    mainHandler.postDelayed({
+                        val sm2 = com.jarvis.assistant.util.SettingsManager(this)
+                        if (sm2.getWakeWordEnabled() || sm2.getBackgroundListen()) {
+                            startWakeWordListening()
+                        }
+                    }, 4000L)
+                }
+            }
+            if (okOw) {
+                android.util.Log.i("JarvisService", "OpenWakeWord listening — say hello world")
+                return
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("JarvisService", "OpenWakeWord failed: " + e.message)
+        }
+
+        // 2) Porcupine if access key present
         if (porcupine.isAvailable) {
             val ok = porcupine.start(
                 onWake = {
                     mainHandler.post {
-                        // Pause wake engine while command STT owns the mic
                         porcupine.stop()
                         startListeningCycle()
-                        // Resume wake listening after a short delay (command cycle ends → IDLE)
                         mainHandler.postDelayed({
-                            if (com.jarvis.assistant.util.SettingsManager(this).getBackgroundListen()) {
+                            val sm2 = com.jarvis.assistant.util.SettingsManager(this)
+                            if (sm2.getWakeWordEnabled() || sm2.getBackgroundListen()) {
                                 startWakeWordListening()
                             }
-                        }, 2_500L)
+                        }, 2500L)
                     }
                 },
                 onError = { msg ->
-                    android.util.Log.w("JarvisService", "Porcupine: $msg — falling back to STT wake")
+                    android.util.Log.w("JarvisService", "Porcupine: " + msg)
                     mainHandler.post { startSttWakeFallback() }
                 }
             )
