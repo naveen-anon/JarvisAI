@@ -167,7 +167,7 @@ class AssistantForegroundService : Service() {
                 }
             }
             if (okOw) {
-                android.util.Log.i("JarvisService", "OpenWakeWord listening — say hello world")
+                android.util.Log.i("JarvisService", "OpenWakeWord listening — say hey jarvis")
                 return
             }
         } catch (e: Exception) {

@@ -23,9 +23,9 @@ class OpenWakeWordEngine(private val context: Context) {
             stop()
             val models = listOf(
                 WakeWordModel(
-                    name = "Hello World",
-                    modelPath = "hello_world.onnx",
-                    threshold = 0.45f
+                    name = "Hey Jarvis",
+                    modelPath = "hey_jarvis.onnx",
+                    threshold = 0.5f
                 )
             )
             val eng = WakeWordEngine(
@@ -44,7 +44,7 @@ class OpenWakeWordEngine(private val context: Context) {
                         onWake()
                     }
             }
-            Log.i(TAG, "started")
+            Log.i(TAG, "started — say hey jarvis")
             true
         } catch (e: Exception) {
             Log.e(TAG, "start failed: " + e.message, e)
