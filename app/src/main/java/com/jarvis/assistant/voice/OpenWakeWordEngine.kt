@@ -2,9 +2,9 @@ package com.jarvis.assistant.voice
 
 import android.content.Context
 import android.util.Log
-import com.rementia.openwakeword.lib.DetectionMode
 import com.rementia.openwakeword.lib.WakeWordEngine
-import com.rementia.openwakeword.lib.WakeWordModel
+import com.rementia.openwakeword.lib.model.DetectionMode
+import com.rementia.openwakeword.lib.model.WakeWordModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,7 +22,11 @@ class OpenWakeWordEngine(private val context: Context) {
         return try {
             stop()
             val models = listOf(
-                WakeWordModel("Hello World", "hello_world.onnx", threshold = 0.45f)
+                WakeWordModel(
+                    name = "Hello World",
+                    modelPath = "hello_world.onnx",
+                    threshold = 0.45f
+                )
             )
             val eng = WakeWordEngine(
                 context = context.applicationContext,
