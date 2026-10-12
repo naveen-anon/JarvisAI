@@ -145,9 +145,50 @@ class AssistantForegroundService : Service() {
     }
 
     private fun startWakeWordListening() {
-        try { openWake?.stop() } catch (_: Exception) {}
+        // Siri-style: low-power on-device wake only (not continuous Google STT).
+        try { stt.stopContinuous() } catch (_: Exception) {}
         try { porcupine.stop() } catch (_: Exception) {}
-        startSttWakeFallback()
+
+        try {
+            if (openWake == null) {
+                openWake = com.jarvis.assistant.voice.OpenWakeWordEngine(this)
+            }
+            val ok = openWake!!.start {
+                mainHandler.post {
+                    // Pause wake → command mic (like Siri after "Hey Siri")
+                    try { openWake?.stop() } catch (_: Exception) {}
+                    startListeningCycle()
+                    // Resume wake after command window
+                    mainHandler.postDelayed({
+                        startWakeWordListening()
+                    }, 5000L)
+                }
+            }
+            if (ok) {
+                android.util.Log.i("JarvisService", "Siri-style wake on — say Hey Jarvis")
+                return
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("JarvisService", "OpenWakeWord failed: " + e.message)
+        }
+
+        // Optional: Porcupine if key configured
+        if (porcupine.isAvailable) {
+            val ok = porcupine.start(
+                onWake = {
+                    mainHandler.post {
+                        porcupine.stop()
+                        startListeningCycle()
+                        mainHandler.postDelayed({ startWakeWordListening() }, 5000L)
+                    }
+                },
+                onError = { msg ->
+                    android.util.Log.w("JarvisService", "Porcupine: " + msg)
+                }
+            )
+            if (ok) return
+        }
+        android.util.Log.w("JarvisService", "No on-device wake available")
     }
 
     /** Google SpeechRecognizer continuous keyword match (higher battery, no Picovoice key). */
@@ -157,27 +198,9 @@ class AssistantForegroundService : Service() {
      * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
      */
     private fun startSttWakeFallback() {
-        android.util.Log.i("JarvisService", "STT continuous wake — say Hey Jarvis")
-        try {
-            android.widget.Toast.makeText(
-                this,
-                "Listening for Hey Jarvis",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-        } catch (_: Exception) {}
-        try {
-            stt.listenContinuous { trailing ->
-                mainHandler.post {
-                    try { stt.stopContinuous() } catch (_: Exception) {}
-                    startListeningCycle()
-                    mainHandler.postDelayed({
-                        startSttWakeFallback()
-                    }, 3500L)
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("JarvisService", "STT wake error: " + e.message)
-        }
+        // Disabled on purpose — continuous Google STT is not Siri-like (mic always hot).
+        // Use OpenWakeWord / Porcupine + Talk button / widget.
+        try { stt.stopContinuous() } catch (_: Exception) {}
     }
 
 
