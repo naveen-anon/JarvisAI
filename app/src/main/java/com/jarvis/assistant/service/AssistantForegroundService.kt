@@ -664,6 +664,7 @@ fun startListeningCycle() {
     override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onDestroy() {
+        try { openWake?.stop() } catch (_: Exception) {}
         try { callAnnouncer?.stop() } catch (_: Exception) {}
         mainHandler.removeCallbacksAndMessages(null)
         proactive?.stop()

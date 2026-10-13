@@ -74,19 +74,19 @@ class SettingsManager(context: Context) {
 
     // Background wake-word listening (must stay INSIDE the class)
     
-    /** "Hey Jarvis" via Google STT continuous. Uses mic while on. */
+    /** On-device / wake-word master switch (OpenWakeWord / Porcupine). */
     fun getWakeWordEnabled(): Boolean = prefs.getBoolean("wake_word", true)
     fun setWakeWordEnabled(v: Boolean) = prefs.edit().putBoolean("wake_word", v).apply()
 
     fun getBackgroundListen(): Boolean = prefs.getBoolean("background_listen", true)
     
     /** Google STT continuous "hey jarvis" — higher battery; off by default. */
-    fun getSttContinuousWake(): Boolean = prefs.getBoolean("stt_continuous_wake", true)
+    fun getSttContinuousWake(): Boolean = prefs.getBoolean("stt_continuous_wake", false)
     fun setSttContinuousWake(enabled: Boolean) =
         prefs.edit().putBoolean("stt_continuous_wake", enabled).apply()
 
     fun setBackgroundListen(enabled: Boolean) =
-        prefs.edit().putBoolean("bg_listen", enabled).apply()
+        prefs.edit().putBoolean("background_listen", enabled).apply()
 
     fun getActiveSuitId(): String = prefs.getString("active_suit_id", "mark_1") ?: "mark_1"
     fun setActiveSuitId(id: String) = prefs.edit().putString("active_suit_id", id).apply()
