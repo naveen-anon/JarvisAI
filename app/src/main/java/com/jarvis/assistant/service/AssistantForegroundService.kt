@@ -213,7 +213,18 @@ class AssistantForegroundService : Service() {
         handleUserSpeech(trimmed)
     }
 
-fun startListeningCycle() {
+
+    private fun resumeWakeSoon(delayMs: Long = 2500L) {
+        mainHandler.postDelayed({
+            try {
+                startWakeWordListening()
+            } catch (e: Exception) {
+                android.util.Log.w("JarvisService", "resume wake: " + e.message)
+            }
+        }, delayMs)
+    }
+
+    fun startListeningCycle() {
         val now = System.currentTimeMillis()
         // Allow re-entry if stuck > 8s
         if (listenCycleRunning && now - lastListenCycleMs < 8000L) {
@@ -223,9 +234,15 @@ fun startListeningCycle() {
         lastListenCycleMs = now
         listenCycleRunning = true
 
+        // CRITICAL: release on-device wake mic before Google STT (reactor / Talk / wake)
+        try { openWake?.stop() } catch (_: Exception) {}
+        try { porcupine.stop() } catch (_: Exception) {}
         try { stt.stopContinuous() } catch (_: Exception) {}
         try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
+        try {
+            android.widget.Toast.makeText(this, "Listening…", android.widget.Toast.LENGTH_SHORT).show()
+        } catch (_: Exception) {}
 
         val ack = try {
             val sm = SettingsManager(this)
@@ -267,6 +284,7 @@ fun startListeningCycle() {
                         } else {
                             try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                             listener?.onStateChanged(BrainState.IDLE)
+                            resumeWakeSoon()
                         }
                     },
                     onError = {
@@ -274,6 +292,7 @@ fun startListeningCycle() {
                         try { stt.stopContinuous() } catch (_: Exception) {}
                         try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                         listener?.onStateChanged(BrainState.IDLE)
+                        resumeWakeSoon()
                     }
                 )
             } catch (e: Exception) {
@@ -305,6 +324,8 @@ fun startListeningCycle() {
             }
             tts.speak(speechText)
             listener?.onStateChanged(BrainState.IDLE)
+            // After reply, return to Siri-style on-device wake (mic only for KWS)
+            resumeWakeSoon(3500L)
         }
     }
 
