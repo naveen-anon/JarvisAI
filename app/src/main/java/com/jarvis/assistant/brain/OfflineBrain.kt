@@ -137,8 +137,8 @@ class OfflineBrain(
         if (containsAny(cmd, "search sms", "search messages", "find sms", "find text message",
                 "sms search", "message search", "messages mein dhoondo", "sms mein")
         ) {
-            val q = text.replace(Regex("(?i)(search|find|dhoondo|look for)\s+(in\s+)?(my\s+)?(sms|messages|texts?)"), "")
-                .replace(Regex("(?i)(sms|messages|texts?)\s+(mein|me|search|find)"), "")
+            val q = text.replace(Regex("""(?i)(search|find|dhoondo|look for)\s+(in\s+)?(my\s+)?(sms|messages|texts?)"""), "")
+                .replace(Regex("""(?i)(sms|messages|texts?)\s+(mein|me|search|find)"""), "")
                 .trim()
                 .ifBlank { text.substringAfter(" ").trim() }
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_sms", q))
@@ -146,8 +146,8 @@ class OfflineBrain(
         if (containsAny(cmd, "search photos", "find photos", "find photo", "photo search",
                 "photos of", "pictures of", "gallery search", "photo dhoondo")
         ) {
-            val q = text.replace(Regex("(?i)(search|find|show|dhoondo)\s+(in\s+)?(my\s+)?(photos?|pictures?|gallery)"), "")
-                .replace(Regex("(?i)(photos?|pictures?)\s+of"), "")
+            val q = text.replace(Regex("""(?i)(search|find|show|dhoondo)\s+(in\s+)?(my\s+)?(photos?|pictures?|gallery)"""), "")
+                .replace(Regex("""(?i)(photos?|pictures?)\s+of"""), "")
                 .trim()
                 .ifBlank { text.substringAfter(" ").trim() }
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_photos", q))
@@ -155,8 +155,8 @@ class OfflineBrain(
         if (containsAny(cmd, "search mail", "search email", "find email", "find mail",
                 "email search", "mail search", "gmail search", "email mein")
         ) {
-            val q = text.replace(Regex("(?i)(search|find)\s+(in\s+)?(my\s+)?(mail|email|gmail)"), "")
-                .replace(Regex("(?i)(mail|email|gmail)\s+search"), "")
+            val q = text.replace(Regex("""(?i)(search|find)\s+(in\s+)?(my\s+)?(mail|email|gmail)"""), "")
+                .replace(Regex("""(?i)(mail|email|gmail)\s+search"""), "")
                 .trim()
                 .ifBlank { text.substringAfter(" ").trim() }
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_mail", q))
@@ -165,7 +165,7 @@ class OfflineBrain(
         if (containsAny(cmd, "agent mode", "run agent", "jarvis agent", "do the following",
                 "multi step", "complete this task", "agent se", "agent task")
         ) {
-            val task = text.replace(Regex("(?i)(please\s+)?(jarvis\s+)?(agent mode|run agent|jarvis agent|agent se|agent task|do the following|multi step|complete this task)[:\-]?"), "")
+            val task = text.replace(Regex("""(?i)(please\s+)?(jarvis\s+)?(agent mode|run agent|jarvis agent|agent se|agent task|do the following|multi step|complete this task)[:\-]?"""), "")
                 .trim()
                 .ifBlank { text }
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("agent_task", task))
