@@ -158,8 +158,10 @@ class AssistantForegroundService : Service() {
             val okOw = openWake!!.start {
                 mainHandler.post {
                     try { openWake?.stop() } catch (_: Exception) {}
+                    // Siri-like: glow + listening state immediately on "Hey Jarvis"
+                    try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
+                    try { com.jarvis.assistant.ui.ActivationEdgeOverlay.show(this@AssistantForegroundService) } catch (_: Exception) {}
                     startListeningCycle()
-                    // Wake restarts via resumeWakeSoon after command ends
                 }
             }
             if (okOw) {
@@ -175,6 +177,8 @@ class AssistantForegroundService : Service() {
                 onWake = {
                     mainHandler.post {
                         try { porcupine.stop() } catch (_: Exception) {}
+                        try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
+                        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.show(this@AssistantForegroundService) } catch (_: Exception) {}
                         startListeningCycle()
                     }
                 },
@@ -245,6 +249,7 @@ class AssistantForegroundService : Service() {
             listenCycleRunning = true
             lastListenCycleMs = System.currentTimeMillis()
             try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
+            try { com.jarvis.assistant.ui.ActivationEdgeOverlay.show(this@AssistantForegroundService) } catch (_: Exception) {}
             listener?.onStateChanged(BrainState.LISTENING)
             try {
                 stt.listenOnce(
@@ -259,6 +264,7 @@ class AssistantForegroundService : Service() {
                             handleUserSpeech(s)
                         } else {
                             try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                            try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
                             listener?.onStateChanged(BrainState.IDLE)
                             resumeWakeSoon(600L)
                         }
@@ -267,6 +273,7 @@ class AssistantForegroundService : Service() {
                         listenCycleRunning = false
                         try { stt.stopContinuous() } catch (_: Exception) {}
                         try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
                         listener?.onStateChanged(BrainState.IDLE)
                         resumeWakeSoon(600L)
                     }
@@ -295,6 +302,7 @@ class AssistantForegroundService : Service() {
         // Note: do not removeCallbacksAndMessages(null) — that kills proactive timers.
 
         try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
+        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.show(this) } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
         try {
             android.widget.Toast.makeText(this, "Listening…", android.widget.Toast.LENGTH_SHORT).show()
@@ -319,6 +327,7 @@ class AssistantForegroundService : Service() {
                 listenCycleRunning = false
                 try { stt.stopContinuous() } catch (_: Exception) {}
                 try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
                 listener?.onStateChanged(BrainState.IDLE)
                 android.util.Log.w("JarvisService", "listen cycle timed out — reset")
                 resumeWakeSoon(800L)
@@ -345,6 +354,7 @@ class AssistantForegroundService : Service() {
                             handleUserSpeech(s)
                         } else {
                             try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                            try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
                             listener?.onStateChanged(BrainState.IDLE)
                             resumeWakeSoon(1200L)
                         }
@@ -353,6 +363,7 @@ class AssistantForegroundService : Service() {
                         listenCycleRunning = false
                         try { stt.stopContinuous() } catch (_: Exception) {}
                         try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
                         listener?.onStateChanged(BrainState.IDLE)
                         android.util.Log.w("JarvisService", "STT onError")
                         resumeWakeSoon(1200L)
@@ -370,6 +381,7 @@ class AssistantForegroundService : Service() {
 
     private fun handleUserSpeech(speech: String) {
         listener?.onTranscript(speech)
+        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.THINKING)
 
         scope.launch {

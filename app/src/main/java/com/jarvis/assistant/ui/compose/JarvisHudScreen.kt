@@ -155,7 +155,8 @@ fun JarvisHudScreen(
                     )
                 )
         )
-        CornerBrackets(Modifier.fillMaxSize())
+        SiriActivationBorder(active = ui.hudState == HudState.LISTENING || ui.waveformActive, modifier = Modifier.fillMaxSize())
+        CornerBrackets(modifier = Modifier.fillMaxSize(), active = ui.hudState == HudState.LISTENING)
 
         Column(
             modifier = Modifier
@@ -1371,26 +1372,59 @@ private fun ScanlineOverlay(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun CornerBrackets(modifier: Modifier = Modifier) {
-    val c = NavyBlue.copy(alpha = 0.7f)
+private fun CornerBrackets(modifier: Modifier = Modifier, active: Boolean = false) {
+    val c = if (active) Cyan.copy(alpha = 0.95f) else NavyBlue.copy(alpha = 0.7f)
     Canvas(modifier) {
         val len = 22.dp.toPx()
         val pad = 10.dp.toPx()
-        val w = 1.5f
-        // Top-left
+        val w = if (active) 2.5f else 1.5f
         drawLine(c, Offset(pad, pad), Offset(pad + len, pad), w)
         drawLine(c, Offset(pad, pad), Offset(pad, pad + len), w)
-        // Top-right
         drawLine(c, Offset(size.width - pad - len, pad), Offset(size.width - pad, pad), w)
         drawLine(c, Offset(size.width - pad, pad), Offset(size.width - pad, pad + len), w)
-        // Bottom-left
         drawLine(c, Offset(pad, size.height - pad), Offset(pad + len, size.height - pad), w)
         drawLine(c, Offset(pad, size.height - pad - len), Offset(pad, size.height - pad), w)
-        // Bottom-right
         drawLine(c, Offset(size.width - pad - len, size.height - pad), Offset(size.width - pad, size.height - pad), w)
         drawLine(c, Offset(size.width - pad, size.height - pad - len), Offset(size.width - pad, size.height - pad), w)
     }
 }
+
+/** Siri-style multi-colour edge glow while listening / activated. */
+@Composable
+private fun SiriActivationBorder(active: Boolean, modifier: Modifier = Modifier) {
+    if (!active) return
+    val infinite = rememberInfiniteTransition(label = "siriBorder")
+    val phase by infinite.animateFloat(
+        0f, 360f,
+        infiniteRepeatable(tween(2800, easing = LinearEasing)),
+        label = "phase"
+    )
+    Canvas(modifier) {
+        val pad = 6.dp.toPx()
+        val stroke = 5.dp.toPx()
+        val r = 18.dp.toPx()
+        val colors = listOf(
+            Color(0xFF00D9FF),
+            Color(0xFF7B2FFF),
+            Color(0xFFFF2D95),
+            Color(0xFF00FFC6),
+            Color(0xFF3B82F6),
+            Color(0xFF00D9FF)
+        )
+        val brush = Brush.sweepGradient(colors)
+        // Approximate rotation via rotating canvas
+        rotate(phase) {
+            drawRoundRect(
+                brush = brush,
+                topLeft = Offset(pad - size.minDimension, pad - size.minDimension),
+                size = androidx.compose.ui.geometry.Size(size.width + size.minDimension * 2, size.height + size.minDimension * 2),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(r, r),
+                style = Stroke(width = stroke)
+            )
+        }
+    }
+}
+
 
 /* ───────── Glass helpers ───────── */
 
