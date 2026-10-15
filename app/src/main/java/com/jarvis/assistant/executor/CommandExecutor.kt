@@ -168,45 +168,30 @@ class CommandExecutor(private val context: Context) {
 
 
     private fun closeApp(appName: String?): String {
-        if (appName.isNullOrBlank()) return "Which application should I close, sir?"
-        val q = appName.trim()
-        val ql = q.lowercase()
-        // "close all" → visible home screen (no silent kill of other apps)
-        if (ql in listOf("all", "everything", "saari apps", "sab apps") ||
+        // Leave current app by showing Home (visible). No force-stop / App Info.
+        val label = appName?.trim().orEmpty().ifBlank { "app" }
+        val ql = label.lowercase()
+        val spoken = if (
+            ql in listOf("all", "everything", "saari apps", "sab apps") ||
             ql.contains("all apps") || ql.contains("sab kuch")
         ) {
-            return try {
-                val home = Intent(Intent.ACTION_MAIN).apply {
-                    addCategory(Intent.CATEGORY_HOME)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                context.startActivity(home)
-                "Home screen open hai, sir. Recent apps se jo band karna hai wahan se clear kar sakte ho."
-            } catch (_: Exception) {
-                "Couldn't open home screen."
-            }
+            "Home screen, sir."
+        } else {
+            "$label se home pe aa gaye, sir."
         }
-        val pkg = resolvePackageName(q)
-            ?: return "I couldn't find $q installed."
-        if (pkg == context.packageName) {
-            return "I can't close myself that way, sir. Use the recent apps screen."
-        }
-        // Visible path: system App Info — user taps Force stop (no silent kill)
+        return goHomeVisible(spoken)
+    }
+
+    private fun goHomeVisible(spoken: String): String {
         return try {
-            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = android.net.Uri.parse("package:$pkg")
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val home = Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_HOME)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
-            context.startActivity(intent)
-            val label = try {
-                val ai = context.packageManager.getApplicationInfo(pkg, 0)
-                context.packageManager.getApplicationLabel(ai).toString()
-            } catch (_: Exception) {
-                q
-            }
-            "Opening $label app info. Force stop wahan dikhega — confirm kar dena, sir."
-        } catch (e: Exception) {
-            "Couldn't open app settings for $q: ${e.message}"
+            context.startActivity(home)
+            spoken
+        } catch (_: Exception) {
+            "Couldn't open home screen."
         }
     }
 
