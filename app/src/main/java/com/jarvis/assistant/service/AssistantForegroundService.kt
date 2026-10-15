@@ -147,9 +147,12 @@ class AssistantForegroundService : Service() {
     private fun startWakeWordListening() {
         // Siri-style pipeline:
         // Background = OpenWakeWord (Hey Jarvis) or Porcupine — NOT Google continuous STT.
+        listenCycleRunning = false
         try { stt.stopContinuous() } catch (_: Exception) {}
         try { porcupine.stop() } catch (_: Exception) {}
         try { openWake?.stop() } catch (_: Exception) {}
+        // Brief pause so previous AudioRecord releases (fixes "mic used but no wake")
+        try { Thread.sleep(200) } catch (_: Exception) {}
 
         try {
             if (openWake == null) {
@@ -222,10 +225,28 @@ class AssistantForegroundService : Service() {
     }
 
 
-    private fun resumeWakeSoon(delayMs: Long = 2500L) {
+    private fun forceReleaseCommandMic() {
+        try { stt.stopContinuous() } catch (_: Exception) {}
+        try { openWake?.stop() } catch (_: Exception) {}
+        try { porcupine.stop() } catch (_: Exception) {}
+        listenCycleRunning = false
+        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
+    }
+
+    private fun resumeWakeSoon(delayMs: Long = 1800L) {
         mainHandler.postDelayed({
             try {
-                startWakeWordListening()
+                // Critical: Google STT must be fully stopped before OpenWakeWord takes AudioRecord
+                forceReleaseCommandMic()
+                // Small gap so AudioRecord is free
+                mainHandler.postDelayed({
+                    try {
+                        startWakeWordListening()
+                        android.util.Log.i("JarvisService", "Hey Jarvis wake armed")
+                    } catch (e: Exception) {
+                        android.util.Log.w("JarvisService", "resume wake: " + e.message)
+                    }
+                }, 350L)
             } catch (e: Exception) {
                 android.util.Log.w("JarvisService", "resume wake: " + e.message)
             }
@@ -400,8 +421,9 @@ class AssistantForegroundService : Service() {
             }
             tts.speak(speechText)
             listener?.onStateChanged(BrainState.IDLE)
-            // Siri-style: short follow-up listen, then back to Hey Jarvis wake
-            startFollowUpListen()
+            // Prefer reliable Hey Jarvis wake over follow-up STT (STT held mic forever)
+            forceReleaseCommandMic()
+            resumeWakeSoon(2200L)
         }
     }
 

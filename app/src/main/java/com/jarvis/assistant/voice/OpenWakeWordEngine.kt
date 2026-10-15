@@ -25,14 +25,14 @@ class OpenWakeWordEngine(private val context: Context) {
                 WakeWordModel(
                     name = "Hey Jarvis",
                     modelPath = "hey_jarvis.onnx",
-                    threshold = 0.22f
+                    threshold = 0.12f
                 )
             )
             val eng = WakeWordEngine(
                 context = context.applicationContext,
                 models = models,
                 detectionMode = DetectionMode.SINGLE_BEST,
-                detectionCooldownMs = 2500L
+                detectionCooldownMs = 1500L
             )
             engine = eng
             eng.start()
