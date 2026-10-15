@@ -77,6 +77,10 @@ class CommandExecutor(private val context: Context) {
             ActionType.READ_CLIPBOARD -> com.jarvis.assistant.util.ClipboardHelper(context).readAloudFriendly()
             ActionType.OPEN_CLIPBOARD_LINK -> com.jarvis.assistant.util.ClipboardHelper(context).openIfUrl()
             ActionType.NOTIF_SUMMARY -> com.jarvis.assistant.notifications.JarvisNotificationListener.summaryOrHelp()
+            ActionType.SEARCH_SMS -> com.jarvis.assistant.util.PersonalContextHelper(context).searchSms(cmd.target)
+            ActionType.SEARCH_PHOTOS -> com.jarvis.assistant.util.PersonalContextHelper(context).searchPhotos(cmd.target)
+            ActionType.SEARCH_MAIL -> com.jarvis.assistant.util.PersonalContextHelper(context).searchMail(cmd.target)
+            ActionType.AGENT_TASK -> runAgentTask(cmd.target ?: cmd.message)
             ActionType.CALENDAR_NEXT -> com.jarvis.assistant.util.CalendarHelper(context).formatBrief(2)
 
             
@@ -168,6 +172,23 @@ class CommandExecutor(private val context: Context) {
     }
 
 
+
+
+    private fun runAgentTask(task: String?): String {
+        if (task.isNullOrBlank()) return "What should the agent do, sir?"
+        val helper = com.jarvis.assistant.util.PersonalContextHelper(context)
+        return helper.runAgentTask(task) { step ->
+            // Re-enter offline brain for each step (open app, call, etc.)
+            try {
+                val brain = com.jarvis.assistant.brain.OfflineBrain(context, this) { }
+                brain.handle(step) ?: execute(
+                    com.jarvis.assistant.model.AssistantCommand("web_search", step)
+                )
+            } catch (e: Exception) {
+                "Failed: ${e.message}"
+            }
+        }
+    }
 
     private fun clearRecents(): String {
         val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance

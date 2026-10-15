@@ -132,6 +132,50 @@ class OfflineBrain(
 
         com.jarvis.assistant.util.CommandHistoryStore(context).add(text)
 
+
+        // Personal context — SMS / Photos / Mail
+        if (containsAny(cmd, "search sms", "search messages", "find sms", "find text message",
+                "sms search", "message search", "messages mein dhoondo", "sms mein")
+        ) {
+            val q = text.replace(Regex("(?i)(search|find|dhoondo|look for)\s+(in\s+)?(my\s+)?(sms|messages|texts?)"), "")
+                .replace(Regex("(?i)(sms|messages|texts?)\s+(mein|me|search|find)"), "")
+                .trim()
+                .ifBlank { text.substringAfter(" ").trim() }
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_sms", q))
+        }
+        if (containsAny(cmd, "search photos", "find photos", "find photo", "photo search",
+                "photos of", "pictures of", "gallery search", "photo dhoondo")
+        ) {
+            val q = text.replace(Regex("(?i)(search|find|show|dhoondo)\s+(in\s+)?(my\s+)?(photos?|pictures?|gallery)"), "")
+                .replace(Regex("(?i)(photos?|pictures?)\s+of"), "")
+                .trim()
+                .ifBlank { text.substringAfter(" ").trim() }
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_photos", q))
+        }
+        if (containsAny(cmd, "search mail", "search email", "find email", "find mail",
+                "email search", "mail search", "gmail search", "email mein")
+        ) {
+            val q = text.replace(Regex("(?i)(search|find)\s+(in\s+)?(my\s+)?(mail|email|gmail)"), "")
+                .replace(Regex("(?i)(mail|email|gmail)\s+search"), "")
+                .trim()
+                .ifBlank { text.substringAfter(" ").trim() }
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_mail", q))
+        }
+        // AI Agent — multi-step hands-free
+        if (containsAny(cmd, "agent mode", "run agent", "jarvis agent", "do the following",
+                "multi step", "complete this task", "agent se", "agent task")
+        ) {
+            val task = text.replace(Regex("(?i)(please\s+)?(jarvis\s+)?(agent mode|run agent|jarvis agent|agent se|agent task|do the following|multi step|complete this task)[:\-]?"), "")
+                .trim()
+                .ifBlank { text }
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("agent_task", task))
+        }
+        if (com.jarvis.assistant.util.CommandChainSplitter.looksLikeChain(text) &&
+            containsAny(cmd, "and then", " then ", " phir ", "after that", " aur ")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("agent_task", text))
+        }
+
         // Siri-style on-screen awareness
         if (containsAny(
                 cmd,
@@ -510,7 +554,7 @@ class OfflineBrain(
             return "Like Siri, you can say Hey Jarvis, then: open or close apps, install from Play Store, " +
                    "clear recent apps, call or message contacts, control volume and music, set alarms and timers, " +
                    "ask what's on my screen, notification summary, security report, weather and briefing, " +
-                   "remember notes, and ask general questions. After I answer, you can follow up without saying Hey Jarvis again, sir."
+                   "remember notes, and search SMS, photos and mail, run multi-step agent tasks, and ask general questions. After I answer, you can follow up without saying Hey Jarvis again, sir."
         }
 
         // Auto-learn: proactively surface a learned habit before falling back to generic suggestions
