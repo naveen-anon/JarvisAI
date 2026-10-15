@@ -94,17 +94,9 @@ class AssistantForegroundService : Service() {
         val smBoot = com.jarvis.assistant.util.SettingsManager(this)
         // Mic must NOT open until clap / Porcupine wake / explicit Listen button.
         // Clap wake is OFF by default so AudioRecord does not hold the mic at boot.
-        if (smBoot.getClapWakeEnabled()) {
-            try {
-                // Higher sensitivity value = less false triggers (see ClapDetector docs)
-                val sens = smBoot.getClapSensitivity().coerceIn(1.0f, 2.5f)
-                clapDetector.start(sensitivity = sens) {
-                    mainHandler.post { startListeningCycle() }
-                }
-            } catch (_: Exception) {}
-        } else {
-            android.util.Log.i("JarvisService", "Clap wake disabled — mic not held at boot")
-        }
+        // Clap wake disabled — continuous mic not allowed in background
+        android.util.Log.i("JarvisService", "Clap wake skipped (no background mic)")
+        try { clapDetector.stop() } catch (_: Exception) {}
         tts = TextToSpeechHelper(this)
         callAnnouncer = com.jarvis.assistant.util.IncomingCallAnnouncer(this) { tts }
         try { callAnnouncer?.start() } catch (_: Exception) {}
@@ -132,9 +124,8 @@ class AssistantForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — clap or say Jarvis to activate"))
-        val sm = com.jarvis.assistant.util.SettingsManager(this)
-        // Always start on-device wake (OpenWakeWord). Mic stays on by design while listening.
+        startForeground(NOTIF_ID, buildNotification("J.A.R.V.I.S. online — say Hey Jarvis"))
+        // Siri-style: on-device KWS only (not continuous Google STT).
         try { stt.stopContinuous() } catch (_: Exception) {}
         startWakeWordListening()
         val action = intent?.action
@@ -144,52 +135,63 @@ class AssistantForegroundService : Service() {
         return START_STICKY
     }
 
+
+    /** Stop every continuous mic owner (OpenWakeWord, Porcupine, Google STT continuous). */
+    private fun releaseAllMics() {
+        try { openWake?.stop() } catch (_: Exception) {}
+        try { porcupine.stop() } catch (_: Exception) {}
+        try { stt.stopContinuous() } catch (_: Exception) {}
+        try { clapDetector.stop() } catch (_: Exception) {}
+    }
+
     private fun startWakeWordListening() {
-        // Siri-style: low-power on-device wake only (not continuous Google STT).
+        // Siri-style pipeline:
+        // Background = OpenWakeWord (Hey Jarvis) or Porcupine — NOT Google continuous STT.
         try { stt.stopContinuous() } catch (_: Exception) {}
         try { porcupine.stop() } catch (_: Exception) {}
+        try { openWake?.stop() } catch (_: Exception) {}
 
         try {
             if (openWake == null) {
                 openWake = com.jarvis.assistant.voice.OpenWakeWordEngine(this)
             }
-            val ok = openWake!!.start {
+            val okOw = openWake!!.start {
                 mainHandler.post {
-                    // Pause wake → command mic (like Siri after "Hey Siri")
                     try { openWake?.stop() } catch (_: Exception) {}
                     startListeningCycle()
-                    // Resume wake after command window
-                    mainHandler.postDelayed({
-                        startWakeWordListening()
-                    }, 5000L)
+                    // Wake restarts via resumeWakeSoon after command ends
                 }
             }
-            if (ok) {
-                android.util.Log.i("JarvisService", "Siri-style wake on — say Hey Jarvis")
+            if (okOw) {
+                android.util.Log.i("JarvisService", "Siri-style wake ON — say Hey Jarvis")
                 return
             }
         } catch (e: Exception) {
             android.util.Log.w("JarvisService", "OpenWakeWord failed: " + e.message)
         }
 
-        // Optional: Porcupine if key configured
         if (porcupine.isAvailable) {
             val ok = porcupine.start(
                 onWake = {
                     mainHandler.post {
-                        porcupine.stop()
+                        try { porcupine.stop() } catch (_: Exception) {}
                         startListeningCycle()
-                        mainHandler.postDelayed({ startWakeWordListening() }, 5000L)
                     }
                 },
                 onError = { msg ->
                     android.util.Log.w("JarvisService", "Porcupine: " + msg)
                 }
             )
-            if (ok) return
+            if (ok) {
+                android.util.Log.i("JarvisService", "Porcupine wake ON — say Jarvis")
+                return
+            }
         }
-        android.util.Log.w("JarvisService", "No on-device wake available")
+        android.util.Log.w("JarvisService", "No on-device wake engine available")
     }
+
+
+
 
     /** Google SpeechRecognizer continuous keyword match (higher battery, no Picovoice key). */
 
@@ -198,10 +200,12 @@ class AssistantForegroundService : Service() {
      * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
      */
     private fun startSttWakeFallback() {
-        // Disabled on purpose — continuous Google STT is not Siri-like (mic always hot).
-        // Use OpenWakeWord / Porcupine + Talk button / widget.
+        // Never use continuous Google STT for wake (battery + always-hot mic UI).
         try { stt.stopContinuous() } catch (_: Exception) {}
     }
+
+
+
 
 
 
@@ -223,6 +227,9 @@ class AssistantForegroundService : Service() {
             }
         }, delayMs)
     }
+
+
+
 
     fun startListeningCycle() {
         val now = System.currentTimeMillis()
