@@ -995,8 +995,8 @@ class OfflineBrain(
         // Uninstall / delete app
         containsAny(cmd, "uninstall", "delete app", "remove app", "app delete", "app hatao", "uninstall karo") -> {
             val cleaned = original
-                .replace(Regex("(?i)(please\s+)?(uninstall|delete app|remove app|app delete|app hatao|uninstall karo|delete|remove)"), " ")
-                .replace(Regex("(?i)\bapp\b"), " ")
+                .replace(Regex("""(?i)(please\s+)?(uninstall|delete app|remove app|app delete|app hatao|uninstall karo|delete|remove)"""), " ")
+                .replace(Regex("""(?i)\bapp\b"""), " ")
                 .trim()
             AssistantCommand("uninstall_app", cleaned.ifBlank { null })
         }
@@ -1006,9 +1006,9 @@ class OfflineBrain(
         // Install from Play Store
         containsAny(cmd, "install", "play store", "download app", "install karo", "app install") -> {
             val cleaned = original
-                .replace(Regex("(?i)(please\s+)?(install|download|get)\s+(the\s+)?(app\s+)?"), " ")
-                .replace(Regex("(?i)(from\s+)?(the\s+)?play\s*store"), " ")
-                .replace(Regex("(?i)install karo|download karo|app install"), " ")
+                .replace(Regex("""(?i)(please\s+)?(install|download|get)\s+(the\s+)?(app\s+)?"""), " ")
+                .replace(Regex("""(?i)(from\s+)?(the\s+)?play\s*store"""), " ")
+                .replace(Regex("""(?i)install karo|download karo|app install"""), " ")
                 .trim()
             AssistantCommand("install_app", cleaned.ifBlank { null })
         }
