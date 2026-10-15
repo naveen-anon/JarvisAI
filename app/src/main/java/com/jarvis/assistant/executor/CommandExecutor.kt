@@ -41,6 +41,7 @@ class CommandExecutor(private val context: Context) {
         return when (ActionType.fromKey(cmd.action)) {
             ActionType.OPEN_APP -> openApp(cmd.target)
             ActionType.CLOSE_APP -> closeApp(cmd.target)
+            ActionType.CLEAR_RECENTS -> clearRecents()
             ActionType.UNINSTALL_APP -> uninstallApp(cmd.target)
             ActionType.INSTALL_APP -> installApp(cmd.target)
             ActionType.APP_CALL -> appCall(cmd.target, cmd.message)
@@ -166,6 +167,17 @@ class CommandExecutor(private val context: Context) {
         }
     }
 
+
+
+    private fun clearRecents(): String {
+        val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
+            ?: return "Recent apps clear ke liye Accessibility on karo — Settings → Accessibility → Jarvis."
+        return try {
+            svc.clearRecentsApps()
+        } catch (e: Exception) {
+            "Couldn't clear recent apps: ${e.message}"
+        }
+    }
 
     private fun closeApp(appName: String?): String {
         // Leave current app by showing Home (visible). No force-stop / App Info.

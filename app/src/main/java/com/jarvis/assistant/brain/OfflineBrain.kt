@@ -980,6 +980,15 @@ class OfflineBrain(
         // Call — "call X", "please call X", "phone X", "dial X" (English order)
         // (matched earlier, before this when — see top of function)
 
+        // Recent apps
+        containsAny(
+            cmd,
+            "clear recent", "clear recents", "close recent", "close recents",
+            "recent apps close", "recent apps clear", "clear recent apps",
+            "close recent apps", "recents clear", "recents band",
+            "recent band karo", "recent clear karo", "recent apps band"
+        ) -> AssistantCommand("clear_recents")
+
         // Close / kill app
         containsAny(cmd, "close all apps", "close everything", "band karo sab", "sab apps band") ->
             AssistantCommand("close_app", "all")

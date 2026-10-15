@@ -16,6 +16,7 @@ data class AssistantCommand(
 enum class ActionType(val key: String) {
     OPEN_APP("open_app"),
     CLOSE_APP("close_app"),
+    CLEAR_RECENTS("clear_recents"),
     UNINSTALL_APP("uninstall_app"),
     INSTALL_APP("install_app"),
     CALL("call"),

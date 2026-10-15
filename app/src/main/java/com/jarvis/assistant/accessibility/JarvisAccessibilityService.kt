@@ -47,6 +47,77 @@ class JarvisAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {}
 
+
+    /** Open the system Recents / Overview screen. */
+    fun openRecents(): Boolean {
+        return try {
+            performGlobalAction(GLOBAL_ACTION_RECENTS)
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Open Recents, then try to tap a "Clear all" style control (OEM-dependent labels).
+     * Returns a short status string for TTS.
+     */
+    fun clearRecentsApps(): String {
+        if (!openRecents()) {
+            return "Couldn't open recent apps. Enable Accessibility for Jarvis, sir."
+        }
+        // Wait briefly for overview UI, then search for clear control
+        handler.postDelayed({
+            tryClickClearAll()
+        }, 700L)
+        return "Recent apps screen open — Clear all try kar raha hoon, sir."
+    }
+
+    private fun tryClickClearAll() {
+        val root = rootInActiveWindow ?: return
+        val labels = listOf(
+            "Clear all", "Clear", "Close all", "CLEAR ALL", "CLEAR",
+            "Remove all", "End all", "Clear everything",
+            "सभी साफ़ करें", "सभी हटाएं", " sab saaf", "Clear all apps"
+        )
+        for (label in labels) {
+            try {
+                val nodes = root.findAccessibilityNodeInfosByText(label) ?: continue
+                for (n in nodes) {
+                    var cur: AccessibilityNodeInfo? = n
+                    var depth = 0
+                    while (cur != null && depth < 6) {
+                        if (cur.isClickable) {
+                            cur.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            return
+                        }
+                        cur = cur.parent
+                        depth++
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+        // Content-description search
+        tryClickByDesc(root, 0)
+    }
+
+    private fun tryClickByDesc(node: AccessibilityNodeInfo, depth: Int) {
+        if (depth > 18) return
+        val d = (node.contentDescription?.toString() ?: "").lowercase()
+        val t = (node.text?.toString() ?: "").lowercase()
+        val hit = listOf("clear all", "close all", "remove all", "clear").any {
+            d.contains(it) || t.contains(it)
+        }
+        if (hit && node.isClickable) {
+            try { node.performAction(AccessibilityNodeInfo.ACTION_CLICK) } catch (_: Exception) {}
+            return
+        }
+        for (i in 0 until node.childCount) {
+            try {
+                node.getChild(i)?.let { tryClickByDesc(it, depth + 1) }
+            } catch (_: Exception) {}
+        }
+    }
+
     fun getScreenText(): String {
         val root = rootInActiveWindow ?: return "No screen content available."
         val seen = LinkedHashSet<String>()
