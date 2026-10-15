@@ -233,18 +233,20 @@ class AssistantForegroundService : Service() {
 
     fun startListeningCycle() {
         val now = System.currentTimeMillis()
-        // Allow re-entry if stuck > 8s
-        if (listenCycleRunning && now - lastListenCycleMs < 8000L) {
+        // Allow re-tap after 1.5s (old 8s gate blocked reactor retries)
+        if (listenCycleRunning && now - lastListenCycleMs < 1500L) {
             android.util.Log.d("JarvisService", "listen cycle busy")
             return
         }
         lastListenCycleMs = now
         listenCycleRunning = true
 
-        // CRITICAL: release on-device wake mic before Google STT (reactor / Talk / wake)
+        // Hold wake engines OFF for entire command window
         try { openWake?.stop() } catch (_: Exception) {}
         try { porcupine.stop() } catch (_: Exception) {}
         try { stt.stopContinuous() } catch (_: Exception) {}
+        // Note: do not removeCallbacksAndMessages(null) — that kills proactive timers.
+
         try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
         listener?.onStateChanged(BrainState.LISTENING)
         try {
@@ -264,19 +266,23 @@ class AssistantForegroundService : Service() {
         }
         try { tts.speak(ack) } catch (_: Exception) {}
 
-        // Safety: clear stuck flag even if STT never callbacks
+        // Safety timeout
         mainHandler.postDelayed({
-            if (listenCycleRunning && System.currentTimeMillis() - lastListenCycleMs >= 12000L) {
+            if (listenCycleRunning && System.currentTimeMillis() - lastListenCycleMs >= 15000L) {
                 listenCycleRunning = false
                 try { stt.stopContinuous() } catch (_: Exception) {}
                 try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                 listener?.onStateChanged(BrainState.IDLE)
                 android.util.Log.w("JarvisService", "listen cycle timed out — reset")
+                resumeWakeSoon(800L)
             }
-        }, 12000L)
+        }, 15000L)
 
+        // Wait for "Yes sir" TTS to finish so Google STT owns a free mic
         mainHandler.postDelayed({
             try {
+                try { openWake?.stop() } catch (_: Exception) {}
+                try { porcupine.stop() } catch (_: Exception) {}
                 stt.listenOnce(
                     onResult = { speech ->
                         listenCycleRunning = false
@@ -285,13 +291,15 @@ class AssistantForegroundService : Service() {
                         val echo = s.equals("yes sir", true) ||
                             s.equals("yes ma'am", true) ||
                             s.equals("yes mam", true) ||
-                            s.equals("yes", true)
+                            s.equals("yes", true) ||
+                            s.equals("listening", true)
+                        android.util.Log.i("JarvisService", "STT result: [$s] echo=$echo")
                         if (s.isNotBlank() && !echo) {
                             handleUserSpeech(s)
                         } else {
                             try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                             listener?.onStateChanged(BrainState.IDLE)
-                            resumeWakeSoon()
+                            resumeWakeSoon(1200L)
                         }
                     },
                     onError = {
@@ -299,15 +307,17 @@ class AssistantForegroundService : Service() {
                         try { stt.stopContinuous() } catch (_: Exception) {}
                         try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
                         listener?.onStateChanged(BrainState.IDLE)
-                        resumeWakeSoon()
+                        android.util.Log.w("JarvisService", "STT onError")
+                        resumeWakeSoon(1200L)
                     }
                 )
             } catch (e: Exception) {
                 listenCycleRunning = false
                 android.util.Log.e("JarvisService", "listenOnce failed: ${e.message}")
                 listener?.onStateChanged(BrainState.IDLE)
+                resumeWakeSoon(1200L)
             }
-        }, 1000L)
+        }, 1800L)
     }
 
 
@@ -332,7 +342,7 @@ class AssistantForegroundService : Service() {
             tts.speak(speechText)
             listener?.onStateChanged(BrainState.IDLE)
             // After reply, return to Siri-style on-device wake (mic only for KWS)
-            resumeWakeSoon(3500L)
+            resumeWakeSoon(4000L)
         }
     }
 
