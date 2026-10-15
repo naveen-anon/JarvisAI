@@ -980,6 +980,41 @@ class OfflineBrain(
         // Call — "call X", "please call X", "phone X", "dial X" (English order)
         // (matched earlier, before this when — see top of function)
 
+        // Close / kill app
+        containsAny(cmd, "close all apps", "close everything", "band karo sab", "sab apps band") ->
+            AssistantCommand("close_app", "all")
+        cmd.startsWith("close ") ->
+            AssistantCommand("close_app", original.substringAfter(" ").trim())
+        cmd.startsWith("kill ") ->
+            AssistantCommand("close_app", original.substringAfter(" ").trim())
+        containsAny(cmd, "band karo", "band kar do") && !cmd.contains("alarm") -> {
+            val target = original.replace(Regex("(?i)(band karo|band kar do)"), "").trim()
+            AssistantCommand("close_app", target.ifBlank { "all" })
+        }
+
+        // Uninstall / delete app
+        containsAny(cmd, "uninstall", "delete app", "remove app", "app delete", "app hatao", "uninstall karo") -> {
+            val cleaned = original
+                .replace(Regex("(?i)(please\s+)?(uninstall|delete app|remove app|app delete|app hatao|uninstall karo|delete|remove)"), " ")
+                .replace(Regex("(?i)\bapp\b"), " ")
+                .trim()
+            AssistantCommand("uninstall_app", cleaned.ifBlank { null })
+        }
+        cmd.startsWith("uninstall ") ->
+            AssistantCommand("uninstall_app", original.substringAfter(" ").trim())
+
+        // Install from Play Store
+        containsAny(cmd, "install", "play store", "download app", "install karo", "app install") -> {
+            val cleaned = original
+                .replace(Regex("(?i)(please\s+)?(install|download|get)\s+(the\s+)?(app\s+)?"), " ")
+                .replace(Regex("(?i)(from\s+)?(the\s+)?play\s*store"), " ")
+                .replace(Regex("(?i)install karo|download karo|app install"), " ")
+                .trim()
+            AssistantCommand("install_app", cleaned.ifBlank { null })
+        }
+        cmd.startsWith("install ") ->
+            AssistantCommand("install_app", original.substringAfter(" ").trim())
+
         cmd.startsWith("open ") -> AssistantCommand("open_app", original.substringAfter(" ").trim())
         cmd.startsWith("launch ") -> AssistantCommand("open_app", original.substringAfter(" ").trim())
         cmd.startsWith("start ") -> AssistantCommand("open_app", original.substringAfter(" ").trim())

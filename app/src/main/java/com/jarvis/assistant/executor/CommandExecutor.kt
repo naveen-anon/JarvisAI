@@ -40,6 +40,9 @@ class CommandExecutor(private val context: Context) {
 
         return when (ActionType.fromKey(cmd.action)) {
             ActionType.OPEN_APP -> openApp(cmd.target)
+            ActionType.CLOSE_APP -> closeApp(cmd.target)
+            ActionType.UNINSTALL_APP -> uninstallApp(cmd.target)
+            ActionType.INSTALL_APP -> installApp(cmd.target)
             ActionType.APP_CALL -> appCall(cmd.target, cmd.message)
             ActionType.CALL -> callContact(cmd.target)
             ActionType.SEND_SMS -> sendSms(cmd.target, cmd.message)
@@ -160,6 +163,110 @@ class CommandExecutor(private val context: Context) {
             "Opening WhatsApp with $name."
         } catch (_: Exception) {
             "Couldn't open WhatsApp for $name."
+        }
+    }
+
+
+    private fun closeApp(appName: String?): String {
+        if (appName.isNullOrBlank()) return "Which application should I close, sir?"
+        val q = appName.trim()
+        val ql = q.lowercase()
+        // "close all" → visible home screen (no silent kill of other apps)
+        if (ql in listOf("all", "everything", "saari apps", "sab apps") ||
+            ql.contains("all apps") || ql.contains("sab kuch")
+        ) {
+            return try {
+                val home = Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_HOME)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(home)
+                "Home screen open hai, sir. Recent apps se jo band karna hai wahan se clear kar sakte ho."
+            } catch (_: Exception) {
+                "Couldn't open home screen."
+            }
+        }
+        val pkg = resolvePackageName(q)
+            ?: return "I couldn't find $q installed."
+        if (pkg == context.packageName) {
+            return "I can't close myself that way, sir. Use the recent apps screen."
+        }
+        // Visible path: system App Info — user taps Force stop (no silent kill)
+        return try {
+            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = android.net.Uri.parse("package:$pkg")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            val label = try {
+                val ai = context.packageManager.getApplicationInfo(pkg, 0)
+                context.packageManager.getApplicationLabel(ai).toString()
+            } catch (_: Exception) {
+                q
+            }
+            "Opening $label app info. Force stop wahan dikhega — confirm kar dena, sir."
+        } catch (e: Exception) {
+            "Couldn't open app settings for $q: ${e.message}"
+        }
+    }
+
+    private fun uninstallApp(appName: String?): String {
+        if (appName.isNullOrBlank()) return "Which application should I uninstall, sir?"
+        val pkg = resolvePackageName(appName.trim())
+            ?: return "I couldn't find ${appName.trim()} installed."
+        if (pkg == context.packageName) {
+            return "I can't uninstall myself, sir."
+        }
+        return try {
+            val intent = Intent(Intent.ACTION_DELETE).apply {
+                data = android.net.Uri.parse("package:$pkg")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            val label = try {
+                val ai = context.packageManager.getApplicationInfo(pkg, 0)
+                context.packageManager.getApplicationLabel(ai).toString()
+            } catch (_: Exception) {
+                appName.trim()
+            }
+            "Uninstall screen open kar diya for $label. Confirm dabana hoga, sir."
+        } catch (e: Exception) {
+            "Couldn't start uninstall: ${e.message}"
+        }
+    }
+
+    private fun installApp(appName: String?): String {
+        if (appName.isNullOrBlank()) return "Which application should I install from Play Store, sir?"
+        val name = appName.trim()
+        // If already installed, just open it
+        val existing = resolvePackageName(name)
+        if (existing != null) {
+            return openApp(name)
+        }
+        return try {
+            // Prefer Play Store search / details
+            val marketSearch = Intent(Intent.ACTION_VIEW).apply {
+                data = android.net.Uri.parse(
+                    "market://search?q=" + android.net.Uri.encode(name) + "&c=apps"
+                )
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                setPackage("com.android.vending")
+            }
+            if (marketSearch.resolveActivity(context.packageManager) != null) {
+                context.startActivity(marketSearch)
+                return "Play Store open hai for $name. Install wahan se karo, sir."
+            }
+            val web = Intent(Intent.ACTION_VIEW).apply {
+                data = android.net.Uri.parse(
+                    "https://play.google.com/store/search?q=" +
+                        android.net.Uri.encode(name) + "&c=apps"
+                )
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(web)
+            "Play Store search open hai for $name. Install wahan se, sir."
+        } catch (e: Exception) {
+            "Couldn't open Play Store: ${e.message}"
         }
     }
 
