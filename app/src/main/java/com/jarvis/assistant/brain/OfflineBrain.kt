@@ -131,6 +131,26 @@ class OfflineBrain(
 
 
         com.jarvis.assistant.util.CommandHistoryStore(context).add(text)
+
+        // Siri-style on-screen awareness
+        if (containsAny(
+                cmd,
+                "summarize this page", "summarize the screen", "summarize what i see",
+                "explain this screen", "describe this screen", "screen summarize",
+                "ye screen summarize", "page summarize karo"
+            )
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("analyze_screen"))
+        }
+        if (containsAny(
+                cmd,
+                "read this page", "read the page", "read aloud the screen",
+                "screen padho", "page padho"
+            )
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("read_screen"))
+        }
+
         if (containsAny(cmd, "notification summary", "what did i miss",
                 "brief notifications", "check notifications", "any notifications", "kya notification")) {
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("notif_summary"))
@@ -481,11 +501,16 @@ class OfflineBrain(
             } catch (_: Exception) { "Couldn't open face detection." }
         }
 
+
+        if (containsAny(cmd, "keep listening", "continue listening", "stay listening", "go on") || cmd == "continue") {
+            return "I'm listening for your next request, sir."
+        }
+
         if (containsAny(cmd, "what can you do", "help me", "list commands", "your capabilities") || cmd == "help") {
-            return "Offline, sir: apps, calls, messages, volume and media, Wi-Fi Bluetooth flashlight, " +
-                   "alarms timers reminders, clipboard, notifications, calendar, security report, " +
-                   "briefing, screen read and analyze, vision, app lock, notes and memory, " +
-                   "time date battery, and calculations. Cloud is only for harder questions when online."
+            return "Like Siri, you can say Hey Jarvis, then: open or close apps, install from Play Store, " +
+                   "clear recent apps, call or message contacts, control volume and music, set alarms and timers, " +
+                   "ask what's on my screen, notification summary, security report, weather and briefing, " +
+                   "remember notes, and ask general questions. After I answer, you can follow up without saying Hey Jarvis again, sir."
         }
 
         // Auto-learn: proactively surface a learned habit before falling back to generic suggestions

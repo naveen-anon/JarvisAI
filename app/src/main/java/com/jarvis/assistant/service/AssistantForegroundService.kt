@@ -231,6 +231,53 @@ class AssistantForegroundService : Service() {
 
 
 
+
+    /**
+     * Siri-style: after answering, keep a short follow-up window so the user can
+     * speak the next command without saying "Hey Jarvis" again.
+     */
+    private fun startFollowUpListen() {
+        mainHandler.postDelayed({
+            if (listenCycleRunning) return@postDelayed
+            try { openWake?.stop() } catch (_: Exception) {}
+            try { porcupine.stop() } catch (_: Exception) {}
+            try { stt.stopContinuous() } catch (_: Exception) {}
+            listenCycleRunning = true
+            lastListenCycleMs = System.currentTimeMillis()
+            try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
+            listener?.onStateChanged(BrainState.LISTENING)
+            try {
+                stt.listenOnce(
+                    onResult = { speech ->
+                        listenCycleRunning = false
+                        try { stt.stopContinuous() } catch (_: Exception) {}
+                        val s = speech.trim()
+                        val cancel = s.equals("stop", true) || s.equals("cancel", true) ||
+                            s.equals("never mind", true) || s.equals("nevermind", true) ||
+                            s.equals("bas", true) || s.equals("cancel karo", true)
+                        if (s.isNotBlank() && !cancel) {
+                            handleUserSpeech(s)
+                        } else {
+                            try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                            listener?.onStateChanged(BrainState.IDLE)
+                            resumeWakeSoon(600L)
+                        }
+                    },
+                    onError = {
+                        listenCycleRunning = false
+                        try { stt.stopContinuous() } catch (_: Exception) {}
+                        try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                        listener?.onStateChanged(BrainState.IDLE)
+                        resumeWakeSoon(600L)
+                    }
+                )
+            } catch (_: Exception) {
+                listenCycleRunning = false
+                resumeWakeSoon(600L)
+            }
+        }, 2200L) // after reply TTS starts
+    }
+
     fun startListeningCycle() {
         val now = System.currentTimeMillis()
         // Allow re-tap after 1.5s (old 8s gate blocked reactor retries)
@@ -341,8 +388,8 @@ class AssistantForegroundService : Service() {
             }
             tts.speak(speechText)
             listener?.onStateChanged(BrainState.IDLE)
-            // After reply, return to Siri-style on-device wake (mic only for KWS)
-            resumeWakeSoon(4000L)
+            // Siri-style: short follow-up listen, then back to Hey Jarvis wake
+            startFollowUpListen()
         }
     }
 
