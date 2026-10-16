@@ -329,6 +329,7 @@ class AssistantForegroundService : Service() {
             android.widget.Toast.makeText(this, "Listening…", android.widget.Toast.LENGTH_SHORT).show()
         } catch (_: Exception) {}
 
+        // Siri-style ack — then wait for TTS before STT (long listen window still applies)
         val ack = try {
             val sm = SettingsManager(this)
             val name = sm.getUserName().trim().lowercase()
@@ -340,11 +341,13 @@ class AssistantForegroundService : Service() {
         } catch (_: Exception) {
             "Yes sir"
         }
+        try { openWake?.stop() } catch (_: Exception) {}
+        try { porcupine.stop() } catch (_: Exception) {}
         try { tts.speak(ack) } catch (_: Exception) {}
 
-        // Safety timeout
+        // Safety timeout (longer session)
         mainHandler.postDelayed({
-            if (listenCycleRunning && System.currentTimeMillis() - lastListenCycleMs >= 15000L) {
+            if (listenCycleRunning && System.currentTimeMillis() - lastListenCycleMs >= 20000L) {
                 listenCycleRunning = false
                 try { stt.stopContinuous() } catch (_: Exception) {}
                 try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
@@ -353,10 +356,9 @@ class AssistantForegroundService : Service() {
                 android.util.Log.w("JarvisService", "listen cycle timed out — reset")
                 resumeWakeSoon(800L)
             }
-        }, 15000L)
+        }, 20000L)
 
-        // Wait for "Yes sir" TTS to finish so Google STT owns a free mic
-        mainHandler.postDelayed({
+        fun beginStt(retry: Boolean = false) {
             try {
                 try { openWake?.stop() } catch (_: Exception) {}
                 try { porcupine.stop() } catch (_: Exception) {}
@@ -381,13 +383,19 @@ class AssistantForegroundService : Service() {
                         }
                     },
                     onError = {
-                        listenCycleRunning = false
-                        try { stt.stopContinuous() } catch (_: Exception) {}
-                        try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
-                        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
-                        listener?.onStateChanged(BrainState.IDLE)
-                        android.util.Log.w("JarvisService", "STT onError")
-                        resumeWakeSoon(1200L)
+                        // One automatic retry (speech timeout / no-match is common)
+                        if (!retry && listenCycleRunning) {
+                            android.util.Log.w("JarvisService", "STT error — retry once")
+                            mainHandler.postDelayed({ beginStt(retry = true) }, 400L)
+                        } else {
+                            listenCycleRunning = false
+                            try { stt.stopContinuous() } catch (_: Exception) {}
+                            try { com.jarvis.assistant.ui.HudController.idle() } catch (_: Exception) {}
+                            try { com.jarvis.assistant.ui.ActivationEdgeOverlay.hide() } catch (_: Exception) {}
+                            listener?.onStateChanged(BrainState.IDLE)
+                            android.util.Log.w("JarvisService", "STT onError final")
+                            resumeWakeSoon(1200L)
+                        }
                     }
                 )
             } catch (e: Exception) {
@@ -396,7 +404,10 @@ class AssistantForegroundService : Service() {
                 listener?.onStateChanged(BrainState.IDLE)
                 resumeWakeSoon(1200L)
             }
-        }, 1800L)
+        }
+
+        // After Yes sir finishes, open long STT window
+        mainHandler.postDelayed({ beginStt(false) }, 1600L)
     }
 
 
