@@ -135,6 +135,95 @@ class OfflineBrain(
 
 
 
+
+        // ─── VOICE COMMAND ALIASES (Siri-style) ───
+        if (containsAny(cmd, "go to home screen", "go home", "show home", "home screen pe jao", "homescreen")) {
+            return try {
+                val i = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
+                    addCategory(android.content.Intent.CATEGORY_HOME)
+                    flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(i)
+                "Home screen, sir."
+            } catch (_: Exception) { "Couldn't open home screen." }
+        }
+        if (containsAny(cmd, "take a screenshot", "take screenshot", "screenshot lo", "screen capture", "capture screen")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("screenshot"))
+        }
+        if (containsAny(cmd, "lock my phone", "lock phone", "phone lock karo", "screen lock")) {
+            return try {
+                val i = android.content.Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS).apply {
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(i)
+                "Open security settings to lock, sir."
+            } catch (_: Exception) { "Couldn't open lock settings." }
+        }
+        if (containsAny(cmd, "turn on wifi", "enable wifi", "wifi on", "wifi chalu", "wifi on karo")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("toggle_setting", "wifi"))
+        }
+        if (containsAny(cmd, "turn off wifi", "disable wifi", "wifi off", "wifi band", "wifi off karo")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("toggle_setting", "wifi"))
+        }
+        if (containsAny(cmd, "turn on bluetooth", "enable bluetooth", "bluetooth on", "bluetooth chalu")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("toggle_setting", "bluetooth"))
+        }
+        if (containsAny(cmd, "turn off bluetooth", "disable bluetooth", "bluetooth off", "bluetooth band")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("toggle_setting", "bluetooth"))
+        }
+        if (containsAny(cmd, "turn on flashlight", "turn on torch", "flashlight on", "torch on", "light on")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("toggle_setting", "flashlight"))
+        }
+        if (containsAny(cmd, "turn off flashlight", "turn off torch", "flashlight off", "torch off", "light off")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("toggle_setting", "flashlight"))
+        }
+        if (containsAny(cmd, "volume up", "increase volume", "louder", "awaaz badhao", "sound up")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("set_volume", "up"))
+        }
+        if (containsAny(cmd, "volume down", "decrease volume", "quieter", "awaaz kam", "sound down")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("set_volume", "down"))
+        }
+        if (containsAny(cmd, "mute", "silent", "silence", "awaaz band")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("set_volume", "mute"))
+        }
+        if (containsAny(cmd, "max volume", "full volume", "volume full")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("set_volume", "max"))
+        }
+        if (containsAny(cmd, "pause music", "pause song", "rok do gaana") && !containsAny(cmd, "timer", "alarm")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("media_control", "pause"))
+        }
+        if (containsAny(cmd, "resume music", "continue music") && !containsAny(cmd, "play song", "youtube")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("media_control", "play"))
+        }
+        if (containsAny(cmd, "next song", "next track", "skip song", "agla gaana")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("media_control", "next"))
+        }
+        if (containsAny(cmd, "previous song", "previous track", "last song", "pichla gaana")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("media_control", "previous"))
+        }
+        if (containsAny(cmd, "where am i", "what's my location", "current location", "meri location")) {
+            return try {
+                val i = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    data = android.net.Uri.parse("geo:0,0?q=my+location")
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(i)
+                "Opening maps to your location, sir."
+            } catch (_: Exception) {
+                "Couldn't open maps, sir."
+            }
+        }
+        if (containsAny(cmd, "open settings", "phone settings", "system settings", "settings kholo")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("open_app", "Settings"))
+        }
+        if (containsAny(cmd, "open camera", "camera kholo", "start camera")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("open_app", "Camera"))
+        }
+        if (containsAny(cmd, "find my phone", "where is my phone")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("set_volume", "max"))
+        }
+
+
         // Siri-natural: messages from contact / last texts
         if (containsAny(cmd, "messages from", "texts from", "sms from", "message from")) {
             val who = text.replace(Regex("""(?i).*?(?:messages?|texts?|sms)\s+from\s+"""), "").trim()
@@ -626,11 +715,17 @@ class OfflineBrain(
             return "I'm listening for your next request, sir."
         }
 
-        if (containsAny(cmd, "what can you do", "help me", "list commands", "your capabilities") || cmd == "help") {
-            return "Like Siri, you can say Hey Jarvis, then: open or close apps, install from Play Store, " +
-                   "clear recent apps, call or message contacts, control volume and music, set alarms and timers, " +
-                   "ask what's on my screen, notification summary, security report, weather and briefing, " +
-                   "remember notes, and search SMS, photos and mail, create calendar events, rewrite text, share screen content, run multi-step agent tasks, and ask general questions. After I answer, you can follow up without saying Hey Jarvis again, sir."
+        if (containsAny(cmd, "what can you do", "help me", "list commands", "your capabilities", "voice commands") || cmd == "help") {
+            return "Voice commands, sir: Hey Jarvis, then say — " +
+                   "open or close apps, install or uninstall, clear recents, " +
+                   "call or WhatsApp message someone, volume up down mute, play pause next song, " +
+                   "flashlight wifi bluetooth, set timer or alarm, " +
+                   "what's on my screen, share screen, save this number, " +
+                   "what did I miss from WhatsApp, search SMS photos or mail, " +
+                   "schedule a meeting, rewrite this text, briefing, security report, " +
+                   "go to home screen, take a screenshot, where am I, " +
+                   "and multi-step: open Chrome and then play music. " +
+                   "After I answer you can follow up without saying Hey Jarvis again."
         }
 
         // Auto-learn: proactively surface a learned habit before falling back to generic suggestions
