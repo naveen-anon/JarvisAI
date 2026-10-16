@@ -261,6 +261,16 @@ class OfflineBrain(
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("read_screen"))
         }
 
+        if (containsAny(cmd, "what did i miss from whatsapp", "whatsapp notifications",
+                "any whatsapp", "whatsapp pe kya", "missed whatsapp")) {
+            return com.jarvis.assistant.notifications.JarvisNotificationListener.summaryOrHelp(8, "whatsapp")
+        }
+        if (containsAny(cmd, "telegram notifications", "what did i miss from telegram")) {
+            return com.jarvis.assistant.notifications.JarvisNotificationListener.summaryOrHelp(8, "telegram")
+        }
+        if (containsAny(cmd, "gmail notifications", "email notifications", "mail notifications")) {
+            return com.jarvis.assistant.notifications.JarvisNotificationListener.summaryOrHelp(8, "gmail")
+        }
         if (containsAny(cmd, "notification summary", "what did i miss",
                 "brief notifications", "check notifications", "any notifications", "kya notification")) {
             return executor.execute(com.jarvis.assistant.model.AssistantCommand("notif_summary"))
@@ -848,6 +858,25 @@ class OfflineBrain(
         }
 
 
+
+        // Natural: "message Mom I'm late" / "text Dad that I'll call"
+        Regex("""(?i)(?:message|text|sms)\s+(.+?)\s+(?:that\s+|i(?:'|’)m\s+|i am\s+|ki\s+)(.+)""").find(cmd)?.let { m ->
+            val target = m.groupValues[1].trim()
+            val msg = m.groupValues[2].trim()
+            if (target.length in 2..40 && msg.length >= 2) {
+                return AssistantCommand("whatsapp_message", target, msg)
+            }
+        }
+        Regex("""(?i)(?:whatsapp|wa)\s+(.+?)\s+(.+)""").find(cmd)?.let { m ->
+            val target = m.groupValues[1].trim()
+            val msg = m.groupValues[2].trim()
+            if (!msg.startsWith("pe") && target.length in 2..40 && msg.length >= 2 &&
+                !containsAny(msg, "open", "call", "video")
+            ) {
+                return AssistantCommand("whatsapp_message", target, msg)
+            }
+        }
+
         // WhatsApp — "whatsapp pe NAME ko sms kro MESSAGE"
         Regex("""whatsapp\s*(?:pe|par)?\s+(.+?)\s+ko\s+(?:sms|message|msg|text)?\s*(?:karo|kro|kar do|bhejo|bhej do|bhejna)?\s+(.+)""")
             .find(cmd)?.let { m ->
@@ -1043,6 +1072,24 @@ class OfflineBrain(
         }
 
         // Timer — "set a timer for 5 minutes" / "5 minute ka timer laga do"
+
+        Regex("""(?i)(?:set\s+a?\s*)?(\d+)\s*(minute|minutes|min|mins|second|seconds|sec|secs)\s*timer""").find(cmd)?.let { m ->
+            val n = m.groupValues[1].toIntOrNull() ?: 0
+            val unit = m.groupValues[2].lowercase()
+            val sec = if (unit.startsWith("sec")) n else n * 60
+            if (sec > 0) return AssistantCommand("set_timer", sec.toString())
+        }
+        Regex("""(?i)timer\s+(?:for\s+)?(\d+)\s*(minute|minutes|min|mins|hour|hours|hr|hrs)?""").find(cmd)?.let { m ->
+            val n = m.groupValues[1].toIntOrNull() ?: 0
+            val unit = m.groupValues[2].lowercase()
+            val sec = when {
+                unit.startsWith("hour") || unit.startsWith("hr") -> n * 3600
+                unit.isBlank() || unit.startsWith("min") -> n * 60
+                else -> n * 60
+            }
+            if (sec > 0) return AssistantCommand("set_timer", sec.toString())
+        }
+
         containsAny(cmd, "set a timer", "set timer", "start timer", "timer laga") ->
             AssistantCommand("set_timer", extractDurationSeconds(cmd)?.toString())
 
