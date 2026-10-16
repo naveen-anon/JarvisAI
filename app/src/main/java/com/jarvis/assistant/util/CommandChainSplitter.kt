@@ -8,6 +8,8 @@ object CommandChainSplitter {
 
     private val separators = listOf(
         Regex("""\s+and\s+then\s+""", RegexOption.IGNORE_CASE),
+        Regex("""\s+and\s+also\s+""", RegexOption.IGNORE_CASE),
+        Regex("""\s+plus\s+""", RegexOption.IGNORE_CASE),
         Regex("""\s+then\s+""", RegexOption.IGNORE_CASE),
         Regex("""\s+phir\s+""", RegexOption.IGNORE_CASE),
         Regex("""\s+baad\s+mein\s+""", RegexOption.IGNORE_CASE),

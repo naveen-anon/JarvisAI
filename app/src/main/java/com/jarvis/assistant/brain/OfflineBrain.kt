@@ -133,6 +133,72 @@ class OfflineBrain(
         com.jarvis.assistant.util.CommandHistoryStore(context).add(text)
 
 
+
+
+        // Siri-natural: messages from contact / last texts
+        if (containsAny(cmd, "messages from", "texts from", "sms from", "message from")) {
+            val who = text.replace(Regex("""(?i).*?(?:messages?|texts?|sms)\s+from\s+"""), "").trim()
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_sms", who.ifBlank { text }))
+        }
+        if (containsAny(cmd, "read my messages", "any new messages", "new texts", "latest sms")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("search_sms", "a"))
+        }
+        if (containsAny(cmd, "take me home", "navigate home", "directions home")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("open_app", "Maps"))
+        }
+        if (containsAny(cmd, "i'm bored", "suggest something", "what can i do")) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("proactive_tip"))
+        }
+
+        // Siri extras — calendar, rewrite, media, on-screen actions, proactive
+        if (containsAny(cmd, "schedule meeting", "create event", "add event", "add meeting",
+                "calendar event", "book a meeting", "set meeting", "meeting schedule",
+                "event banao", "meeting set karo")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("create_event", text))
+        }
+        if (containsAny(cmd, "rewrite", "make it formal", "make formal", "make it shorter",
+                "make shorter", "expand this", "make it friendly", "rephrase", "formal banao",
+                "chhota karo")
+        ) {
+            val mode = when {
+                "formal" in cmd || "professional" in cmd -> "formal"
+                "short" in cmd || "shorter" in cmd || "chhota" in cmd -> "short"
+                "expand" in cmd || "longer" in cmd -> "expand"
+                "friendly" in cmd || "casual" in cmd -> "friendly"
+                else -> "formal"
+            }
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("rewrite_text", mode, text))
+        }
+        if (containsAny(cmd, "what's playing", "what is playing", "now playing", "kaunsa gaana",
+                "what song", "which song")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("now_playing"))
+        }
+        if (containsAny(cmd, "share this", "share screen", "share the screen", "share page",
+                "share karo", "ye share karo")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("share_screen"))
+        }
+        if (containsAny(cmd, "save this number", "add this number", "save phone", "add phone from screen",
+                "number save karo", "ye number save")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("screen_save_phone"))
+        }
+        if (containsAny(cmd, "email this address", "mail this", "email from screen", "compose email to")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("screen_email"))
+        }
+        if (containsAny(cmd, "open this link", "open the link", "open link on screen", "link kholo")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("screen_open_link"))
+        }
+        if (containsAny(cmd, "what should i do", "any suggestions", "proactive", "suggest something",
+                "kya karna chahiye", "suggestion do")
+        ) {
+            return executor.execute(com.jarvis.assistant.model.AssistantCommand("proactive_tip"))
+        }
+
         // Personal context — SMS / Photos / Mail
         if (containsAny(cmd, "search sms", "search messages", "find sms", "find text message",
                 "sms search", "message search", "messages mein dhoondo", "sms mein")
@@ -554,7 +620,7 @@ class OfflineBrain(
             return "Like Siri, you can say Hey Jarvis, then: open or close apps, install from Play Store, " +
                    "clear recent apps, call or message contacts, control volume and music, set alarms and timers, " +
                    "ask what's on my screen, notification summary, security report, weather and briefing, " +
-                   "remember notes, and search SMS, photos and mail, run multi-step agent tasks, and ask general questions. After I answer, you can follow up without saying Hey Jarvis again, sir."
+                   "remember notes, and search SMS, photos and mail, create calendar events, rewrite text, share screen content, run multi-step agent tasks, and ask general questions. After I answer, you can follow up without saying Hey Jarvis again, sir."
         }
 
         // Auto-learn: proactively surface a learned habit before falling back to generic suggestions

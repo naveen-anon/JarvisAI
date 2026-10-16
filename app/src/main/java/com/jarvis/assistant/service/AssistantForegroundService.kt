@@ -432,9 +432,10 @@ class AssistantForegroundService : Service() {
             }
             tts.speak(speechText)
             listener?.onStateChanged(BrainState.IDLE)
-            // Prefer reliable Hey Jarvis wake over follow-up STT (STT held mic forever)
-            forceReleaseCommandMic()
-            resumeWakeSoon(2200L)
+            // Siri-level: after speaking, one follow-up listen (no second Hey Jarvis), then wake
+            mainHandler.postDelayed({
+                if (!listenCycleRunning) startFollowUpListen()
+            }, 2500L)
         }
     }
 
