@@ -1167,14 +1167,16 @@ class OfflineBrain(
         }
 
         // Timer — "set a timer for 5 minutes" / "5 minute ka timer laga do"
-
-        Regex("""(?i)(?:set\s+a?\s*)?(\d+)\s*(minute|minutes|min|mins|second|seconds|sec|secs)\s*timer""").find(cmd)?.let { m ->
+        Regex("""(?i)(?:set\s+a?\s*)?(\d+)\s*(minute|minutes|min|mins|second|seconds|sec|secs)\s*timer""").find(cmd) != null -> {
+            val m = Regex("""(?i)(?:set\s+a?\s*)?(\d+)\s*(minute|minutes|min|mins|second|seconds|sec|secs)\s*timer""").find(cmd)!!
             val n = m.groupValues[1].toIntOrNull() ?: 0
             val unit = m.groupValues[2].lowercase()
             val sec = if (unit.startsWith("sec")) n else n * 60
-            if (sec > 0) return AssistantCommand("set_timer", sec.toString())
+            if (sec > 0) AssistantCommand("set_timer", sec.toString())
+            else AssistantCommand("set_timer", extractDurationSeconds(cmd)?.toString())
         }
-        Regex("""(?i)timer\s+(?:for\s+)?(\d+)\s*(minute|minutes|min|mins|hour|hours|hr|hrs)?""").find(cmd)?.let { m ->
+        Regex("""(?i)timer\s+(?:for\s+)?(\d+)\s*(minute|minutes|min|mins|hour|hours|hr|hrs)?""").find(cmd) != null -> {
+            val m = Regex("""(?i)timer\s+(?:for\s+)?(\d+)\s*(minute|minutes|min|mins|hour|hours|hr|hrs)?""").find(cmd)!!
             val n = m.groupValues[1].toIntOrNull() ?: 0
             val unit = m.groupValues[2].lowercase()
             val sec = when {
@@ -1182,9 +1184,9 @@ class OfflineBrain(
                 unit.isBlank() || unit.startsWith("min") -> n * 60
                 else -> n * 60
             }
-            if (sec > 0) return AssistantCommand("set_timer", sec.toString())
+            if (sec > 0) AssistantCommand("set_timer", sec.toString())
+            else AssistantCommand("set_timer", extractDurationSeconds(cmd)?.toString())
         }
-
         containsAny(cmd, "set a timer", "set timer", "start timer", "timer laga") ->
             AssistantCommand("set_timer", extractDurationSeconds(cmd)?.toString())
 
