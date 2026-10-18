@@ -20,7 +20,7 @@ class SettingsManager(context: Context) {
     fun setVoiceType(type: String) = prefs.edit().putString("voice_type", type).apply()
 
     /** Prefer ElevenLabs human voice when online + API key set (default on). */
-    fun getPreferCloudVoice(): Boolean = prefs.getBoolean("prefer_cloud_voice", true)
+    fun getPreferCloudVoice(): Boolean = prefs.getBoolean("prefer_cloud_voice", false)
     fun setPreferCloudVoice(enabled: Boolean) =
         prefs.edit().putBoolean("prefer_cloud_voice", enabled).apply()
 
