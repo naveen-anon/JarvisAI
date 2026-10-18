@@ -81,6 +81,14 @@ class CommandExecutor(private val context: Context) {
             ActionType.SEARCH_PHOTOS -> com.jarvis.assistant.util.PersonalContextHelper(context).searchPhotos(cmd.target)
             ActionType.SEARCH_MAIL -> com.jarvis.assistant.util.PersonalContextHelper(context).searchMail(cmd.target)
             ActionType.AGENT_TASK -> runAgentTask(cmd.target ?: cmd.message)
+            ActionType.CREATE_EVENT -> com.jarvis.assistant.util.SiriExtrasHelper(context).createEventFromSpeech(cmd.target ?: cmd.message)
+            ActionType.REWRITE_TEXT -> com.jarvis.assistant.util.SiriExtrasHelper(context).rewriteText(cmd.target, cmd.message)
+            ActionType.NOW_PLAYING -> com.jarvis.assistant.util.SiriExtrasHelper(context).nowPlaying()
+            ActionType.SHARE_SCREEN -> com.jarvis.assistant.util.SiriExtrasHelper(context).shareScreenText()
+            ActionType.SCREEN_SAVE_PHONE -> com.jarvis.assistant.util.SiriExtrasHelper(context).addPhoneFromScreen()
+            ActionType.SCREEN_EMAIL -> com.jarvis.assistant.util.SiriExtrasHelper(context).emailFromScreen()
+            ActionType.SCREEN_OPEN_LINK -> com.jarvis.assistant.util.SiriExtrasHelper(context).openLinkFromScreen()
+            ActionType.PROACTIVE_TIP -> com.jarvis.assistant.util.SiriExtrasHelper(context).proactiveTip()
             ActionType.CALENDAR_NEXT -> com.jarvis.assistant.util.CalendarHelper(context).formatBrief(2)
 
             
@@ -907,36 +915,8 @@ private fun setAlarm(target: String?): String {
 
     /** Opens Hall of Armor (holo grid) or a specific mark detail. */
     private fun showArmor(target: String?): String {
-        val q = target?.trim().orEmpty()
-        // No mark specified → full interactive holographic archive
-        if (q.isEmpty() || q.equals("archive", true) || q.equals("suits", true) ||
-            q.equals("hall", true) || q.equals("list", true)
-        ) {
-            return try {
-                val intent = Intent(context, com.jarvis.assistant.armor.ArmorHoloArchiveActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-                "Opening the Hall of Armor."
-            } catch (e: Exception) {
-                "Couldn't open the Hall of Armor: ${e.message}"
-            }
-        }
-        val mark = ArmorCatalog.search(q)
-            ?: return "I couldn't find armor matching \"$q\". Try mark 33 or silver centurion."
-        return try {
-            val intent = Intent(context, ArmorDetailActivity::class.java).apply {
-                putExtra(ArmorDetailActivity.EXTRA_MARK, mark.number)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
-            "Displaying Mark ${mark.roman} — ${mark.codename}."
-        } catch (e: Exception) {
-            "Couldn't open the armor archive: ${e.message}"
-        }
+        return "Armor archive was removed, sir."
     }
-
-
     private fun summarizeScreen(): String {
         val svc = com.jarvis.assistant.accessibility.JarvisAccessibilityService.instance
             ?: return "Enable Accessibility for Jarvis first, sir — Settings → Accessibility → Jarvis."
@@ -1089,23 +1069,7 @@ private fun setAlarm(target: String?): String {
 
 
     private fun runEquipSuit(cmd: AssistantCommand): String {
-        return try {
-            val repo = com.jarvis.ai.data.repository.SuitRepository()
-            val q = listOfNotNull(cmd.target, cmd.message).joinToString(" ").lowercase()
-            val suit = repo.getAllSuits().firstOrNull { s ->
-                q.contains(s.id.replace("_", " ")) ||
-                    q.contains(s.mark.name.replace("_", " ").lowercase()) ||
-                    q.contains(s.name.substringBefore("—").substringBefore("-").trim().lowercase())
-            } ?: repo.getAllSuits().firstOrNull {
-                it.id == "mark_3" || it.mark.name.contains("3")
-            } ?: return "Suit not found in archive."
-            try { com.jarvis.assistant.ui.HudController.executing() } catch (_: Exception) {}
-            val msg = com.jarvis.ai.controller.ArmorController.equipWithContext(context, suit)
-            try { com.jarvis.assistant.ui.HudController.done() } catch (_: Exception) {}
-            msg
-        } catch (e: Exception) {
-            "Unable to equip suit: ${e.message}"
-        }
+        return "Armor suits were removed from Jarvis, sir."
     }
 
 

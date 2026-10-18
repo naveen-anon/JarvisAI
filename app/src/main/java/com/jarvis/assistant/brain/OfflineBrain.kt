@@ -1207,24 +1207,9 @@ class OfflineBrain(
         }
 
         containsAny(cmd, "show mark", "mark dikhao", "armor mark", "suit mark",
-            "show armor", "armor dikhao", "suit dikhao", "iron man mark") -> {
-            val num = Regex("""(?:mark\s*)?(\d{1,2})""").find(cmd)?.groupValues?.get(1)
-            val target = num
-                ?: Regex("""(?:mark\s+)([ivxlc]+)""").find(cmd)?.groupValues?.get(1)
-                ?: cmd.substringAfter("mark").substringAfter("armor").substringAfter("suit").trim()
-                    .ifBlank { null }
-            AssistantCommand("show_armor", target ?: cmd)
-        }
-        containsAny(cmd, "silver centurion", "mark 33", "mark xxxiii") ->
-            AssistantCommand("show_armor", "33")
-        containsAny(cmd, "mark 42", "mark xlii", "mark forty two", "prehensile") ->
-            AssistantCommand("show_armor", "42")
-        containsAny(cmd, "heartbreaker", "mark 17") ->
-            AssistantCommand("show_armor", "17")
-        containsAny(cmd, "starboost", "mark 39") ->
-            AssistantCommand("show_armor", "39")
-
-
+            "show armor", "armor dikhao", "suit dikhao", "iron man mark",
+            "silver centurion", "mark 33", "mark 42", "heartbreaker", "starboost") ->
+            AssistantCommand("reply", null, "Armor archive was removed, sir.")
 
         // Phase 5 — Web search
         containsAny(cmd, "search for", "search the web", "web search", "search online", "google search") ||
