@@ -13,8 +13,6 @@ import android.provider.Settings
 import android.telephony.SmsManager
 import android.view.KeyEvent
 import com.jarvis.assistant.model.ActionType
-import com.jarvis.assistant.armor.ArmorCatalog
-import com.jarvis.assistant.armor.ArmorDetailActivity
 import com.jarvis.assistant.model.AssistantCommand
 import com.jarvis.assistant.security.AppLockManager
 import com.jarvis.assistant.vision.VisionActivity
