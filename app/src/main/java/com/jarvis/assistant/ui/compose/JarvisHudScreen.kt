@@ -995,10 +995,7 @@ private fun JarvisAiHeader(onSettings: () -> Unit) {
             .clip(shape)
             .background(
                 Brush.verticalGradient(listOf(Color(0x330A1825), Color(0x99160C04), Color(0xB30A0603)))
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(listOf(NavyBlue.copy(alpha = 0.6f), NavyBlue.copy(alpha = 0.15f))),
+            ), NavyBlue.copy(alpha = 0.15f))),
                 shape = shape
             )
             .padding(horizontal = 14.dp, vertical = 12.dp)
@@ -1232,10 +1229,7 @@ private fun TalkButton(onClick: () -> Unit) {
             .clip(RoundedCornerShape(26.dp))
             .background(
                 Brush.verticalGradient(listOf(Color(0x990A1825), Color(0x88050E16)))
-            )
-            .border(
-                width = 1.5.dp,
-                brush = Brush.verticalGradient(listOf(Cyan, Cyan.copy(alpha = 0.4f))),
+            ))),
                 shape = RoundedCornerShape(26.dp)
             )
             .clickable(onClick = onClick),
@@ -1472,12 +1466,7 @@ private fun GlassCard(
                         Color(0xB3050E16)
                     )
                 )
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    listOf(
-                        Cyan.copy(alpha = 0.55f),
+            ),
                         Cyan.copy(alpha = 0.10f)
                     )
                 ),
@@ -1588,11 +1577,7 @@ private fun StarkHeader(
                         Color(0xB3050E16)
                     )
                 )
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    listOf(Cyan.copy(alpha = 0.55f), Cyan.copy(alpha = 0.15f))
+            ), Cyan.copy(alpha = 0.15f))
                 ),
                 shape = headerShape
             )
