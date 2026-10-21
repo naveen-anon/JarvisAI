@@ -9,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -343,6 +344,7 @@ private fun SideTelemetryLeft(battery: String, modifier: Modifier = Modifier) {
         modifier
             .clip(shape)
             .background(Brush.verticalGradient(listOf(GlassFillTop, GlassFillBot)))
+            
             .padding(10.dp)
     ) {
         Text("ARC REACTOR", color = Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -363,6 +365,7 @@ private fun SideTelemetryRight(modifier: Modifier = Modifier) {
         modifier
             .clip(shape)
             .background(Brush.verticalGradient(listOf(GlassFillTop, GlassFillBot)))
+            
             .padding(10.dp)
     ) {
         Text("NAVEEN INDUSTRIES", color = Cyan, fontSize = 8.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -417,6 +420,7 @@ private fun CompanionCard(
                     listOf(Color(0xF00C1E30), Color(0xE0071018))
                 )
             )
+            
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -637,6 +641,8 @@ private fun ModuleTile(
             .heightIn(min = if (compact) 64.dp else 72.dp)
             .clip(shape)
             .background(Brush.verticalGradient(listOf(GlassFillTop, GlassFillBot)))
+            
+            
             .clickable(onClick = onClick)
     ) {
         Box(
@@ -862,6 +868,7 @@ private fun LayeredCard(modifier: Modifier = Modifier, content: @Composable () -
                 .offset(x = 5.dp, y = 5.dp)
                 .clip(shape)
                 .background(Color(0x140A1F1D))
+                
         )
         Box(
             Modifier
@@ -869,11 +876,13 @@ private fun LayeredCard(modifier: Modifier = Modifier, content: @Composable () -
                 .offset(x = 2.5.dp, y = 2.5.dp)
                 .clip(shape)
                 .background(Color(0x1D0A1F1D))
+                
         )
         Box(
             Modifier
                 .clip(shape)
                 .background(Color(0x330A1F1D))
+                
                 .padding(10.dp)
         ) {
             content()
@@ -929,6 +938,7 @@ private fun TealPill(modifier: Modifier = Modifier, icon: Int, text: String, onC
         modifier = modifier
             .clip(RoundedCornerShape(999.dp))
             .background(Color(0x1A00D9FF))
+            
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -961,6 +971,7 @@ private fun IronDock(
                 .size(50.dp)
                 .clip(CircleShape)
                 .background(Color(0x33FF6A00))
+                
                 .clickable(onClick = onTalk),
             contentAlignment = Alignment.Center
         ) {
@@ -994,9 +1005,8 @@ private fun JarvisAiHeader(onSettings: () -> Unit) {
             .clip(shape)
             .background(
                 Brush.verticalGradient(listOf(Color(0x330A1825), Color(0x99160C04), Color(0xB30A0603)))
-            ), NavyBlue.copy(alpha = 0.15f))),
-                shape = shape
             )
+            
             .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1162,6 +1172,7 @@ private fun SideMenuRow(icon: Int, line1: String, line2: String, onClick: () -> 
             .fillMaxWidth()
             .clip(shape)
             .background(Color(0x330A1825))
+            
             .clickable(onClick = onClick)
             .padding(vertical = 8.dp, horizontal = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -1183,6 +1194,7 @@ private fun OnlineStatusBar(label: String, detail: String) {
             .fillMaxWidth()
             .clip(shape)
             .background(Color(0x330A1825))
+            
             .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Column {
@@ -1212,6 +1224,7 @@ private fun CompactTalkButton(onClick: () -> Unit) {
             .size(44.dp)
             .clip(CircleShape)
             .background(Color(0x330A1825))
+            
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -1228,9 +1241,8 @@ private fun TalkButton(onClick: () -> Unit) {
             .clip(RoundedCornerShape(26.dp))
             .background(
                 Brush.verticalGradient(listOf(Color(0x990A1825), Color(0x88050E16)))
-            ))),
-                shape = RoundedCornerShape(26.dp)
             )
+            
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -1465,12 +1477,8 @@ private fun GlassCard(
                         Color(0xB3050E16)
                     )
                 )
-            ),
-                        Cyan.copy(alpha = 0.10f)
-                    )
-                ),
-                shape = shape
             )
+            
     ) {
         // Glossy top sheen — the "liquid glass" highlight
         Box(
@@ -1493,6 +1501,7 @@ private fun GlassCard(
         Box(
             modifier = Modifier
                 .matchParentSize()
+                
         )
         content()
     }
@@ -1576,10 +1585,8 @@ private fun StarkHeader(
                         Color(0xB3050E16)
                     )
                 )
-            ), Cyan.copy(alpha = 0.15f))
-                ),
-                shape = headerShape
             )
+            
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
         Box(
@@ -1599,7 +1606,8 @@ private fun StarkHeader(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0x3300D9FF)),
+                    .background(Color(0x3300D9FF))
+                    ,
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -1625,6 +1633,7 @@ private fun StarkHeader(
                         modifier = Modifier
                             .clip(RoundedCornerShape(2.dp))
                             .background(Amber.copy(alpha = 0.25f))
+                            
                             .padding(horizontal = 4.dp, vertical = 1.dp)
                     ) {
                         Text(
@@ -1676,6 +1685,7 @@ private fun RoundIconBtn(iconRes: Int, onClick: () -> Unit, accent: Color = Cyan
             .size(32.dp)
             .clip(CircleShape)
             .background(Color(0xCC06121C))
+            
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -1765,6 +1775,7 @@ private fun DiagnosticGauge(
             .height(58.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(PanelDim)
+            
             .padding(horizontal = 6.dp, vertical = 4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1847,6 +1858,7 @@ private fun SuitDiagnosticsPanel(modifier: Modifier = Modifier) {
             .fillMaxHeight()
             .clip(RoundedCornerShape(10.dp))
             .background(PanelDim)
+            
             .padding(horizontal = 4.dp, vertical = 6.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1887,6 +1899,7 @@ private fun VerticalBarMeter(label: String, percent: Float, accent: Color) {
                 .height(60.dp)
                 .clip(RoundedCornerShape(3.dp))
                 .background(Color(0xFF050E16))
+                
         ) {
             // ticks
             val infinite = rememberInfiniteTransition(label = label)
@@ -1918,7 +1931,8 @@ private fun SuitIcon() {
         modifier = Modifier
             .size(46.dp)
             .clip(CircleShape)
-            .background(Color(0x3300D9FF)),
+            .background(Color(0x3300D9FF))
+            ,
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -1941,6 +1955,7 @@ private fun EnergyMatrixPanel(
             .fillMaxHeight()
             .clip(RoundedCornerShape(10.dp))
             .background(PanelDim)
+            
             .padding(horizontal = 4.dp, vertical = 6.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -2059,6 +2074,7 @@ private fun CompactRow(id: String, percent: Float, accent: Color) {
                 .height(4.dp)
                 .clip(RoundedCornerShape(2.dp))
                 .background(Color(0xFF050E16))
+                
         ) {
             Box(
                 modifier = Modifier
@@ -2296,6 +2312,7 @@ private fun StateStatusBar(label: String, state: HudState) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(PanelDim)
+            
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -2340,6 +2357,7 @@ private fun PulsingDot(color: Color) {
             .size(8.dp)
             .clip(CircleShape)
             .background(color.copy(alpha = a))
+            
     )
 }
 
@@ -2357,6 +2375,7 @@ private fun WaveformBar(active: Boolean) {
             .height(22.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(Color(0xFF050E16))
+            
     ) {
         val n = 56
         val w = size.width / n
@@ -2389,6 +2408,7 @@ private fun ResponseBar(text: String) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(PanelDim)
+            
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -2442,6 +2462,7 @@ private fun ChevronAction(
             .height(34.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(PanelDim)
+            
             .clickable(onClick = onClick)
             .padding(horizontal = 6.dp),
         contentAlignment = Alignment.Center
@@ -2477,6 +2498,7 @@ private fun BottomNav(
             .background(
                 Brush.verticalGradient(listOf(Color(0xF0050E16), Color(0xF003080E)))
             )
+            
             .padding(horizontal = 4.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -2488,6 +2510,7 @@ private fun BottomNav(
                     .size(52.dp)
                     .clip(CircleShape)
                     .background(Color(0x40FFAA00))
+                    
                     .clickable(onClick = onMic),
                 contentAlignment = Alignment.Center
             ) {
