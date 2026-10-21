@@ -207,8 +207,33 @@ class AssistantForegroundService : Service() {
      * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
      */
     private fun startSttWakeFallback() {
-        // Never use continuous Google STT for wake (battery + always-hot mic UI).
-        try { stt.stopContinuous() } catch (_: Exception) {}
+        val sm = com.jarvis.assistant.util.SettingsManager(this)
+        if (!sm.getBackgroundListen()) {
+            android.util.Log.i("JarvisService", "Background listen off — STT wake idle")
+            try { stt.stopContinuous() } catch (_: Exception) {}
+            return
+        }
+        android.util.Log.i("JarvisService", "STT continuous wake (Hey Jarvis)")
+        try {
+            stt.listenContinuous { trailing ->
+                mainHandler.post {
+                    try { stt.stopContinuous() } catch (_: Exception) {}
+                    try { porcupine.stop() } catch (_: Exception) {}
+                    if (trailing.isNotBlank()) {
+                        handleUserSpeech(trailing)
+                    } else {
+                        startListeningCycle()
+                    }
+                    mainHandler.postDelayed({
+                        if (com.jarvis.assistant.util.SettingsManager(this).getBackgroundListen()) {
+                            startWakeWordListening()
+                        }
+                    }, 5_000L)
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("JarvisService", "STT wake failed: ${e.message}")
+        }
     }
 
 

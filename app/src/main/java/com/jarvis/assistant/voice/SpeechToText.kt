@@ -84,7 +84,7 @@ class SpeechToText(private val context: Context) {
         onFired: () -> Unit
     ) {
         val now = System.currentTimeMillis()
-        if (now - lastWakeMs < 900) return
+        if (now - lastWakeMs < 2200) return
         val match = findWakeWord(heard) ?: return
         lastWakeMs = now
         onFired()
