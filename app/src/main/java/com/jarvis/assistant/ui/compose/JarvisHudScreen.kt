@@ -154,7 +154,6 @@ fun JarvisHudScreen(
                     )
                 )
         )
-)
         CornerBrackets(modifier = Modifier.fillMaxSize(), active = ui.hudState == HudState.LISTENING)
 
         Column(
@@ -1382,8 +1381,6 @@ private fun CornerBrackets(modifier: Modifier = Modifier, active: Boolean = fals
 
 /** Liquid-glass multi-colour edge — transparent frosted rim, same palette. */
 @Composable
-private fun
-{
     if (!active) return
     val infinite = rememberInfiniteTransition(label = "siriBorder")
     val phase by infinite.animateFloat(
