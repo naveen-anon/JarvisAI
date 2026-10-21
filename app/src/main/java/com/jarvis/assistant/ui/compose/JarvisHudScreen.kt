@@ -1381,71 +1381,8 @@ private fun CornerBrackets(modifier: Modifier = Modifier, active: Boolean = fals
 
 /** Liquid-glass multi-colour edge — transparent frosted rim, same palette. */
 @Composable
-    if (!active) return
-    val infinite = rememberInfiniteTransition(label = "siriBorder")
-    val phase by infinite.animateFloat(
-        0f, 360f,
-        infiniteRepeatable(tween(3200, easing = LinearEasing)),
-        label = "phase"
-    )
-    val pulse by infinite.animateFloat(
-        0.55f, 0.85f,
-        infiniteRepeatable(tween(1400), RepeatMode.Reverse),
-        label = "pulse"
-    )
-    Canvas(modifier) {
-        val pad = 8.dp.toPx()
-        val r = 22.dp.toPx()
-        // Soft transparent outer glass glow
-        val glassColors = listOf(
-            Color(0xFF00D9FF).copy(alpha = 0.35f * pulse),
-            Color(0xFF7B2FFF).copy(alpha = 0.28f * pulse),
-            Color(0xFFFF2D95).copy(alpha = 0.30f * pulse),
-            Color(0xFF00FFC6).copy(alpha = 0.28f * pulse),
-            Color(0xFF3B82F6).copy(alpha = 0.32f * pulse),
-            Color(0xFF00D9FF).copy(alpha = 0.35f * pulse)
-        )
-        val brush = Brush.sweepGradient(glassColors)
-        rotate(phase) {
-            // Wide soft rim (liquid glass blur simulation)
-            drawRoundRect(
-                brush = brush,
-                topLeft = Offset(pad - size.minDimension * 0.15f, pad - size.minDimension * 0.15f),
-                size = androidx.compose.ui.geometry.Size(
-                    size.width + size.minDimension * 0.3f,
-                    size.height + size.minDimension * 0.3f
-                ),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(r * 1.2f, r * 1.2f),
-                style = Stroke(width = 18.dp.toPx())
-            )
-            // Thin bright edge
-            drawRoundRect(
-                brush = Brush.sweepGradient(
-                    listOf(
-                        Color(0xFF00D9FF).copy(alpha = 0.75f),
-                        Color(0xFF7B2FFF).copy(alpha = 0.65f),
-                        Color(0xFFFF2D95).copy(alpha = 0.70f),
-                        Color(0xFF00FFC6).copy(alpha = 0.65f),
-                        Color(0xFF3B82F6).copy(alpha = 0.70f),
-                        Color(0xFF00D9FF).copy(alpha = 0.75f)
-                    )
-                ),
-                topLeft = Offset(pad, pad),
-                size = androidx.compose.ui.geometry.Size(size.width - pad * 2, size.height - pad * 2),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(r, r),
-                style = Stroke(width = 2.5.dp.toPx())
-            )
-        }
-        // Inner frosted highlight (top edge only feel)
-        drawRoundRect(
-            brush = Brush.verticalGradient(
-                listOf(Color.White.copy(alpha = 0.12f), Color.Transparent)
-            ),
-            topLeft = Offset(pad + 4.dp.toPx(), pad + 4.dp.toPx()),
-            size = androidx.compose.ui.geometry.Size(size.width - pad * 2 - 8.dp.toPx(), 28.dp.toPx()),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(r * 0.6f, r * 0.6f)
-        )
-    }
+private fun SiriActivationBorder(active: Boolean, modifier: Modifier = Modifier) {
+    // multicolour rotating border removed
 }
 
 
