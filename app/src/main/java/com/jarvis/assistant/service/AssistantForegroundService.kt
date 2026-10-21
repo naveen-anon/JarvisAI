@@ -194,7 +194,8 @@ class AssistantForegroundService : Service() {
                 return
             }
         }
-        android.util.Log.w("JarvisService", "No on-device wake engine available")
+        android.util.Log.w("JarvisService", "No on-device wake engine — STT fallback")
+        startSttWakeFallback()
     }
 
 
