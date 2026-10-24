@@ -220,6 +220,7 @@ class AssistantForegroundService : Service() {
                 mainHandler.post {
                     try { stt.stopContinuous() } catch (_: Exception) {}
                     try { porcupine.stop() } catch (_: Exception) {}
+                    try { openWake?.stop() } catch (_: Exception) {}
                     if (trailing.isNotBlank()) {
                         handleUserSpeech(trailing)
                     } else {
