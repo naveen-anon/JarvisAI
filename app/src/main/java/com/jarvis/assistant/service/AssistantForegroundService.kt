@@ -145,68 +145,22 @@ class AssistantForegroundService : Service() {
     }
 
     private fun startWakeWordListening() {
-        // Siri-style pipeline:
-        // Background = OpenWakeWord (Hey Jarvis) or Porcupine — NOT Google continuous STT.
+        val sm = com.jarvis.assistant.util.SettingsManager(this)
+        if (!sm.getBackgroundListen() && !sm.getWakeWordEnabled()) {
+            android.util.Log.i("JarvisService", "Wake off in settings")
+            return
+        }
         listenCycleRunning = false
         try { stt.stopContinuous() } catch (_: Exception) {}
         try { porcupine.stop() } catch (_: Exception) {}
         try { openWake?.stop() } catch (_: Exception) {}
-        // Brief pause so previous AudioRecord releases (fixes "mic used but no wake")
         try { Thread.sleep(200) } catch (_: Exception) {}
 
-        try {
-            if (openWake == null) {
-                openWake = com.jarvis.assistant.voice.OpenWakeWordEngine(this)
-            }
-            val okOw = openWake!!.start {
-                mainHandler.post {
-                    try { openWake?.stop() } catch (_: Exception) {}
-                    // Siri-like: glow + listening state immediately on "Hey Jarvis"
-                    try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
-                    try { com.jarvis.assistant.ui.ActivationEdgeOverlay.show(this@AssistantForegroundService) } catch (_: Exception) {}
-                    startListeningCycle()
-                }
-            }
-            if (okOw) {
-                android.util.Log.i("JarvisService", "Siri-style wake ON — say Hey Jarvis")
-                return
-            }
-        } catch (e: Exception) {
-            android.util.Log.w("JarvisService", "OpenWakeWord failed: " + e.message)
-        }
-
-        if (porcupine.isAvailable) {
-            val ok = porcupine.start(
-                onWake = {
-                    mainHandler.post {
-                        try { porcupine.stop() } catch (_: Exception) {}
-                        try { com.jarvis.assistant.ui.HudController.listening() } catch (_: Exception) {}
-                        try { com.jarvis.assistant.ui.ActivationEdgeOverlay.show(this@AssistantForegroundService) } catch (_: Exception) {}
-                        startListeningCycle()
-                    }
-                },
-                onError = { msg ->
-                    android.util.Log.w("JarvisService", "Porcupine: " + msg)
-                }
-            )
-            if (ok) {
-                android.util.Log.i("JarvisService", "Porcupine wake ON — say Jarvis")
-                return
-            }
-        }
-        android.util.Log.w("JarvisService", "No on-device wake engine — STT fallback")
+        // STT-only wake (OpenWake/Porcupine skipped until stable on device)
+        android.util.Log.w("JarvisService", "Using STT continuous wake — say Hey Jarvis")
         startSttWakeFallback()
     }
 
-
-
-
-    /** Google SpeechRecognizer continuous keyword match (higher battery, no Picovoice key). */
-
-    /**
-     * Continuous Google STT wake is DISABLED — it holds the mic open and drains battery.
-     * Without Porcupine key: rely on clap wake + notification "Listen" + in-app Talk button.
-     */
     private fun startSttWakeFallback() {
         val sm = com.jarvis.assistant.util.SettingsManager(this)
         if (!sm.getBackgroundListen()) {
